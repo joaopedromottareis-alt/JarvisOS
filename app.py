@@ -162,7 +162,12 @@ if "eventos_locais" not in db: db["eventos_locais"] = []
 def obter_servico_google_agenda():
     creds = None
     if "GOOGLE_CREDENTIALS" in st.secrets:
+        import google.auth.transport.requests
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import InstalledAppFlow
+        
         try:
+            # Remove quebras de linha acidentais ou espaços extras das bordas
             raw_credentials = st.secrets["GOOGLE_CREDENTIALS"].strip()
             cred_data = json.loads(raw_credentials)
             
@@ -185,10 +190,9 @@ def obter_servico_google_agenda():
                     token.write(creds.to_json())
             return build('calendar', 'v3', credentials=creds)
         except Exception as e:
-            st.error(f"Erro na autenticação: {e}")
             return None
     return None
-    # ==================== CÉREBRO INTEGRADO DO JARVIS (SOLUÇÃO MULTI-DIAS) ====================
+# ==================== CÉREBRO INTEGRADO DO JARVIS (SOLUÇÃO MULTI-DIAS) ====================
 def processar_comando_e_criar_metas(comando):
     data_hoje_str = datetime.date.today().isoformat()
     
@@ -270,8 +274,7 @@ def processar_comando_e_criar_metas(comando):
                         "textColor": "#ffffff"
                     }
                     db["eventos_locais"].append(novo_ev)
-
-                    service = obter_servico_google_agenda()
+                    
                     if service:
                         try:
                             event_body = {
@@ -413,11 +416,12 @@ with aba_saude:
 # 4. ABA CRONOGRAMA OPERACIONAL
 with aba_calendario:
     st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
-    service = obter_servico_google_agenda()
+    
     if service:
-        st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500;'> 🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
+        st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500;'>🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
     else:
-        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)    
+        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'>🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
+    
     # Preparação da lista de eventos
     eventos_para_exibir = [{
         "title": "06:00 - Sistema Inicializado",
@@ -531,7 +535,8 @@ with aba_calendario:
             "contentHeight": 680, # Altura fixa para as células
             "handleWindowResize": True
         }
-calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
+        
+        calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
 
 # 5. ABA DE GRÁFICOS
 with aba_graficos:
