@@ -270,8 +270,8 @@ def processar_comando_e_criar_metas(comando):
                         "textColor": "#ffffff"
                     }
                     db["eventos_locais"].append(novo_ev)
+                    
                     service = obter_servico_google_agenda()
-
                     if service:
                         try:
                             event_body = {
