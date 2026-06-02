@@ -161,32 +161,34 @@ if "eventos_locais" not in db: db["eventos_locais"] = []
 # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE ====================
 def obter_servico_google_agenda():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            try:
-                creds.refresh(Request())
-            except Exception:
-                return None
-        else:
-            if not os.path.exists('credentials.json'):
-                return None
-            try:
-                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-                creds = flow.run_local_server(port=0)
-            except Exception:
-                return None
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-    try:
-        return build('calendar', 'v3', credentials=creds)
-    except Exception:
-        return None
-
-service = obter_servico_google_agenda()
-
-# ==================== CÉREBRO INTEGRADO DO JARVIS (SOLUÇÃO MULTI-DIAS) ====================
+    if "GOOGLE_CREDENTIALS" in st.secrets:
+        try:
+            raw_credentials = st.secrets["GOOGLE_CREDENTIALS"].strip()
+            cred_data = json.loads(raw_credentials)
+            
+            if os.path.exists('token.json'):
+                creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+                
+            if not creds or not creds.valid:
+                if creds and creds.expired and creds.refresh_token:
+                    try:
+                        creds.refresh(Request())
+                    except Exception:
+                        return None
+                else:
+                    try:
+                        flow = InstalledAppFlow.from_client_config(cred_data, SCOPES)
+                        creds = flow.run_local_server(port=0, open_browser=False)
+                    except Exception:
+                        return None
+                with open('token.json', 'w') as token:
+                    token.write(creds.to_json())
+            return build('calendar', 'v3', credentials=creds)
+        except Exception as e:
+            st.error(f"Erro na autenticação: {e}")
+            return None
+    return None
+    # ==================== CÉREBRO INTEGRADO DO JARVIS (SOLUÇÃO MULTI-DIAS) ====================
 def processar_comando_e_criar_metas(comando):
     data_hoje_str = datetime.date.today().isoformat()
     
@@ -516,7 +518,7 @@ with aba_calendario:
 
     st.markdown("<br>", unsafe_allow_html=True)
     with st.container(border=True):
-        options = {
+      options = {
             "initialView": "dayGridMonth",
             "headerToolbar": {
                 "left": "prev,next today",
@@ -526,7 +528,7 @@ with aba_calendario:
             "editable": True,
             "selectable": True,
             "timeZone": "local",
-            "contentHeight": 680,
+            "contentHeight": 680, # Altura fixa para as células
             "handleWindowResize": True
         }
         
