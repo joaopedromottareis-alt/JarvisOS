@@ -14,7 +14,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
-API_KEY = "SUA_API_KEY_DA_GROQ_AQUI"
+API_KEY = "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"
 client = Groq(api_key=API_KEY)
 MODELO_IA = "llama-3.3-70b-versatile" 
 
