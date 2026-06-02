@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
 
-# CSS Avançado anti-sobreposição e injeção de estilo em Cards Isolados
+# CSS Global Avançado - Ajustado para harmonizar o FullCalendar e os Containers
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -37,7 +37,7 @@ st.markdown("""
     
     /* Margens seguras para evitar quebras em telas Desktop */
     .block-container { 
-        padding: 2.5rem 3.5rem !important; 
+        padding: 2rem 3rem !important; 
         max-width: 100% !important; 
     }
     #MainMenu, footer, header { visibility: hidden !important; }
@@ -60,7 +60,7 @@ st.markdown("""
 
     /* Customização de containers nativos para simular os cards arredondados das fotos */
     div[data-testid="stVerticalBlock"] > div {
-        gap: 1.5rem !important;
+        gap: 1.2rem !important;
     }
     
     /* Inputs e Dropdowns com visual integrado e espaçados */
@@ -111,16 +111,6 @@ st.markdown("""
         background-color: #1c1c26 !important;
     }
     
-    /* FORÇA O IFRAME DO CALENDÁRIO A RESPONDER À ALTURA FIXA SEM COLAPSAR */
-    iframe[title="streamlit_calendar.calendar"] {
-        border: 1px solid #1e1e26 !important;
-        border-radius: 16px !important;
-        background-color: #121218 !important;
-        min-height: 800px !important;
-        height: 800px !important;
-        display: block !important;
-    }
-    
     /* Expander transparente estilizado para opções secundárias */
     .stExpander {
         background-color: #121218 !important;
@@ -128,19 +118,75 @@ st.markdown("""
         border-radius: 14px !important;
     }
 
+    /* ================= INJEÇÃO DE HARMÔNIA NO FULLCALENDAR (IFRAME) ================= */
+    iframe[title="streamlit_calendar.calendar"] {
+        border: 1px solid #1e1e26 !important;
+        border-radius: 16px !important;
+        background-color: #121218 !important;
+        min-height: 720px !important;
+        height: 720px !important;
+        display: block !important;
+    }
+
+    /* Substituição das cores berrantes nativas por tons Dark/Dourado */
+    .fc .fc-button-primary {
+        background-color: #121218 !important;
+        border: 1px solid #22222a !important;
+        color: #ffffff !important;
+        text-transform: capitalize !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        transition: all 0.2s ease;
+    }
+    .fc .fc-button-primary:hover {
+        background-color: #d4af37 !important;
+        color: #0a0a0d !important;
+        border-color: #d4af37 !important;
+    }
+    .fc .fc-button-active {
+        background-color: #d4af37 !important;
+        color: #0a0a0d !important;
+        border-color: #d4af37 !important;
+        font-weight: 600 !important;
+    }
+    .fc-theme-standard td, .fc-theme-standard th {
+        border: 1px solid #1e1e26 !important;
+    }
+    .fc .fc-col-header-cell-cushion {
+        color: #8e8e9a !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 0 !important;
+    }
+    .fc .fc-daygrid-day-number {
+        color: #ffffff !important;
+        font-size: 12px !important;
+        padding: 6px !important;
+    }
+    .fc .fc-toolbar-title {
+        color: #d4af37 !important;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+    }
+    
     /* Estilização da visão de lista/linha do tempo (Estilo Day Agenda Dark) */
+    .fc-list-day { 
+        background-color: #1c1c26 !important; 
+    }
+    .fc-list-day-text, .fc-list-day-side-text { 
+        color: #d4af37 !important; 
+        font-weight: 600 !important; 
+    }
     .fc-list-event {
         background-color: #121218 !important;
         border-radius: 8px !important;
         margin-bottom: 6px !important;
     }
+    .fc-list-event:hover td { 
+        background-color: #1c1c26 !important; 
+    }
     .fc-list-event-dot {
         border-color: #d4af37 !important;
-    }
-    .fc-list-day-cushion {
-        background-color: #1c1c26 !important;
-        color: #d4af37 !important;
-        font-weight: bold !important;
     }
     .fc-list-event-time { color: #8e8e9a !important; font-weight: 500 !important; }
     .fc-list-event-title { color: #ffffff !important; font-weight: 600 !important; }
@@ -203,7 +249,7 @@ def obter_servico_google_agenda():
 
 service = obter_servico_google_agenda()
 
-# ==================== CÉREBRO INTEGRADO DO JARVIS (SOLUÇÃO MULTI-DIAS) ====================
+# ==================== CÉREBRO INTEGRADO DO JARVIS ====================
 def processar_comando_e_criar_metas(comando):
     data_hoje_str = datetime.date.today().isoformat()
     
@@ -212,18 +258,18 @@ def processar_comando_e_criar_metas(comando):
     Seu objetivo é analisar a mensagem do usuário e decidir se deve criar uma meta no painel e/ou eventos no Google Agenda.
     Considere que a data de HOJE é {data_hoje_str}.
     
-    Se o usuário pedir para agendar algo que dure vários dias (ex: "do dia 3 ao 7"), você deve identificar a "data_inicio" e a "data_fim". 
+    Se o usuário pedir para agendar algo que dure vários dias, identifique a "data_inicio" e a "data_fim". 
     Se for apenas um dia, coloque a mesma data em ambos os campos.
     
     REGRA CRÍTICA PARA O TÍTULO DO EVENTO:
     Você DEVE obrigatoriamente incluir a hora de início no início do título do evento (ex: "15:00 - Ocupado"). Se não houver hora combinada, use "00:00 - Título".
     
-    Você DEVE responder ESTRITAMENTE no formato JSON abaixo, sem textos fora do JSON:
+    Você DEVE responder ESTRITAMENTE no formato JSON abaixo:
     {{
-        "resposta_chat": "Sua resposta elegante e motivadora falando com o usuário, tratando-o como 'Senhor'.",
+        "resposta_chat": "Sua resposta elegante falada com o usuário, tratando-o como 'Senhor'.",
         "criar_meta": true ou false,
         "novas_metas": [
-            {{"nome": "Nome curto da meta", "categoria": "Estudos", "Saúde", "Alimentação" ou "Trabalho"}}
+            {{ "nome": "Nome curto da meta", "categoria": "Estudos", "Saúde", "Alimentação" ou "Trabalho" }}
         ],
         "criar_agenda": true ou false,
         "evento_agenda": {{
@@ -301,7 +347,7 @@ def processar_comando_e_criar_metas(comando):
                     contador_id += 1
                 
                 salvar_dados(db)
-                st.toast("📅 Cronograma multi-dias mapeado e fixado com sucesso!")
+                st.toast("📅 Cronograma mapeado e fixado com sucesso!")
                 st.session_state.cal_version += 1
             except Exception:
                 pass
@@ -423,14 +469,17 @@ with aba_saude:
             if st.button("Catalogar Refeição no Sistema"):
                 if refeicao: db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao}); salvar_dados(db); st.toast("Refeição arquivada com sucesso!")
 
-# 4. ABA CRONOGRAMA OPERACIONAL
+# 4. ABA CRONOGRAMA OPERACIONAL (RESTRUTURADA E HARMONIZADA)
 with aba_calendario:
+    # Garante o escopo e sincronia local
+    service = obter_servico_google_agenda()
+
     st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
     
     if service:
-        st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500;'>🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
+        st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
     else:
-        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'>🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
+        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
     
     # Preparação da lista de eventos
     eventos_para_exibir = [{
@@ -445,19 +494,19 @@ with aba_calendario:
     if db.get("eventos_locais"):
         eventos_para_exibir.extend(db["eventos_locais"])
 
-    # Painel Modularizado Superior
+    # Painel Modularizado Superior Simétrico
     with st.expander("🛠️ Central Operacional de Agendamentos (Clique para expandir/recolher)", expanded=False):
         c_add, c_del = st.columns(2)
         
         with c_add:
-            st.markdown("### ➕ Adicionar Novo Evento")
-            nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino de Perna")
-            data_evento = st.date_input("Data Selecionada:", datetime.date.today())
-            h_ini = st.time_input("Horário de Início:", datetime.time(14, 0))
-            h_fim = st.time_input("Horário de Término:", datetime.time(15, 0))
-            recorrente = st.checkbox("🔄 Repetir diariamente (Rotina Fixa)")
+            st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>➕ Adicionar Novo Evento</h4>", unsafe_allow_html=True)
+            nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino de Perna", key="cal_nome_ev")
+            data_evento = st.date_input("Data Selecionada:", datetime.date.today(), key="cal_data_ev")
+            h_ini = st.time_input("Horário de Início:", datetime.time(14, 0), key="cal_hini_ev")
+            h_fim = st.time_input("Horário de Término:", datetime.time(15, 0), key="cal_hfim_ev")
+            recorrente = st.checkbox("🔄 Repetir diariamente (Rotina Fixa)", key="cal_rec_ev")
             
-            if st.button("Gravar Compromisso"):
+            if st.button("Gravar Compromisso", key="cal_save_btn"):
                 if nome_evento:
                     start_dt = datetime.datetime.combine(data_evento, h_ini)
                     end_dt = datetime.datetime.combine(data_evento, h_fim)
@@ -494,7 +543,7 @@ with aba_calendario:
                     st.rerun()
 
         with c_del:
-            st.markdown("### 🗑️ Desacoplar Compromissos")
+            st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>🗑️ Desacoplar Compromissos</h4>", unsafe_allow_html=True)
             opcoes_remocao = {}
             for idx, ev in enumerate(eventos_para_exibir):
                 if ev.get("editable") != False:
@@ -502,9 +551,9 @@ with aba_calendario:
                     opcoes_remocao[ev_id] = ev.get("title", f"Compromisso ({idx})")
             
             if opcoes_remocao:
-                evento_para_remover = st.selectbox("Selecione qual compromisso remover do banco:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x])
+                evento_para_remover = st.selectbox("Selecione qual compromisso remover:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x], key="cal_del_select")
                 
-                if st.button("Remover Registro Selecionado"):
+                if st.button("Remover Registro Selecionado", key="cal_del_btn"):
                     if service and not evento_para_remover.startswith("antigo_"):
                         try:
                             service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
@@ -524,37 +573,37 @@ with aba_calendario:
             else:
                 st.info("Nenhum compromisso mutável registrado na grade local.")
             
-            if st.button("⚠️ Limpar Todos os Eventos do Painel Local"):
+            st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+            if st.button("⚠️ Limpar Todos os Eventos do Painel Local", key="cal_clear_all_btn"):
                 db["eventos_locais"] = []
                 salvar_dados(db)
                 st.session_state.cal_version += 1
                 st.rerun()
 
-st.markdown("<br>", unsafe_allow_html=True)
-with st.container(border=True):
-    # Configuração da Linha do Tempo Estilo Agenda
-    options = {
-        "initialView": "listDay",
-        "headerToolbar": {
-            "left": "prev,next today",
-            "center": "title",
-            "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
-        },
-        "buttonText": {
-            "today": "Hoje",
-            "month": "Mês",
-            "week": "Semana",
-            "listDay": "Agenda Diária",
-            "listWeek": "Compromissos"
-        },
-        "editable": True,
-        "selectable": True,
-        "timeZone": "local",
-        "contentHeight": 680,
-        "handleWindowResize": True
-    }
-    
-    calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
+    # Container Isolado e Estilizado do Calendário
+    with st.container(border=True):
+        options = {
+            "initialView": "listDay",
+            "headerToolbar": {
+                "left": "prev,next today",
+                "center": "title",
+                "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
+            },
+            "buttonText": {
+                "today": "Hoje",
+                "month": "Mês",
+                "week": "Semana",
+                "listDay": "Agenda Diária",
+                "listWeek": "Compromissos"
+            },
+            "editable": True,
+            "selectable": True,
+            "timeZone": "local",
+            "contentHeight": 660,
+            "handleWindowResize": True
+        }
+        
+        calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_fixed_final_{st.session_state.cal_version}")
 
 # 5. ABA DE GRÁFICOS
 with aba_graficos:
