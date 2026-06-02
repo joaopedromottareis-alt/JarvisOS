@@ -412,11 +412,12 @@ with aba_saude:
 
 # 4. ABA CRONOGRAMA OPERACIONAL
  with aba_calendario:
-     st.markdown('<div class="titulo-card">📅 Alocaç')
-     service = obter_servico_google_agenda()
-     if service:
-         st.markdown("<span style='color: #2ecc71; f")
-        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'>🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
+    st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
+    service = obter_servico_google_agenda()
+    if service:
+        st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500;'> 🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
+    else:
+        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
     
     # Preparação da lista de eventos
     eventos_para_exibir = [{
