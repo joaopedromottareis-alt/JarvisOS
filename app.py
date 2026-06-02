@@ -531,7 +531,7 @@ with aba_calendario:
             "contentHeight": 680, # Altura fixa para as células
             "handleWindowResize": True
         }
-        calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
+calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
 
 # 5. ABA DE GRÁFICOS
 with aba_graficos:
