@@ -411,14 +411,13 @@ with aba_saude:
                 if refeicao: db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao}); salvar_dados(db); st.toast("Refeição arquivada com sucesso!")
 
 # 4. ABA CRONOGRAMA OPERACIONAL
- with aba_calendario:
+with aba_calendario:
     st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
     service = obter_servico_google_agenda()
     if service:
         st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500;'> 🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
     else:
-        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
-    
+        st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)    
     # Preparação da lista de eventos
     eventos_para_exibir = [{
         "title": "06:00 - Sistema Inicializado",
