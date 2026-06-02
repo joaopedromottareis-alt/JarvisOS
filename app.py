@@ -25,7 +25,6 @@ st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout=
 
 # CSS Avançado anti-sobreposição e injeção de estilo em Cards Isolados
 st.markdown("""
-
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
@@ -128,6 +127,23 @@ st.markdown("""
         border: 1px solid #1e1e26 !important;
         border-radius: 14px !important;
     }
+
+    /* Estilização da visão de lista/linha do tempo (Estilo Day Agenda Dark) */
+    .fc-list-event {
+        background-color: #121218 !important;
+        border-radius: 8px !important;
+        margin-bottom: 6px !important;
+    }
+    .fc-list-event-dot {
+        border-color: #d4af37 !important;
+    }
+    .fc-list-day-cushion {
+        background-color: #1c1c26 !important;
+        color: #d4af37 !important;
+        font-weight: bold !important;
+    }
+    .fc-list-event-time { color: #8e8e9a !important; font-weight: 500 !important; }
+    .fc-list-event-title { color: #ffffff !important; font-weight: 600 !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -249,7 +265,6 @@ def processar_comando_e_criar_metas(comando):
                 inicio_parsed = datetime.datetime.strptime(ev["hora_inicio"], "%H:%M").time()
                 fim_parsed = datetime.datetime.strptime(ev["hora_fim"], "%H:%M").time()
                 
-                # Loop inteligente para preencher cada dia do intervalo sem pular datas
                 dia_atual = d_ini
                 timestamp_base = int(time.time())
                 contador_id = 0
@@ -273,7 +288,7 @@ def processar_comando_e_criar_metas(comando):
                     if service:
                         try:
                             event_body = {
-                                'id': id_unico.replace("_", ""), # O ID do Google Agenda não permite underscores
+                                'id': id_unico.replace("_", ""), 
                                 'summary': ev["titulo"],
                                 'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                 'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
@@ -515,23 +530,31 @@ with aba_calendario:
                 st.session_state.cal_version += 1
                 st.rerun()
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    with st.container(border=True):
-        options = {
-            "initialView": "dayGridMonth",
-            "headerToolbar": {
-                "left": "prev,next today",
-                "center": "title",
-                "right": "dayGridMonth,timeGridWeek,timeGridDay"
-            },
-            "editable": True,
-            "selectable": True,
-            "timeZone": "local",
-            "contentHeight": 680,
-            "handleWindowResize": True
-        }
-        
-        calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
+st.markdown("<br>", unsafe_allow_html=True)
+with st.container(border=True):
+    # Configuração da Linha do Tempo Estilo Agenda
+    options = {
+        "initialView": "listDay",
+        "headerToolbar": {
+            "left": "prev,next today",
+            "center": "title",
+            "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
+        },
+        "buttonText": {
+            "today": "Hoje",
+            "month": "Mês",
+            "week": "Semana",
+            "listDay": "Agenda Diária",
+            "listWeek": "Compromissos"
+        },
+        "editable": True,
+        "selectable": True,
+        "timeZone": "local",
+        "contentHeight": 680,
+        "handleWindowResize": True
+    }
+    
+    calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_mensal_estabilizado_{st.session_state.cal_version}")
 
 # 5. ABA DE GRÁFICOS
 with aba_graficos:
