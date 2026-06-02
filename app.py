@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
 
-# CSS Global Avançado - Ajustado para harmonizar o FullCalendar e os Containers
+# CSS Global Avançado - Totalmente calibrado para remodelar o cabeçalho, dias e tabela do Calendário
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -58,7 +58,7 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Customização de containers nativos para simular os cards arredondados das fotos */
+    /* Customização de containers nativos para simular os cards arredondados */
     div[data-testid="stVerticalBlock"] > div {
         gap: 1.2rem !important;
     }
@@ -72,7 +72,7 @@ st.markdown("""
         margin-bottom: 5px;
     }
     
-    /* Botões Limpos com efeito Hover Glow das referências */
+    /* Botões Limpos com efeito Hover Glow */
     .stButton>button { 
         background-color: #121218; 
         color: #d4af37; 
@@ -111,37 +111,48 @@ st.markdown("""
         background-color: #1c1c26 !important;
     }
     
-    /* Expander transparente estilizado para opções secundárias */
+    /* Expander transparente estilizado */
     .stExpander {
         background-color: #121218 !important;
         border: 1px solid #1e1e26 !important;
         border-radius: 14px !important;
     }
 
-    /* ================= INJEÇÃO DE HARMÔNIA NO FULLCALENDAR (IFRAME) ================= */
+    /* ================= REESTRUTURAÇÃO COMPLETA DO DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
-        border-radius: 16px !important;
-        background-color: #121218 !important;
-        min-height: 720px !important;
-        height: 720px !important;
+        border-radius: 20px !important;
+        background-color: #0c0c10 !important;
+        min-height: 740px !important;
+        height: 740px !important;
         display: block !important;
     }
 
-    /* Substituição das cores berrantes nativas por tons Dark/Dourado */
+    /* Título Superior Central (Mês / Ano) - Estilo Minimalista UI */
+    .fc .fc-toolbar-title {
+        color: #d4af37 !important;
+        font-size: 1.6rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+    }
+
+    /* Botões de Navegação e Filtros - Remodelados (Sem blocos pesados de cor) */
     .fc .fc-button-primary {
-        background-color: #121218 !important;
+        background-color: transparent !important;
         border: 1px solid #22222a !important;
-        color: #ffffff !important;
+        color: #a0a0aa !important;
         text-transform: capitalize !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        padding: 6px 14px !important;
         font-size: 13px !important;
+        font-weight: 500 !important;
         transition: all 0.2s ease;
     }
     .fc .fc-button-primary:hover {
-        background-color: #d4af37 !important;
-        color: #0a0a0d !important;
-        border-color: #d4af37 !important;
+        background-color: #1c1c26 !important;
+        color: #ffffff !important;
+        border-color: #444452 !important;
     }
     .fc .fc-button-active {
         background-color: #d4af37 !important;
@@ -149,29 +160,51 @@ st.markdown("""
         border-color: #d4af37 !important;
         font-weight: 600 !important;
     }
-    .fc-theme-standard td, .fc-theme-standard th {
-        border: 1px solid #1e1e26 !important;
+
+    /* Cabeçalhos da Grade (Dias da Semana - Sun, Mon, Tue...) */
+    .fc-theme-standard th {
+        border: none !important;
+        border-bottom: 2px solid #1e1e26 !important;
+        background-color: transparent !important;
     }
     .fc .fc-col-header-cell-cushion {
         color: #8e8e9a !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
-        padding: 8px 0 !important;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 12px 0 !important;
+    }
+
+    /* Customização das Células da Tabela */
+    .fc-theme-standard td {
+        border: 1px solid #161620 !important;
+    }
+    
+    /* Números dos dias - Transmutação para Indicadores Arredondados e Limpos */
+    .fc .fc-daygrid-day-top {
+        justify-content: center !important;
+        padding-top: 6px !important;
     }
     .fc .fc-daygrid-day-number {
         color: #ffffff !important;
-        font-size: 12px !important;
-        padding: 6px !important;
-    }
-    .fc .fc-toolbar-title {
-        color: #d4af37 !important;
-        font-size: 1.3rem !important;
-        font-weight: 700 !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        padding: 4px 8px !important;
+        border-radius: 50% !important;
+        transition: all 0.2s ease;
     }
     
-    /* Estilização da visão de lista/linha do tempo (Estilo Day Agenda Dark) */
+    /* Destaque do Dia Atual - Círculo Dourado Esguio */
+    .fc .fc-day-today .fc-daygrid-day-number {
+        background-color: rgba(212, 175, 55, 0.15) !important;
+        color: #d4af37 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Estilização da Visão de Lista / Linha do Tempo Diária */
     .fc-list-day { 
-        background-color: #1c1c26 !important; 
+        background-color: #121218 !important; 
     }
     .fc-list-day-text, .fc-list-day-side-text { 
         color: #d4af37 !important; 
@@ -180,7 +213,6 @@ st.markdown("""
     .fc-list-event {
         background-color: #121218 !important;
         border-radius: 8px !important;
-        margin-bottom: 6px !important;
     }
     .fc-list-event:hover td { 
         background-color: #1c1c26 !important; 
@@ -469,9 +501,8 @@ with aba_saude:
             if st.button("Catalogar Refeição no Sistema"):
                 if refeicao: db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao}); salvar_dados(db); st.toast("Refeição arquivada com sucesso!")
 
-# 4. ABA CRONOGRAMA OPERACIONAL (RESTRUTURADA E HARMONIZADA)
+# 4. ABA CRONOGRAMA OPERACIONAL
 with aba_calendario:
-    # Garante o escopo e sincronia local
     service = obter_servico_google_agenda()
 
     st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
@@ -583,7 +614,7 @@ with aba_calendario:
     # Container Isolado e Estilizado do Calendário
     with st.container(border=True):
         options = {
-            "initialView": "listDay",
+            "initialView": "dayGridMonth", # Define a exibição inicial em tabela mensal limpa
             "headerToolbar": {
                 "left": "prev,next today",
                 "center": "title",
