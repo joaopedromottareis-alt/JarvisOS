@@ -25,50 +25,7 @@ st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout=
 
 # CSS Avançado anti-sobreposição e injeção de estilo em Cards Isolados
 st.markdown("""
-import streamlit as st
-import streamlit_authenticator as stauth
 
-# 1. CADASTRO DE USUÁRIOS E SENHAS CRIPTOGRAFADAS
-# (Para testar, o usuário é "admin" e a senha é "admin123")
-credentials = {
-    "usernames": {
-        "admin": {
-            "name": "Senhor",
-            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # "admin123" criptografado
-        }
-    }
-}
-
-# 2. CONFIGURAÇÃO DO AUTENTICADOR
-authenticator = stauth.Authenticate(
-    credentials,
-    cookie_name="jarvis_login_cookie",
-    key="jarvis_chave_secreta_assinatura",
-    cookie_expiry_days=30
-)
-
-# 3. RENDERIZAR O FORMULÁRIO DE LOGIN NA TELA
-name, authentication_status, username = authenticator.login(location='main')
-
-# 4. TRATAMENTO DOS STATUS DE LOGIN
-if authentication_status == False:
-    st.error("❌ Usuário ou senha incorretos. Acesso negado.")
-    st.stop() # Bloqueia o resto do script
-
-elif authentication_status == None:
-    st.warning("🔒 Por favor, insira suas credenciais para acessar o Jarvis OS.")
-    st.stop() # Bloqueia o resto do script até digitar
-
-# ---------------------------------------------------------
-# SE CHEGAR AQUI, O LOGIN FOI UM SUCESSO!
-# ---------------------------------------------------------
-# Adiciona um botão de Logout discreto na barra lateral
-authenticator.logout('Sair do Sistema', 'sidebar')
-
-st.success(f"Bem-vindo de volta, {name}!")
-
-# REVISE AQUI: Todo o restante do seu código original (Abas, Chat, Calendário)
-# continua aqui para baixo, exatamente como estava funcionando antes!
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
