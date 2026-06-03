@@ -7,11 +7,10 @@ import hashlib
 from groq import Groq
 import plotly.graph_objects as go
 
-# --- Importações para o Calendário ---
+# --- Importações para o Calendário e OAuth Web ---
 from streamlit_calendar import calendar
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
@@ -24,31 +23,27 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
+# CSS Global Avançado
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Força o sumiço completo da barra lateral */
     [data-testid="stSidebarCollapsedControl"], [data-testid="stSidebar"] {
         display: none !important;
     }
     
-    /* Configuração Base Clean-Dark Space */
     .stApp { 
         background-color: #0a0a0d; 
         color: #e4e4e9; 
         font-family: 'Inter', system-ui, sans-serif; 
     }
     
-    /* Margens seguras para evitar quebras em telas Desktop */
     .block-container { 
         padding: 2rem 3rem !important; 
         max-width: 100% !important; 
     }
     #MainMenu, footer, header { visibility: hidden !important; }
     
-    /* Títulos do Sistema */
     h1, h2, h3, h4 { 
         color: #d4af37 !important; 
         font-weight: 700; 
@@ -64,12 +59,10 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Customização de containers nativos para simular os cards arredondados */
     div[data-testid="stVerticalBlock"] > div {
         gap: 1.2rem !important;
     }
     
-    /* Inputs e Dropdowns com visual integrado e espaçados */
     div[data-baseweb="select"], div[data-baseweb="input"], .stTextInput>div>div>input, .stDateInput>div>div>input {
         background-color: #121218 !important; 
         border: 1px solid #22222a !important; 
@@ -78,7 +71,6 @@ st.markdown("""
         margin-bottom: 5px;
     }
     
-    /* Botões Limpos com efeito Hover Glow */
     .stButton>button { 
         background-color: #121218; 
         color: #d4af37; 
@@ -96,7 +88,6 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
-    /* Abas Superiores Estilo Aplicação Premium */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: #121218; 
         border: 1px solid #1e1e26;
@@ -117,21 +108,18 @@ st.markdown("""
         background-color: #1c1c26 !important;
     }
     
-    /* Expander transparente estilizado */
     .stExpander {
         background-color: #121218 !important;
         border: 1px solid #1e1e26 !important;
         border-radius: 14px !important;
     }
 
-    /* Alinhamento do botão de logout no canto superior direito */
     .logout-container {
         display: flex;
         justify-content: flex-end;
         align-items: center;
     }
 
-    /* ================= DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
         border-radius: 20px !important;
@@ -141,24 +129,16 @@ st.markdown("""
         display: block !important;
     }
 
-    /* ================= AJUSTE EXCLUSIVO DE RESPONSIVIDADE PARA CELULAR ================= */
     @media (max-width: 768px) {
-        .block-container { 
-            padding: 1rem 1rem !important; 
-        }
-        h1 {
-            font-size: 1.8rem !important; 
-        }
-        iframe[title="streamlit_calendar.calendar"] {
-            min-height: 560px !important; 
-            height: 560px !important;
-        }
+        .block-container { padding: 1rem 1rem !important; }
+        h1 { font-size: 1.8rem !important; }
+        iframe[title="streamlit_calendar.calendar"] { min-height: 560px !important; height: 560px !important; }
     }
     </style>
 """, unsafe_allow_html=True)
 
 
-# ==================== GERENCIADOR DE USUÁRIOS (CUSTOM SEGURO) ====================
+# ==================== GERENCIADOR DE USUÁRIOS ====================
 ARQUIVO_CONFIG_USERS = "usuarios_config.json"
 
 def gerar_hash_sha256(senha_texto):
@@ -173,30 +153,49 @@ def carregar_credenciais_salvas():
             if "usernames" in dados:
                 return dados["usernames"]
             return dados
-            
-    return {
-        "admin": {
-            "name": "Senhor Admin",
-            "password": gerar_hash_sha256("admin123")
-        }
-    }
+    return {"admin": {"name": "Senhor Admin", "password": gerar_hash_sha256("admin123")}}
 
 def salvar_novas_credenciais(dicionario_usernames):
     estrutura = {"usernames": dicionario_usernames}
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
         json.dump(estrutura, f, indent=4, ensure_ascii=False)
 
-
 usernames_db = carregar_credenciais_salvas()
 
-if "autenticado" not in st.session_state:
-    st.session_state.autenticado = False
-if "username" not in st.session_state:
-    st.session_state.username = None
+if "autenticado" not in st.session_state: st.session_state.autenticado = False
+if "username" not in st.session_state: st.session_state.username = None
+
+# Captura de retorno do OAuth do Google na URL
+query_params = st.query_params
+if "code" in query_params and "state" in st.session_state and st.session_state.get("aguardando_oauth_user"):
+    target_user = st.session_state.aguardando_oauth_user
+    try:
+        client_config = {
+            "web": {
+                "client_id": st.secrets["google_oauth"]["client_id"],
+                "client_secret": st.secrets["google_oauth"]["client_secret"],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        }
+        flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=st.secrets["google_oauth"]["redirect_uri"])
+        flow.fetch_token(code=query_params["code"])
+        
+        # Salva o token específico deste usuário
+        token_path = f"token_google_{target_user}.json"
+        with open(token_path, "w") as f:
+            f.write(flow.credentials.to_json())
+            
+        st.session_state.autenticado = True
+        st.session_state.username = target_user
+        st.session_state.pop("aguardando_oauth_user", None)
+        st.query_params.clear()
+        st.rerun()
+    except Exception as e:
+        st.error(f"Erro na validação do token do Google: {e}")
 
 if not st.session_state.autenticado:
     st.markdown("<h2>🔱 TERMINAL DE ACESSO - JARVIS OS</h2>", unsafe_allow_html=True)
-    
     modo_tela = st.radio("Selecione o protocolo de entrada:", ["Fazer Login", "Registrar Nova Conta"], horizontal=True)
     
     if modo_tela == "Fazer Login":
@@ -234,44 +233,36 @@ if not st.session_state.autenticado:
                 if not novo_nome or not novo_user or not nova_senha:
                     st.error("⚠️ Todos os campos operacionais precisam estar preenchidos.")
                 elif novo_user in usernames_db:
-                    st.error("❌ Este Username já está mapeado no banco de dados. Escolha outro.")
+                    st.error("❌ Este Username já está mapeado no banco de dados.")
                 elif nova_senha != confirmar_senha:
                     st.error("❌ As senhas fornecidas não coincidem.")
                 else:
-                    usernames_db[novo_user] = {
-                        "name": novo_nome,
-                        "password": gerar_hash_sha256(nova_senha)
-                    }
+                    usernames_db[novo_user] = {"name": novo_nome, "password": gerar_hash_sha256(nova_senha)}
                     salvar_novas_credenciais(usernames_db)
-                    st.success(f"✅ Conta para '{novo_nome}' criada com sucesso! Altere para 'Fazer Login' para entrar.")
+                    st.success(f"✅ Conta para '{novo_nome}' criada com sucesso!")
         st.stop()
 
 # ==================== INÍCIO DA SESSÃO DO USUÁRIO LOGADO ====================
 username = st.session_state.username
 
 if st.session_state.autenticado and username:
-    
     name = usernames_db[username]["name"]
-    
     ARQUIVO_DADOS = f"dados_user_{username}.json"
-    ARQUIVO_TOKEN_GOOGLE = f"token_{username}.json"
+    ARQUIVO_TOKEN_GOOGLE = f"token_google_{username}.json"
 
     def carregar_dados():
         if os.path.exists(ARQUIVO_DADOS):
-            with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f:
-                return json.load(f)
+            with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: return json.load(f)
         return {"metas": [], "agua": 0, "peso_usuario": 70.0, "historico_pomodoro": 0, "refeicoes": [], "eventos_locais": []}
 
     def salvar_dados(dados):
-        with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=4, ensure_ascii=False)
+        with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f: json.dump(dados, f, indent=4, ensure_ascii=False)
 
     if "db" not in st.session_state or st.session_state.get("atual_user") != username:
         st.session_state.db = carregar_dados()
         st.session_state.atual_user = username
         
     db = st.session_state.db
-    
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": f"Sistemas online, {name}. Defina suas diretrizes e eu cuidarei de estruturar os alvos operacionais."}]
 
@@ -279,15 +270,12 @@ if st.session_state.autenticado and username:
     if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
-
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # ==================== HEADER PREMIUM COM LOGOUT ISOLADO À DIREITA ====================
+    # ==================== HEADER PREMIUM COM LOGOUT ====================
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
-    
     with col_titulo_sistema:
         st.markdown("""<h1 style='margin-bottom: 0px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>""", unsafe_allow_html=True)
-    
     with col_botao_logout:
         st.markdown("<div class='logout-container'></div>", unsafe_allow_html=True)
         if st.button("🚪 Encerrar Sessão"):
@@ -297,31 +285,26 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: #1e1e26;'>", unsafe_allow_html=True)
 
-    # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE INDIVIDUALIZADA ====================
+    # ==================== MOTOR DE AGENDA MULTIUSUÁRIO WEB ====================
     def obter_servico_google_agenda():
-        creds = None
-        if os.path.exists(ARQUIVO_TOKEN_GOOGLE):
+        if not os.path.exists(ARQUIVO_TOKEN_GOOGLE):
+            return None
+        try:
             creds = Credentials.from_authorized_user_file(ARQUIVO_TOKEN_GOOGLE, SCOPES)
-        if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                try: creds.refresh(Request())
-                except: return None
-            else:
-                if not os.path.exists('credentials.json'): return None
-                try:
-                    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-                    creds = flow.run_local_server(port=0)
-                except: return None
-            with open(ARQUIVO_TOKEN_GOOGLE, 'w') as token: token.write(creds.to_json())
-        try: return build('calendar', 'v3', credentials=creds)
-        except: return None
+                from google.auth.transport.requests import Request
+                creds.refresh(Request())
+                with open(ARQUIVO_TOKEN_GOOGLE, "w") as f:
+                    f.write(creds.to_json())
+            return build('calendar', 'v3', credentials=creds)
+        except:
+            return None
 
     service = obter_servico_google_agenda()
 
     # ==================== CÉREBRO INTEGRADO DO JARVIS ====================
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
-        
         prompt_sistema = f"""
         Você é o Jarvis, o assistente pessoal de alta tecnologia do usuário.
         Seu objetivo é analisar a mensagem do usuário e decidir se deve criar uma meta no painel e/ou eventos no Google Agenda.
@@ -419,11 +402,7 @@ if st.session_state.autenticado and username:
 
     # ==================== INTERFACE WORKSTATION ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
-        "🎯 Painel de Diretrizes", 
-        "⏱️ Módulo de Foco Temporal", 
-        "💧 Parâmetros Biométricos",
-        "📅 Cronograma Operacional", 
-        "📊 Análise Estatística"
+        "🎯 Painel de Diretrizes", "⏱️ Módulo de Foco Temporal", "💧 Parâmetros Biométricos", "📅 Cronograma Operacional", "📊 Análise Estatística"
     ])
 
     # 1. ABA DE METAS
@@ -505,14 +484,10 @@ if st.session_state.autenticado and username:
             st.markdown('<div class="titulo-card">💧 Monitoramento de Hidratação</div>', unsafe_allow_html=True)
             with st.container(border=True):
                 peso_texto = st.text_input("Informe seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)).replace('.', ','))
-                try:
-                    peso_limpo = float(peso_texto.replace(',', '.'))
-                except ValueError:
-                    peso_limpo = 70.0
+                try: peso_limpo = float(peso_texto.replace(',', '.'))
+                except ValueError: peso_limpo = 70.0
                 if peso_limpo != db.get("peso_usuario", 70.0) and peso_limpo > 0: 
-                    db["peso_usuario"] = peso_limpo
-                    salvar_dados(db)
-                    st.rerun()
+                    db["peso_usuario"] = peso_limpo; salvar_dados(db); st.rerun()
                 alvo_calculado = int(peso_limpo * 35)
                 st.markdown("<br>", unsafe_allow_html=True)
                 st.metric("Consumo Atual", f"{db['agua']} ml", f"Alvo Recomendado: {alvo_calculado} ml")
@@ -533,22 +508,39 @@ if st.session_state.autenticado and username:
         st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
         
         if service:
-            st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟢 Sincronização ativa no perfil de operador atual.</span>", unsafe_allow_html=True)
         else:
-            st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
-        
+            st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'> 🟡 Módulo do Google Agenda offline para este perfil.</span>", unsafe_allow_html=True)
+            
+            # Botão de vinculação individual com redirecionamento limpo na nuvem
+            if st.button("🔗 Sincronizar Minha Conta Google Agenda"):
+                try:
+                    client_config = {
+                        "web": {
+                            "client_id": st.secrets["google_oauth"]["client_id"],
+                            "client_secret": st.secrets["google_oauth"]["client_secret"],
+                            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                            "token_uri": "https://oauth2.googleapis.com/token",
+                        }
+                    }
+                    flow = Flow.from_client_config(client_config, scopes=SCOPES, redirect_uri=st.secrets["google_oauth"]["redirect_uri"])
+                    auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+                    
+                    st.session_state.aguardando_oauth_user = username
+                    st.markdown(f'<a href="{auth_url}" target="_self"><input type="button" value="Clique aqui para Autorizar o Acesso" style="background-color:#d4af37; color:#0a0a0d; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;"></a>', unsafe_allow_html=True)
+                except Exception as e:
+                    st.error("Erro ao gerar link de autenticação. Verifique os Secrets do Streamlit.")
+
         eventos_para_exibir = [{
             "title": "06:00 - Sistema Inicializado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
             "backgroundColor": "#121218", "borderColor": "#1e1e26", "textColor": "#8e8e9a", "editable": False
         }]
-        if db.get("eventos_locais"):
-            eventos_para_exibir.extend(db["eventos_locais"])
+        if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
         with st.expander("🛠️ Central Operacional de Agendamentos", expanded=False):
             c_add, c_del = st.columns(2)
-            
             with c_add:
                 st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>➕ Adicionar Novo Evento</h4>", unsafe_allow_html=True)
                 nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino", key="cal_nome_ev")
@@ -564,26 +556,16 @@ if st.session_state.autenticado and username:
                         id_unico = "jarvis_" + str(int(time.time())) + "_manual"
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
-                        novo_ev = {
-                            "id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), 
-                            "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"
-                        }
+                        novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"}
                         
                         if service:
                             try:
-                                event_body = {
-                                    'id': id_unico.replace("_", ""), 'summary': titulo_formatado,
-                                    'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
-                                    'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
-                                }
+                                event_body = {'id': id_unico.replace("_", ""), 'summary': titulo_formatado, 'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'}, 'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'}}
                                 if recorrente: event_body['recurrence'] = ['RRULE:FREQ=DAILY']
                                 service.events().insert(calendarId='primary', body=event_body).execute()
                             except: pass
                         
-                        db["eventos_locais"].append(novo_ev)
-                        salvar_dados(db)
-                        st.session_state.cal_version += 1
-                        st.rerun()
+                        db["eventos_locais"].append(novo_ev); salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
 
             with c_del:
                 st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>🗑️ Desacoplar Compromissos</h4>", unsafe_allow_html=True)
@@ -595,31 +577,21 @@ if st.session_state.autenticado and username:
                 
                 if opcoes_remocao:
                     evento_para_remover = st.selectbox("Selecione qual compromisso remover:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x], key="cal_del_select")
-                    
                     if st.button("Remover Registro Selecionado", key="cal_del_btn"):
                         if service and not evento_para_remover.startswith("antigo_"):
                             try: service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
                             except: pass
-                        
                         if evento_para_remover.startswith("antigo_"):
                             idx_alvo = int(evento_para_remover.split("_")[1]) - 1
                             if 0 <= idx_alvo < len(db["eventos_locais"]): db["eventos_locais"].pop(idx_alvo)
                         else:
                             db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev.get("id") != evento_para_remover]
-                        
-                        salvar_dados(db)
-                        st.session_state.cal_version += 1
-                        st.rerun()
+                        salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
                 else:
                     st.info("Nenhum compromisso mutável registrado na grade local.")
 
         with st.container(border=True):
-            options = {
-                "initialView": "dayGridMonth",
-                "headerToolbar": {"left": "prev,next today", "center": "title", "right": "dayGridMonth,timeGridWeek,listDay,listWeek"},
-                "buttonText": {"today": "Hoje", "month": "Mês", "week": "Semana", "listDay": "Agenda Diária", "listWeek": "Compromissos"},
-                "editable": True, "selectable": True, "timeZone": "local", "contentHeight": 660, "handleWindowResize": True
-            }
+            options = {"initialView": "dayGridMonth", "headerToolbar": {"left": "prev,next today", "center": "title", "right": "dayGridMonth,timeGridWeek,listDay,listWeek"}, "buttonText": {"today": "Hoje", "month": "Mês", "week": "Semana", "listDay": "Agenda Diária", "listWeek": "Compromissos"}, "editable": True, "selectable": True, "timeZone": "local", "contentHeight": 660, "handleWindowResize": True}
             calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_fixed_final_{st.session_state.cal_version}")
 
     # 5. ABA DE GRÁFICOS
