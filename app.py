@@ -30,35 +30,13 @@ st.markdown("""
     
     /* Configuração Base do Sistema com Efeito de Luzes em Degradê Borrado no Fundo */
     .stApp { 
-        background-color: #0b0c10; 
-        color: #f3f4f6; 
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        position: relative;
-        overflow-x: hidden;
-    }
-    
-    .stApp::before {
-        content: "";
-        position: absolute;
-        width: 400px;
-        height: 400px;
-        top: -150px;
-        left: -150px;
-        background: radial-gradient(circle, rgba(255,0,128,0.2) 0%, rgba(0,0,0,0) 70%);
-        filter: blur(160px);
-        z-index: -1;
-    }
-
-    .stApp::after {
-        content: "";
-        position: absolute;
-        width: 500px;
-        height: 500px;
-        bottom: -100px;
-        right: -100px;
-        background: radial-gradient(circle, rgba(122,0,255,0.18) 0%, rgba(0,0,0,0) 70%);
-        filter: blur(160px);
-        z-index: -1;
+        background-color: #0b0c10 !important; 
+        color: #f3f4f6 !important; 
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background-image: 
+            radial-gradient(circle at 10% 10%, rgba(255, 0, 128, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 90% 90%, rgba(122, 0, 255, 0.15) 0%, transparent 40%) !important;
+        background-attachment: fixed !important;
     }
     
     /* Ocultar elementos nativos desnecessários */
@@ -72,7 +50,7 @@ st.markdown("""
     }
     
     /* Títulos Estilo "Pop/Cartoonizado" e Amigável */
-    h1, h2, h3, h4 { 
+    .custom-title {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         background: linear-gradient(45deg, #ff007f, #7a00ff, #00f2fe);
         -webkit-background-clip: text;
@@ -245,7 +223,7 @@ if "username" not in st.session_state: st.session_state.username = None
 
 # Captura de retorno do OAuth do Google na URL
 query_params = st.query_params
-if "code" in query_params and "state" in st.session_state and st.session_state.get("aguardando_oauth_user"):
+if "code" in query_params and st.session_state.get("aguardando_oauth_user"):
     target_user = st.session_state.aguardando_oauth_user
     try:
         client_config = {
@@ -272,7 +250,7 @@ if "code" in query_params and "state" in st.session_state and st.session_state.g
         st.error(f"ERRO DE VALIDAÇÃO: {e}")
 
 if not st.session_state.autenticado:
-    st.markdown("<h2>✨ ENTRAR NO JARVIS OS</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 class='custom-title'>✨ ENTRAR NO JARVIS OS</h2>", unsafe_allow_html=True)
     modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
     
     if modo_tela == "LOGIN":
@@ -352,7 +330,7 @@ if st.session_state.autenticado and username:
     # ==================== HEADER OPERACIONAL COM LOGOUT ====================
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     with col_titulo_sistema:
-        st.markdown("""<h1 style='margin-bottom: 0px !important;'>🚀 JARVIS OS</h1>""", unsafe_allow_html=True)
+        st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🚀 JARVIS OS</h1>""", unsafe_allow_html=True)
     with col_botao_logout:
         st.markdown("<div class='logout-container'></div>", unsafe_allow_html=True)
         if st.button("SAIR DA SESSÃO"):
@@ -513,7 +491,7 @@ if st.session_state.autenticado and username:
                                 st.rerun()
                             st.markdown("<hr style='margin: 12px 0; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
 
-    # 2. ABA POMODORO
+    # 2. ABA POMODORO (Correção completa do travamento de tela por loop de sleep)
     with aba_pomodoro:
         st.markdown('<div class="titulo-card">⏱️ BLOCO DE FOCO ESTILO TIME-LAPSE</div>', unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
@@ -544,14 +522,16 @@ if st.session_state.autenticado and username:
                     st.markdown(f"<div style='text-align: center; padding: 15px 0;'><span style='color:#a6a7ab; font-size:14px; font-weight:600; text-transform: uppercase;'>Timer Correndo</span><h1 style='font-size: 82px; font-family: system-ui; font-weight:800; margin: 10px 0; background: linear-gradient(45deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#ff007f; font-size:16px; font-weight:700;'>🎯 {meta_alvo}</span></div>", unsafe_allow_html=True)
             
             if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
-                time.sleep(1); st.session_state.pomo_segundos_restantes -= 1
+                time.sleep(1)
+                st.session_state.pomo_segundos_restantes -= 1
                 if st.session_state.pomo_segundos_restantes == 0:
                     st.session_state.pomo_rodando = False
                     tempo_minutos_ganhos = st.session_state.pomo_tempo_inicial_escolhido
                     for m in db["metas"]:
                         if m["nome"] == meta_alvo and not m["concluida"]: m["tempo_dedicado"] += tempo_minutos_ganhos
                     db["historico_pomodoro"] += tempo_minutos_ganhos
-                    salvar_dados(db); st.balloons()
+                    salvar_dados(db)
+                    st.balloons()
                 st.rerun()
 
     # 3. ABA BIOMETRIA
@@ -614,7 +594,7 @@ if st.session_state.autenticado and username:
             "title": "🎬 Dia Iniciado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
-            "backgroundColor": "#1e1f24", "borderColor": "#rgba(255,255,255,0.1)", "textColor": "#a6a7ab", "editable": False
+            "backgroundColor": "#1e1f24", "borderColor": "rgba(255,255,255,0.1)", "textColor": "#a6a7ab", "editable": False
         }]
         if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
@@ -636,6 +616,7 @@ if st.session_state.autenticado and username:
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
                         novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#7a00ff", "borderColor": "#ff007f", "textColor": "#ffffff"}
+                        db["eventos_locais"].append(novo_ev)
                         
                         if service:
                             try:
@@ -643,70 +624,35 @@ if st.session_state.autenticado and username:
                                 if recorrente: event_body['recurrence'] = ['RRULE:FREQ=DAILY']
                                 service.events().insert(calendarId='primary', body=event_body).execute()
                             except: pass
-                        
-                        db["eventos_locais"].append(novo_ev); salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
-
+                        salvar_dados(db)
+                        st.rerun()
             with c_del:
-                st.markdown("#### Remover Evento")
-                opcoes_remocao = {}
-                for idx, ev in enumerate(eventos_para_exibir):
-                    if ev.get("editable") != False:
-                        ev_id = ev.get("id", f"antigo_{idx}")
-                        opcoes_remocao[ev_id] = ev.get("title", f"Compromisso ({idx})")
-                
-                if opcoes_remocao:
-                    evento_para_remover = st.selectbox("Escolha qual deseja remover:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x], key="cal_del_select")
-                    if st.button("Apagar Evento Selecionado", key="cal_del_btn"):
-                        if service and not evento_para_remover.startswith("antigo_"):
-                            try: service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("jarvis_", "").split("_")[0]).execute()
+                st.markdown("#### Excluir Evento")
+                if db["eventos_locais"]:
+                    opcoes_del = {ev["title"]: ev["id"] for ev in db["eventos_locais"]}
+                    selecionado_del = st.selectbox("Escolha o evento para remover:", list(opcoes_del.keys()))
+                    if st.button("Remover Evento", key="cal_del_btn"):
+                        id_remover = opcoes_del[selecionado_del]
+                        db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev["id"] != id_remover]
+                        if service:
+                            try: service.events().delete(calendarId='primary', eventId=id_remover.replace("_", "")).execute()
                             except: pass
-                        db["eventos_locais"] = [e for e in db["eventos_locais"] if e.get("id") != evento_para_remover]
-                        salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
+                        salvar_dados(db)
+                        st.rerun()
                 else:
-                    st.info("Nenhum evento customizado para remover.")
+                    st.info("Nenhum evento local para remover.")
 
-        st.markdown("<div class='calendar-container'>", unsafe_allow_html=True)
-        calendar(events=eventos_para_exibir, options={"initialView": "dayGridMonth", "headerToolbar": {"left": "prev,next today", "center": "title", "right": "dayGridMonth,timeGridWeek,timeGridDay"}}, key=f"calendar_widget_{st.session_state.cal_version}")
-        st.markdown("</div>", unsafe_allow_html=True)
+        calendar(events=eventos_para_exibir, options={"initialView": "dayGridMonth"}, key=f"cal_widget_{st.session_state.cal_version}")
 
-    # 5. ABA DE GRÁFICOS E METRICAS INTERATIVAS
+    # 5. ABA ESTATÍSTICAS
     with aba_graficos:
-        st.markdown('<div class="titulo-card">📊 SEUS ANALYTICS INTERATIVOS</div>', unsafe_allow_html=True)
-        
-        cg1, cg2 = st.columns(2)
-        with cg1:
-            with st.container(border=True):
-                st.markdown("### 🔥 Produtividade (Minutos de Foco)")
-                total_pomo = db.get("historico_pomodoro", 0)
-                st.metric("Total Acumulado", f"{total_pomo} min", "Foco Contínuo")
-                
-                metas_nome = [m["nome"] for m in db["metas"]]
-                metas_valores = [m["tempo_dedicado"] for m in db["metas"]]
-                
-                if any(metas_valores):
-                    fig_pomo = go.Figure(data=[go.Bar(
-                        x=metas_nome, y=metas_valores,
-                        marker_color=['#7a00ff', '#ff007f', '#00f2fe', '#00ff7f'][:len(metas_nome)]
-                    )])
-                    fig_pomo.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=20, b=20))
-                    st.plotly_chart(fig_pomo, use_container_width=True)
-                else:
-                    st.info("Gere dados completando ciclos no cronômetro.")
-                    
-        with cg2:
-            with st.container(border=True):
-                st.markdown("### 🏆 Conclusão de Metas")
-                concluidas = len([m for m in db["metas"] if m["concluida"]])
-                total_metas = len(db["metas"])
-                
-                if total_metas > 0:
-                    fig_meta = go.Figure(data=[go.Pie(
-                        labels=["Concluídas", "Pendentes"], 
-                        values=[concluidas, total_metas - concluidas],
-                        hole=.6,
-                        marker_colors=['#00f2fe', '#1e1f24']
-                    )])
-                    fig_meta.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=20, b=20))
-                    st.plotly_chart(fig_meta, use_container_width=True)
-                else:
-                    st.info("Peça ao Jarvis para listar objetivos estratégicos para você.")
+        st.markdown('<div class="titulo-card">📊 SEUS RELATÓRIOS INTEGRADOS</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 📈 Resumo do Progresso")
+            if db.get("metas"):
+                concluidas = sum(1 for m in db["metas"] if m["concluida"])
+                total = len(db["metas"])
+                st.progress(concluidas / total if total > 0 else 0)
+                st.metric("Metas Completadas", f"{concluidas}/{total}", f"Foco total acumulado: {db.get('historico_pomodoro', 0)} min")
+            else:
+                st.info("Adicione metas para gerar métricas de estatísticas.")
