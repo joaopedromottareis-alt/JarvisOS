@@ -22,12 +22,18 @@ MODELO_IA = "llama-3.3-70b-versatile"
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
-st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
+# Configura o estado inicial da barra lateral como recolhido (collapsed)
+st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
 
 # CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Força o sumiço completo do botão de abrir a barra lateral e da própria barra */
+    [data-testid="stSidebarCollapsedControl"], [data-testid="stSidebar"] {
+        display: none !important;
+    }
     
     /* Configuração Base Clean-Dark Space */
     .stApp { 
@@ -119,6 +125,15 @@ st.markdown("""
         border-radius: 14px !important;
     }
 
+    /* Header de Status no topo */
+    .status-top-bar {
+        background-color: #121218;
+        border: 1px solid #1e1e26;
+        border-radius: 14px;
+        padding: 12px 20px;
+        margin-bottom: 25px;
+    }
+
     /* ================= DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
@@ -156,7 +171,6 @@ def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
             dados = json.load(f)
-            # Adapta caso o arquivo venha do formato antigo ou novo
             if "credentials" in dados and "usernames" in dados["credentials"]:
                 return dados["credentials"]["usernames"]
             if "usernames" in dados:
@@ -171,7 +185,6 @@ def carregar_credenciais_salvas():
     }
 
 def salvar_novas_credenciais(dicionario_usernames):
-    # Salva em uma estrutura limpa e direta
     estrutura = {"usernames": dicionario_usernames}
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
         json.dump(estrutura, f, indent=4, ensure_ascii=False)
@@ -179,7 +192,6 @@ def salvar_novas_credenciais(dicionario_usernames):
 
 usernames_db = carregar_credenciais_salvas()
 
-# Gerenciamento de estado da sessão de login
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 if "username" not in st.session_state:
@@ -201,7 +213,6 @@ if not st.session_state.autenticado:
                     hash_informado = gerar_hash_sha256(input_senha)
                     hash_salvo = usernames_db[input_user]["password"]
                     
-                    # Fallback temporário para aceitar o admin123 antigo sem hash se necessário
                     if hash_informado == hash_salvo or input_senha == hash_salvo:
                         st.session_state.autenticado = True
                         st.session_state.username = input_user
@@ -274,14 +285,24 @@ if st.session_state.autenticado and username:
 
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # Botão de Logout na Barra Lateral
-    if st.sidebar.button("Encerrar Sessão (Logout)"):
-        st.session_state.autenticado = False
-        st.session_state.username = None
-        st.rerun()
-        
-    st.sidebar.markdown(f"🤖 **Terminal Conectado:** {name}")
-    st.sidebar.markdown(f"📂 *Arquivo Ativo:* `{ARQUIVO_DADOS}`")
+    # ==================== TOP BAR - BARRA DE STATUS GLOBAL INTEGRADA ====================
+    # Substitui completamente a barra lateral antiga por um design horizontal premium
+    st.markdown("""<h1 style='margin-bottom: 5px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>""", unsafe_allow_html=True)
+    
+    col_status_info, col_status_btn = st.columns([4, 1])
+    with col_status_info:
+        st.markdown(f"""
+            <div class="status-top-bar">
+                <span>🤖 <b>Operador Conectado:</b> {name}</span>
+                <span style="margin-left: 25px; color: #8e8e9a;">📂 <b>Arquivo Ativo:</b> <code>{ARQUIVO_DADOS}</code></span>
+            </div>
+        """, unsafe_allow_html=True)
+    with col_status_btn:
+        st.markdown("<div style='padding-top: 2px;'></div>", unsafe_allow_html=True)
+        if st.button("🚪 Encerrar Sessão"):
+            st.session_state.autenticado = False
+            st.session_state.username = None
+            st.rerun()
 
     # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE INDIVIDUALIZADA ====================
     def obter_servico_google_agenda():
@@ -404,8 +425,6 @@ if st.session_state.autenticado and username:
             return "Módulos de IA em espera. Sistemas locais em modo de contingência operante."
 
     # ==================== INTERFACE WORKSTATION ====================
-    st.markdown("<h1 style='margin-bottom: 25px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>", unsafe_allow_html=True)
-
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
         "🎯 Painel de Diretrizes", 
         "⏱️ Módulo de Foco Temporal", 
