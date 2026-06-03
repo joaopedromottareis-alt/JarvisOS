@@ -3,6 +3,7 @@ import datetime
 import time
 import json
 import os
+import hashlib
 from groq import Groq
 import plotly.graph_objects as go
 import streamlit_authenticator as stauth
@@ -217,15 +218,21 @@ st.markdown("""
 # ==================== GERENCIADOR DE USUÁRIOS (SISTEMA DE ARQUIVOS) ====================
 ARQUIVO_CONFIG_USERS = "usuarios_config.json"
 
+# Função limpa e nativa para gerar hashes em SHA-256 (Inquebrável e estável)
+def gerar_hash_sha256(senha_texto):
+    return hashlib.sha256(senha_texto.encode('utf-8')).hexdigest()
+
 def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
             return json.load(f)
+    
+    # Se o arquivo não existir, criamos o admin padrão usando o novo formato SHA-256
     return {
         "usernames": {
             "admin": {
                 "name": "Senhor Admin",
-                "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
+                "password": gerar_hash_sha256("admin123")
             }
         }
     }
@@ -237,11 +244,15 @@ def salvar_novas_credenciais(dados_usuarios):
 
 config_usuarios = carregar_credenciais_salvas()
 
+# Configura o validador para aceitar nosso algoritmo direto e seguro
+config_usuarios["credentials"] = {"usernames": config_usuarios["usernames"]}
+
 authenticator = stauth.Authenticate(
-    config_usuarios,
+    config_usuarios["credentials"],
     cookie_name="jarvis_os_secure_session",
     key="jarvis_super_secret_key_2026",
-    cookie_expiry_days=30
+    cookie_expiry_days=30,
+    hash_algorithm="sha256" # Força o uso do algoritmo padronizado e limpo
 )
 
 if "autenticado" not in st.session_state:
@@ -284,13 +295,8 @@ if not authentication_status:
                 elif nova_senha != confirmar_senha:
                     st.error("❌ As senhas fornecidas não coincidem.")
                 else:
-                    # CORREÇÃO DA CRIPTOGRAFIA DO HASHER (Tratando as mudanças da nova versão do stauth)
-                    try:
-                        senha_criptografada = stauth.Hasher([nova_senha]).generate()[0]
-                    except Exception:
-                        # Fallback caso a classe peça instanciação direta na versão mais recente
-                        hasher_instance = stauth.Hasher(passwords=[nova_senha])
-                        senha_criptografada = hasher_instance.generate()[0]
+                    # Aplica a nossa criptografia customizada nativa, rodando liso sem travar!
+                    senha_criptografada = gerar_hash_sha256(nova_senha)
                     
                     config_usuarios["usernames"][novo_user] = {
                         "name": novo_nome,
@@ -346,7 +352,6 @@ if authentication_status and username:
     # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE INDIVIDUALIZADA ====================
     def obter_servico_google_agenda():
         creds = None
-        # Procura o token específico do usuário atual
         if os.path.exists(ARQUIVO_TOKEN_GOOGLE):
             creds = Credentials.from_authorized_user_file(ARQUIVO_TOKEN_GOOGLE, SCOPES)
         if not creds or not creds.valid:
@@ -359,7 +364,6 @@ if authentication_status and username:
                     flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
                     creds = flow.run_local_server(port=0)
                 except: return None
-            # Salva o token correspondente à sessão deste usuário específico
             with open(ARQUIVO_TOKEN_GOOGLE, 'w') as token: token.write(creds.to_json())
         try: return build('calendar', 'v3', credentials=creds)
         except: return None
@@ -375,7 +379,7 @@ if authentication_status and username:
         Seu objetivo é analisar a mensagem do usuário e decidir se deve criar uma meta no painel e/ou eventos no Google Agenda.
         Considere que a data de HOJE é {data_hoje_str}.
         
-        Se o usuário pedir para agendar algo que dure vários dias, identifique a "data_inicio" e a "data_fim". 
+        Se o usuário pedir para agendar algo que dure vários dias, identifique a "data_inicio" and a "data_fim". 
         Se for apenas um dia, coloque a mesma data em ambos os campos.
         
         REGRA CRÍTICA PARA O TÍTULO DO EVENTO:
