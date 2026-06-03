@@ -222,16 +222,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==================== SISTEMA DE LOGIN E CONTAS (OPÇÃO 2) ====================
-# Configuração dos operadores autorizados. Senha padrão para ambos: admin123
 credentials = {
     "usernames": {
         "admin": {
             "name": "Senhor Admin",
-            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" 
+            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
         },
         "jarvis": {
             "name": "Operador Jarvis",
-            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe"
+            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
         }
     }
 }
@@ -243,9 +242,16 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=30
 )
 
-name, authentication_status, username = authenticator.login(location='main')
+# Tratamento adaptativo da chamada de login para evitar o TypeError
+try:
+    authenticator.login()
+except TypeError:
+    authenticator.login('Login', 'main')
 
-# Controle de fluxo do Streamlit baseado no status do Login
+authentication_status = st.session_state.get("authentication_status")
+username = st.session_state.get("username")
+
+# Fluxo de contenção se não autenticado
 if authentication_status == False:
     st.error("❌ Credenciais de segurança incorretas.")
     st.stop()
@@ -254,7 +260,9 @@ elif authentication_status == None:
     st.stop()
 
 # ==================== INÍCIO DA SESSÃO DO USUÁRIO LOGADO ====================
-if authentication_status:
+if authentication_status and username:
+    
+    name = credentials["usernames"][username]["name"]
     
     # Isolar dinamicamente o arquivo de banco de dados por operador
     ARQUIVO_DADOS = f"dados_user_{username}.json"
@@ -417,7 +425,7 @@ if authentication_status:
         except Exception as e:
             return "Módulos de IA em espera. Sistemas locais em modo de contingência operante."
 
-    # ==================== INTERFACE WORKSTATION PRINCIPAL ====================
+    # ==================== INTERFACE WORKSTATION DESKTOP ====================
     st.markdown("<h1 style='margin-bottom: 25px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>", unsafe_allow_html=True)
 
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -446,7 +454,7 @@ if authentication_status:
             st.markdown('<div class="titulo-card">🎯 Objetivos em Execução</div>', unsafe_allow_html=True)
             with st.container(border=True):
                 metas_ativas = [m for m in db["metas"] if not m["concluida"]]
-                if not metas_ativas: st.info("Nenhuma diretriz ativa em andamento no momento.")
+                if not metas_ativas: st.info("Nenhuma diretriz ativa em andamento no momento, Senhor.")
                 else:
                     for m in db["metas"]:
                         if not m["concluida"]:
@@ -507,8 +515,10 @@ if authentication_status:
             st.markdown('<div class="titulo-card">💧 Monitoramento de Hidratação</div>', unsafe_allow_html=True)
             with st.container(border=True):
                 peso_texto = st.text_input("Informe seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)).replace('.', ','))
-                try: peso_limpo = float(peso_texto.replace(',', '.'))
-                except ValueError: peso_limpo = 70.0
+                try:
+                    peso_limpo = float(peso_texto.replace(',', '.'))
+                except ValueError:
+                    peso_limpo = 70.0
                 if peso_limpo != db.get("peso_usuario", 70.0) and peso_limpo > 0: 
                     db["peso_usuario"] = peso_limpo
                     salvar_dados(db)
@@ -523,7 +533,7 @@ if authentication_status:
         with cs2:
             st.markdown('<div class="titulo-card">🍲 Log de Nutrição</div>', unsafe_allow_html=True)
             with st.container(border=True):
-                refeicao = st.text_input("O que você consumiu na última janela?", placeholder="Ex: Arroz, feijão e frango grelhado")
+                refeicao = st.text_input("O que você consumiu na última janela?", placeholder="Ex: Patinho, arroz integral e brócolis")
                 st.markdown("<br><br>", unsafe_allow_html=True)
                 if st.button("Catalogar Refeição no Sistema"):
                     if refeicao: db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao}); salvar_dados(db); st.toast("Refeição arquivada com sucesso!")
@@ -533,45 +543,58 @@ if authentication_status:
         st.markdown('<div class="titulo-card">📅 Alocação de Rotinas e Agenda Integrada</div>', unsafe_allow_html=True)
         
         if service:
-            st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟢 Sincronização com Google Agenda ativa.</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>🟢 Sincronização em tempo real com Google Agenda ativa.</span>", unsafe_allow_html=True)
         else:
-            st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'> 🟡 Modo Local Ativo (Google off-line).</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
         
+        # Preparação da lista de eventos
         eventos_para_exibir = [{
             "title": "06:00 - Sistema Inicializado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
-            "backgroundColor": "#121218", "borderColor": "#1e1e26", "textColor": "#8e8e9a", "editable": False
+            "backgroundColor": "#121218",
+            "borderColor": "#1e1e26",
+            "textColor": "#8e8e9a",
+            "editable": False
         }]
         if db.get("eventos_locais"):
             eventos_para_exibir.extend(db["eventos_locais"])
 
-        with st.expander("🛠️ Central Operacional de Agendamentos", expanded=False):
+        # Painel Modularizado Superior Simétrico
+        with st.expander("🛠️ Central Operacional de Agendamentos (Clique para expandir/recolher)", expanded=False):
             c_add, c_del = st.columns(2)
+            
             with c_add:
                 st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>➕ Adicionar Novo Evento</h4>", unsafe_allow_html=True)
-                nome_evento = st.text_input("Título da Atividade:", key="cal_nome_ev")
+                nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino de Perna", key="cal_nome_ev")
                 data_evento = st.date_input("Data Selecionada:", datetime.date.today(), key="cal_data_ev")
                 h_ini = st.time_input("Horário de Início:", datetime.time(14, 0), key="cal_hini_ev")
                 h_fim = st.time_input("Horário de Término:", datetime.time(15, 0), key="cal_hfim_ev")
-                recorrente = st.checkbox("🔄 Repetir diariamente", key="cal_rec_ev")
+                recorrente = st.checkbox("🔄 Repetir diariamente (Rotina Fixa)", key="cal_rec_ev")
                 
                 if st.button("Gravar Compromisso", key="cal_save_btn"):
                     if nome_evento:
                         start_dt = datetime.datetime.combine(data_evento, h_ini)
                         end_dt = datetime.datetime.combine(data_evento, h_fim)
-                        id_unico = f"jarvis_{int(time.time())}_manual"
+                        id_unico = "jarvis_" + str(int(time.time())) + "_manual"
+                        
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
                         novo_ev = {
-                            "id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), 
-                            "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"
+                            "id": id_unico,
+                            "title": titulo_formatado,
+                            "start": start_dt.isoformat(),
+                            "end": end_dt.isoformat(),
+                            "backgroundColor": "#1c1c26",
+                            "borderColor": "#d4af37",
+                            "textColor": "#ffffff"
                         }
                         
                         if service:
                             try:
                                 event_body = {
-                                    'id': id_unico.replace("_", ""), 'summary': titulo_formatado,
+                                    'id': id_unico.replace("_", ""),
+                                    'summary': titulo_formatado,
                                     'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                     'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                 }
@@ -586,28 +609,64 @@ if authentication_status:
 
             with c_del:
                 st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>🗑️ Desacoplar Compromissos</h4>", unsafe_allow_html=True)
-                opcoes_remocao = {ev.get("id"): ev.get("title") for ev in eventos_para_exibir if ev.get("editable") != False}
+                opcoes_remocao = {}
+                for idx, ev in enumerate(eventos_para_exibir):
+                    if ev.get("editable") != False:
+                        ev_id = ev.get("id", f"antigo_{idx}")
+                        opcoes_remocao[ev_id] = ev.get("title", f"Compromisso ({idx})")
                 
                 if opcoes_remocao:
                     evento_para_remover = st.selectbox("Selecione qual compromisso remover:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x], key="cal_del_select")
+                    
                     if st.button("Remover Registro Selecionado", key="cal_del_btn"):
-                        if service:
-                            try: service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
+                        if service and not evento_para_remover.startswith("antigo_"):
+                            try:
+                                service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
                             except: pass
-                        db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev.get("id") != evento_para_remover]
+                        
+                        if evento_para_remover.startswith("antigo_"):
+                            idx_alvo = int(evento_para_remover.split("_")[1]) - 1
+                            if 0 <= idx_alvo < len(db["eventos_locais"]):
+                                db["eventos_locais"].pop(idx_alvo)
+                        else:
+                            db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev.get("id") != evento_para_remover]
+                        
                         salvar_dados(db)
                         st.session_state.cal_version += 1
                         st.rerun()
                 else:
-                    st.info("Nenhum compromisso mutável registrado.")
+                    st.info("Nenhum compromisso mutável registrado na grade local.")
+                
+                st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
+                if st.button("⚠️ Limpar Todos os Eventos do Painel Local", key="cal_clear_all_btn"):
+                    db["eventos_locais"] = []
+                    salvar_dados(db)
+                    st.session_state.cal_version += 1
+                    st.rerun()
 
+        # Container Isolado e Estilizado do Calendário
         with st.container(border=True):
             options = {
                 "initialView": "dayGridMonth",
-                "headerToolbar": {"left": "prev,next today", "center": "title", "right": "dayGridMonth,timeGridWeek,listDay,listWeek"},
-                "buttonText": {"today": "Hoje", "month": "Mês", "week": "Semana", "listDay": "Agenda Diária", "listWeek": "Compromissos"},
-                "editable": True, "selectable": True, "timeZone": "local", "contentHeight": 660, "handleWindowResize": True
+                "headerToolbar": {
+                    "left": "prev,next today",
+                    "center": "title",
+                    "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
+                },
+                "buttonText": {
+                    "today": "Hoje",
+                    "month": "Mês",
+                    "week": "Semana",
+                    "listDay": "Agenda Diária",
+                    "listWeek": "Compromissos"
+                },
+                "editable": True,
+                "selectable": True,
+                "timeZone": "local",
+                "contentHeight": 660,
+                "handleWindowResize": True
             }
+            
             calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_fixed_final_{st.session_state.cal_version}")
 
     # 5. ABA DE GRÁFICOS
@@ -626,6 +685,14 @@ if authentication_status:
                 if not metas_filtradas: st.info(msg_vazio)
                 else:
                     nomes_metas = [m["nome"] for m in metas_filtradas]; tempos_metas = [m["tempo_dedicado"] for m in metas_filtradas]
-                    fig = go.Figure(data=[go.Bar(x=nomes_metas, y=tempos_metas, marker_color=cor_barra, text=tempos_metas, textposition='auto')])
-                    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="#cccccc"), margin=dict(l=40, r=40, t=20, b=40), height=380)
+                    fig = go.Figure(data=[go.Bar(x=nomes_metas, y=tempos_metas, marker_color=cor_barra, text=tempos_metas, textposition='auto', hovertemplate="<b>Alvo:</b> %{x}<br><b>Foco:</b> %{y} min<extra></extra>")])
+                    fig.update_layout(
+                        paper_bgcolor="rgba(0,0,0,0)", 
+                        plot_bgcolor="rgba(0,0,0,0)", 
+                        font=dict(color="#cccccc", size=12), 
+                        xaxis=dict(gridcolor="#1e1e26"), 
+                        yaxis=dict(gridcolor="#1e1e26"), 
+                        margin=dict(l=40, r=40, t=20, b=40), 
+                        height=380
+                    )
                     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
