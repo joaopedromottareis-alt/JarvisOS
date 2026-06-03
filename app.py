@@ -25,26 +25,23 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
 
-# CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
+# CSS Global Avançado
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Configuração Base Clean-Dark Space */
     .stApp { 
         background-color: #0a0a0d; 
         color: #e4e4e9; 
         font-family: 'Inter', system-ui, sans-serif; 
     }
     
-    /* Margens seguras para evitar quebras em telas Desktop */
     .block-container { 
         padding: 2rem 3rem !important; 
         max-width: 100% !important; 
     }
     #MainMenu, footer, header { visibility: hidden !important; }
     
-    /* Títulos do Sistema */
     h1, h2, h3, h4 { 
         color: #d4af37 !important; 
         font-weight: 700; 
@@ -60,12 +57,10 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
-    /* Customização de containers nativos para simular os cards arredondados */
     div[data-testid="stVerticalBlock"] > div {
         gap: 1.2rem !important;
     }
     
-    /* Inputs e Dropdowns com visual integrado e espaçados */
     div[data-baseweb="select"], div[data-baseweb="input"], .stTextInput>div>div>input, .stDateInput>div>div>input {
         background-color: #121218 !important; 
         border: 1px solid #22222a !important; 
@@ -74,7 +69,6 @@ st.markdown("""
         margin-bottom: 5px;
     }
     
-    /* Botões Limpos com efeito Hover Glow */
     .stButton>button { 
         background-color: #121218; 
         color: #d4af37; 
@@ -92,7 +86,6 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
-    /* Abas Superiores Estilo Aplicação Premium */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: #121218; 
         border: 1px solid #1e1e26;
@@ -113,14 +106,12 @@ st.markdown("""
         background-color: #1c1c26 !important;
     }
     
-    /* Expander transparente estilizado */
     .stExpander {
         background-color: #121218 !important;
         border: 1px solid #1e1e26 !important;
         border-radius: 14px !important;
     }
 
-    /* ================= DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
         border-radius: 20px !important;
@@ -130,109 +121,37 @@ st.markdown("""
         display: block !important;
     }
 
-    .fc .fc-toolbar-title {
-        color: #d4af37 !important;
-        font-size: 1.6rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 1px !important;
-        text-transform: uppercase !important;
-    }
-
-    .fc .fc-button-primary {
-        background-color: transparent !important;
-        border: 1px solid #22222a !important;
-        color: #a0a0aa !important;
-        text-transform: capitalize !important;
-        border-radius: 10px !important;
-        padding: 6px 14px !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        transition: all 0.2s ease;
-    }
-    .fc .fc-button-primary:hover {
-        background-color: #1c1c26 !important;
-        color: #ffffff !important;
-        border-color: #444452 !important;
-    }
-    .fc .fc-button-active {
-        background-color: #d4af37 !important;
-        color: #0a0a0d !important;
-        border-color: #d4af37 !important;
-        font-weight: 600 !important;
-    }
-
-    .fc-theme-standard th {
-        border: none !important;
-        border-bottom: 2px solid #1e1e26 !important;
-        background-color: transparent !important;
-    }
-    .fc .fc-col-header-cell-cushion {
-        color: #8e8e9a !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        padding: 12px 0 !important;
-    }
-
-    .fc-theme-standard td {
-        border: 1px solid #161620 !important;
-    }
-    
-    .fc .fc-daygrid-day-top {
-        justify-content: center !important;
-        padding-top: 6px !important;
-    }
-    .fc .fc-daygrid-day-number {
-        color: #ffffff !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        padding: 4px 8px !important;
-        border-radius: 50% !important;
-        transition: all 0.2s ease;
-    }
-    
-    .fc .fc-day-today .fc-daygrid-day-number {
-        background-color: rgba(212, 175, 55, 0.15) !important;
-        color: #d4af37 !important;
-        font-weight: 700 !important;
-    }
-
-    /* ================= AJUSTE EXCLUSIVO DE RESPONSIVIDADE PARA CELULAR ================= */
     @media (max-width: 768px) {
-        .block-container { 
-            padding: 1rem 1rem !important; 
-        }
-        h1 {
-            font-size: 1.8rem !important; 
-        }
-        iframe[title="streamlit_calendar.calendar"] {
-            min-height: 560px !important; 
-            height: 560px !important;
-        }
+        .block-container { padding: 1rem 1rem !important; }
+        h1 { font-size: 1.8rem !important; }
+        iframe[title="streamlit_calendar.calendar"] { min-height: 560px !important; height: 560px !important; }
     }
     </style>
 """, unsafe_allow_html=True)
 
 
-# ==================== GERENCIADOR DE USUÁRIOS (SISTEMA DE ARQUIVOS) ====================
+# ==================== GERENCIADOR DE USUÁRIOS (ESTRUTURA CORRIGIDA) ====================
 ARQUIVO_CONFIG_USERS = "usuarios_config.json"
 
-# Função limpa e nativa para gerar hashes em SHA-256 (Inquebrável e estável)
 def gerar_hash_sha256(senha_texto):
     return hashlib.sha256(senha_texto.encode('utf-8')).hexdigest()
 
 def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
-            return json.load(f)
+            dados = json.load(f)
+            # Garante que a estrutura interna venha sempre correta
+            if "credentials" in dados:
+                return dados
     
-    # Se o arquivo não existir, criamos o admin padrão usando o novo formato SHA-256
+    # Estrutura base padrão exigida pelo streamlit-authenticator
     return {
-        "usernames": {
-            "admin": {
-                "name": "Senhor Admin",
-                "password": gerar_hash_sha256("admin123")
+        "credentials": {
+            "usernames": {
+                "admin": {
+                    "name": "Senhor Admin",
+                    "password": gerar_hash_sha256("admin123")
+                }
             }
         }
     }
@@ -244,15 +163,13 @@ def salvar_novas_credenciais(dados_usuarios):
 
 config_usuarios = carregar_credenciais_salvas()
 
-# Configura o validador para aceitar nosso algoritmo direto e seguro
-config_usuarios["credentials"] = {"usernames": config_usuarios["usernames"]}
-
+# Inicializa o autenticador passando estritamente o dicionário de credentials
 authenticator = stauth.Authenticate(
     config_usuarios["credentials"],
     cookie_name="jarvis_os_secure_session",
     key="jarvis_super_secret_key_2026",
     cookie_expiry_days=30,
-    hash_algorithm="sha256" # Força o uso do algoritmo padronizado e limpo
+    hash_algorithm="sha256"
 )
 
 if "autenticado" not in st.session_state:
@@ -290,15 +207,15 @@ if not authentication_status:
             if st.button("Finalizar Cadastro de Operador"):
                 if not novo_nome or not novo_user or not nova_senha:
                     st.error("⚠️ Todos os campos operacionais precisam estar preenchidos.")
-                elif novo_user in config_usuarios["usernames"]:
+                elif novo_user in config_usuarios["credentials"]["usernames"]:
                     st.error("❌ Este Username já está mapeado no banco de dados. Escolha outro.")
                 elif nova_senha != confirmar_senha:
                     st.error("❌ As senhas fornecidas não coincidem.")
                 else:
-                    # Aplica a nossa criptografia customizada nativa, rodando liso sem travar!
                     senha_criptografada = gerar_hash_sha256(nova_senha)
                     
-                    config_usuarios["usernames"][novo_user] = {
+                    # Salva respeitando rigorosamente a árvore do dicionário
+                    config_usuarios["credentials"]["usernames"][novo_user] = {
                         "name": novo_nome,
                         "password": senha_criptografada
                     }
@@ -311,11 +228,9 @@ username = st.session_state.get("username")
 
 if authentication_status and username:
     
-    name = config_usuarios["usernames"][username]["name"]
+    name = config_usuarios["credentials"]["usernames"][username]["name"]
     
-    # Isolar dinamicamente o arquivo de banco de dados por operador
     ARQUIVO_DADOS = f"dados_user_{username}.json"
-    # Isolar dinamicamente o token do Google Agenda para cada usuário não misturar as contas
     ARQUIVO_TOKEN_GOOGLE = f"token_{username}.json"
 
     def carregar_dados():
@@ -344,7 +259,6 @@ if authentication_status and username:
 
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # Adicionar Botão de Logout na Barra Lateral
     authenticator.logout('Encerrar Sessão (Logout)', 'sidebar')
     st.sidebar.markdown(f"🤖 **Terminal Conectado:** {name}")
     st.sidebar.markdown(f"📂 *Arquivo Ativo:* `{ARQUIVO_DADOS}`")
@@ -379,7 +293,7 @@ if authentication_status and username:
         Seu objetivo é analisar a mensagem do usuário e decidir se deve criar uma meta no painel e/ou eventos no Google Agenda.
         Considere que a data de HOJE é {data_hoje_str}.
         
-        Se o usuário pedir para agendar algo que dure vários dias, identifique a "data_inicio" and a "data_fim". 
+        Se o usuário pedir para agendar algo que dure vários dias, identifique a "data_inicio" e a "data_fim". 
         Se for apenas um dia, coloque a mesma data em ambos os campos.
         
         REGRA CRÍTICA PARA O TÍTULO DO EVENTO:
@@ -469,7 +383,7 @@ if authentication_status and username:
         except Exception as e:
             return "Módulos de IA em espera. Sistemas locais em modo de contingência operante."
 
-    # ==================== INTERFACE WORKSTATION DESKTOP ====================
+    # ==================== INTERFACE WORKSTATION ====================
     st.markdown("<h1 style='margin-bottom: 25px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>", unsafe_allow_html=True)
 
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -600,16 +514,16 @@ if authentication_status and username:
         if db.get("eventos_locais"):
             eventos_para_exibir.extend(db["eventos_locais"])
 
-        with st.expander("🛠️ Central Operacional de Agendamentos (Clique para expandir/recolher)", expanded=False):
+        with st.expander("🛠️ Central Operacional de Agendamentos", expanded=False):
             c_add, c_del = st.columns(2)
             
             with c_add:
-                st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>➕ Adicionar Novo Evento</h4>", unsafe_allow_html=True)
-                nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino de Perna", key="cal_nome_ev")
+                st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>➕ Adicionar Novo Evento</h4>", unsafe_allow_html=True)
+                nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino", key="cal_nome_ev")
                 data_evento = st.date_input("Data Selecionada:", datetime.date.today(), key="cal_data_ev")
                 h_ini = st.time_input("Horário de Início:", datetime.time(14, 0), key="cal_hini_ev")
                 h_fim = st.time_input("Horário de Término:", datetime.time(15, 0), key="cal_hfim_ev")
-                recorrente = st.checkbox("🔄 Repetir diariamente (Rotina Fixa)", key="cal_rec_ev")
+                recorrente = st.checkbox("🔄 Repetir diariamente", key="cal_rec_ev")
                 
                 if st.button("Gravar Compromisso", key="cal_save_btn"):
                     if nome_evento:
@@ -640,7 +554,7 @@ if authentication_status and username:
                         st.rerun()
 
             with c_del:
-                st.markdown("<h4 style='font-size:16px; color:#ffffff !important; margin-bottom:12px !important;'>🗑️ Desacoplar Compromissos</h4>", unsafe_allow_html=True)
+                st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>🗑️ Desacoplar Compromissos</h4>", unsafe_allow_html=True)
                 opcoes_remocao = {}
                 for idx, ev in enumerate(eventos_para_exibir):
                     if ev.get("editable") != False:
