@@ -22,15 +22,14 @@ MODELO_IA = "llama-3.3-70b-versatile"
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
-# Configura o estado inicial da barra lateral como recolhido (collapsed)
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
 
 # CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
     
-    /* Força o sumiço completo do botão de abrir a barra lateral e da própria barra */
+    /* Força o sumiço completo da barra lateral */
     [data-testid="stSidebarCollapsedControl"], [data-testid="stSidebar"] {
         display: none !important;
     }
@@ -125,13 +124,11 @@ st.markdown("""
         border-radius: 14px !important;
     }
 
-    /* Header de Status no topo */
-    .status-top-bar {
-        background-color: #121218;
-        border: 1px solid #1e1e26;
-        border-radius: 14px;
-        padding: 12px 20px;
-        margin-bottom: 25px;
+    /* Alinhamento do botão de logout no canto superior direito */
+    .logout-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
     }
 
     /* ================= DESIGN DO CALENDÁRIO ================= */
@@ -285,24 +282,20 @@ if st.session_state.autenticado and username:
 
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # ==================== TOP BAR - BARRA DE STATUS GLOBAL INTEGRADA ====================
-    # Substitui completamente a barra lateral antiga por um design horizontal premium
-    st.markdown("""<h1 style='margin-bottom: 5px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>""", unsafe_allow_html=True)
+    # ==================== HEADER PREMIUM COM LOGOUT ISOLADO À DIREITA ====================
+    col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     
-    col_status_info, col_status_btn = st.columns([4, 1])
-    with col_status_info:
-        st.markdown(f"""
-            <div class="status-top-bar">
-                <span>🤖 <b>Operador Conectado:</b> {name}</span>
-                <span style="margin-left: 25px; color: #8e8e9a;">📂 <b>Arquivo Ativo:</b> <code>{ARQUIVO_DADOS}</code></span>
-            </div>
-        """, unsafe_allow_html=True)
-    with col_status_btn:
-        st.markdown("<div style='padding-top: 2px;'></div>", unsafe_allow_html=True)
+    with col_titulo_sistema:
+        st.markdown("""<h1 style='margin-bottom: 0px !important;'>🔱 JARVIS OPERATIONAL SYSTEM</h1>""", unsafe_allow_html=True)
+    
+    with col_botao_logout:
+        st.markdown("<div class='logout-container'></div>", unsafe_allow_html=True)
         if st.button("🚪 Encerrar Sessão"):
             st.session_state.autenticado = False
             st.session_state.username = None
             st.rerun()
+
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: #1e1e26;'>", unsafe_allow_html=True)
 
     # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE INDIVIDUALIZADA ====================
     def obter_servico_google_agenda():
