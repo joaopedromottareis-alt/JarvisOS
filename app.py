@@ -6,7 +6,6 @@ import os
 import hashlib
 from groq import Groq
 import plotly.graph_objects as go
-import streamlit_authenticator as stauth
 
 # --- Importações para o Calendário ---
 from streamlit_calendar import calendar
@@ -25,23 +24,26 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
 
-# CSS Global Avançado
+# CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* Configuração Base Clean-Dark Space */
     .stApp { 
         background-color: #0a0a0d; 
         color: #e4e4e9; 
         font-family: 'Inter', system-ui, sans-serif; 
     }
     
+    /* Margens seguras para evitar quebras em telas Desktop */
     .block-container { 
         padding: 2rem 3rem !important; 
         max-width: 100% !important; 
     }
     #MainMenu, footer, header { visibility: hidden !important; }
     
+    /* Títulos do Sistema */
     h1, h2, h3, h4 { 
         color: #d4af37 !important; 
         font-weight: 700; 
@@ -57,10 +59,12 @@ st.markdown("""
         margin-bottom: 8px;
     }
 
+    /* Customização de containers nativos para simular os cards arredondados */
     div[data-testid="stVerticalBlock"] > div {
         gap: 1.2rem !important;
     }
     
+    /* Inputs e Dropdowns com visual integrado e espaçados */
     div[data-baseweb="select"], div[data-baseweb="input"], .stTextInput>div>div>input, .stDateInput>div>div>input {
         background-color: #121218 !important; 
         border: 1px solid #22222a !important; 
@@ -69,6 +73,7 @@ st.markdown("""
         margin-bottom: 5px;
     }
     
+    /* Botões Limpos com efeito Hover Glow */
     .stButton>button { 
         background-color: #121218; 
         color: #d4af37; 
@@ -86,6 +91,7 @@ st.markdown("""
         transform: translateY(-1px);
     }
     
+    /* Abas Superiores Estilo Aplicação Premium */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: #121218; 
         border: 1px solid #1e1e26;
@@ -106,12 +112,14 @@ st.markdown("""
         background-color: #1c1c26 !important;
     }
     
+    /* Expander transparente estilizado */
     .stExpander {
         background-color: #121218 !important;
         border: 1px solid #1e1e26 !important;
         border-radius: 14px !important;
     }
 
+    /* ================= DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
         border-radius: 20px !important;
@@ -121,16 +129,24 @@ st.markdown("""
         display: block !important;
     }
 
+    /* ================= AJUSTE EXCLUSIVO DE RESPONSIVIDADE PARA CELULAR ================= */
     @media (max-width: 768px) {
-        .block-container { padding: 1rem 1rem !important; }
-        h1 { font-size: 1.8rem !important; }
-        iframe[title="streamlit_calendar.calendar"] { min-height: 560px !important; height: 560px !important; }
+        .block-container { 
+            padding: 1rem 1rem !important; 
+        }
+        h1 {
+            font-size: 1.8rem !important; 
+        }
+        iframe[title="streamlit_calendar.calendar"] {
+            min-height: 560px !important; 
+            height: 560px !important;
+        }
     }
     </style>
 """, unsafe_allow_html=True)
 
 
-# ==================== GERENCIADOR DE USUÁRIOS (ESTRUTURA CORRIGIDA) ====================
+# ==================== GERENCIADOR DE USUÁRIOS (CUSTOM SEGURO) ====================
 ARQUIVO_CONFIG_USERS = "usuarios_config.json"
 
 def gerar_hash_sha256(senha_texto):
@@ -140,60 +156,62 @@ def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
             dados = json.load(f)
-            # Garante que a estrutura interna venha sempre correta
-            if "credentials" in dados:
-                return dados
-    
-    # Estrutura base padrão exigida pelo streamlit-authenticator
+            # Adapta caso o arquivo venha do formato antigo ou novo
+            if "credentials" in dados and "usernames" in dados["credentials"]:
+                return dados["credentials"]["usernames"]
+            if "usernames" in dados:
+                return dados["usernames"]
+            return dados
+            
     return {
-        "credentials": {
-            "usernames": {
-                "admin": {
-                    "name": "Senhor Admin",
-                    "password": gerar_hash_sha256("admin123")
-                }
-            }
+        "admin": {
+            "name": "Senhor Admin",
+            "password": gerar_hash_sha256("admin123")
         }
     }
 
-def salvar_novas_credenciais(dados_usuarios):
+def salvar_novas_credenciais(dicionario_usernames):
+    # Salva em uma estrutura limpa e direta
+    estrutura = {"usernames": dicionario_usernames}
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
-        json.dump(dados_usuarios, f, indent=4, ensure_ascii=False)
+        json.dump(estrutura, f, indent=4, ensure_ascii=False)
 
 
-config_usuarios = carregar_credenciais_salvas()
+usernames_db = carregar_credenciais_salvas()
 
-# Inicializa o autenticador passando estritamente o dicionário de credentials
-authenticator = stauth.Authenticate(
-    config_usuarios["credentials"],
-    cookie_name="jarvis_os_secure_session",
-    key="jarvis_super_secret_key_2026",
-    cookie_expiry_days=30,
-    hash_algorithm="sha256"
-)
-
+# Gerenciamento de estado da sessão de login
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
+if "username" not in st.session_state:
+    st.session_state.username = None
 
-authentication_status = st.session_state.get("authentication_status")
-
-if not authentication_status:
+if not st.session_state.autenticado:
     st.markdown("<h2>🔱 TERMINAL DE ACESSO - JARVIS OS</h2>", unsafe_allow_html=True)
     
     modo_tela = st.radio("Selecione o protocolo de entrada:", ["Fazer Login", "Registrar Nova Conta"], horizontal=True)
     
     if modo_tela == "Fazer Login":
-        try:
-            authenticator.login()
-        except TypeError:
-            authenticator.login('Login', 'main')
+        with st.container(border=True):
+            st.markdown("### 🔒 Autenticação de Operador")
+            input_user = st.text_input("Username:", key="login_username").strip().lower()
+            input_senha = st.text_input("Senha de Segurança:", type="password", key="login_password")
             
-        authentication_status = st.session_state.get("authentication_status")
-        if authentication_status == False:
-            st.error("❌ Credenciais de segurança incorretas.")
-            st.stop()
-        elif authentication_status == None:
-            st.warning("🔒 Protocolo de Segurança Ativo. Insira suas credenciais.")
+            if st.button("Acessar Painel Principal"):
+                if input_user in usernames_db:
+                    hash_informado = gerar_hash_sha256(input_senha)
+                    hash_salvo = usernames_db[input_user]["password"]
+                    
+                    # Fallback temporário para aceitar o admin123 antigo sem hash se necessário
+                    if hash_informado == hash_salvo or input_senha == hash_salvo:
+                        st.session_state.autenticado = True
+                        st.session_state.username = input_user
+                        st.success("🔓 Acesso liberado. Inicializando Jarvis OS...")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("❌ Senha incorreta para este perfil operacional.")
+                else:
+                    st.error("❌ Username não localizado na base de dados.")
             st.stop()
             
     elif modo_tela == "Registrar Nova Conta":
@@ -207,28 +225,25 @@ if not authentication_status:
             if st.button("Finalizar Cadastro de Operador"):
                 if not novo_nome or not novo_user or not nova_senha:
                     st.error("⚠️ Todos os campos operacionais precisam estar preenchidos.")
-                elif novo_user in config_usuarios["credentials"]["usernames"]:
+                elif novo_user in usernames_db:
                     st.error("❌ Este Username já está mapeado no banco de dados. Escolha outro.")
                 elif nova_senha != confirmar_senha:
                     st.error("❌ As senhas fornecidas não coincidem.")
                 else:
-                    senha_criptografada = gerar_hash_sha256(nova_senha)
-                    
-                    # Salva respeitando rigorosamente a árvore do dicionário
-                    config_usuarios["credentials"]["usernames"][novo_user] = {
+                    usernames_db[novo_user] = {
                         "name": novo_nome,
-                        "password": senha_criptografada
+                        "password": gerar_hash_sha256(nova_senha)
                     }
-                    salvar_novas_credenciais(config_usuarios)
-                    st.success(f"✅ Conta para '{novo_nome}' criada com sucesso! Mude para a aba 'Fazer Login' para entrar.")
+                    salvar_novas_credenciais(usernames_db)
+                    st.success(f"✅ Conta para '{novo_nome}' criada com sucesso! Altere para 'Fazer Login' para entrar.")
         st.stop()
 
 # ==================== INÍCIO DA SESSÃO DO USUÁRIO LOGADO ====================
-username = st.session_state.get("username")
+username = st.session_state.username
 
-if authentication_status and username:
+if st.session_state.autenticado and username:
     
-    name = config_usuarios["credentials"]["usernames"][username]["name"]
+    name = usernames_db[username]["name"]
     
     ARQUIVO_DADOS = f"dados_user_{username}.json"
     ARQUIVO_TOKEN_GOOGLE = f"token_{username}.json"
@@ -259,7 +274,12 @@ if authentication_status and username:
 
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    authenticator.logout('Encerrar Sessão (Logout)', 'sidebar')
+    # Botão de Logout na Barra Lateral
+    if st.sidebar.button("Encerrar Sessão (Logout)"):
+        st.session_state.autenticado = False
+        st.session_state.username = None
+        st.rerun()
+        
     st.sidebar.markdown(f"🤖 **Terminal Conectado:** {name}")
     st.sidebar.markdown(f"📂 *Arquivo Ativo:* `{ARQUIVO_DADOS}`")
 
