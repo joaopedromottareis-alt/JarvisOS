@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL INSPIRADA NAS REFERÊNCIAS ====================
 st.set_page_config(page_title="Jarvis OS - Dashboard", page_icon="🤖", layout="wide")
 
-# CSS Global Avançado - Totalmente calibrado para remodelar o cabeçalho, dias e tabela do Calendário
+# CSS Global Avançado - Totalmente calibrado para Desktop e Celular (Responsivo)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -161,7 +161,7 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Cabeçalhos da Grade (Dias da Semana - Sun, Mon, Tue...) */
+    /* Cabeçalhos da Grade (Dias da Semana) */
     .fc-theme-standard th {
         border: none !important;
         border-bottom: 2px solid #1e1e26 !important;
@@ -222,6 +222,20 @@ st.markdown("""
     }
     .fc-list-event-time { color: #8e8e9a !important; font-weight: 500 !important; }
     .fc-list-event-title { color: #ffffff !important; font-weight: 600 !important; }
+
+    /* ================= AJUSTE EXCLUSIVO DE RESPONSIVIDADE PARA CELULAR ================= */
+    @media (max-width: 768px) {
+        .block-container { 
+            padding: 1rem 1rem !important; /* Aproveita melhor as laterais da tela do celular */
+        }
+        h1 {
+            font-size: 1.8rem !important; /* Evita que o título principal quebre feio */
+        }
+        iframe[title="streamlit_calendar.calendar"] {
+            min-height: 560px !important; /* Encurta a altura do calendário para evitar scroll infinito no celular */
+            height: 560px !important;
+        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -614,7 +628,7 @@ with aba_calendario:
     # Container Isolado e Estilizado do Calendário
     with st.container(border=True):
         options = {
-            "initialView": "dayGridMonth", # Define a exibição inicial em tabela mensal limpa
+            "initialView": "dayGridMonth",
             "headerToolbar": {
                 "left": "prev,next today",
                 "center": "title",
