@@ -221,7 +221,6 @@ def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
             return json.load(f)
-    # Contas padrão inicial caso o arquivo não exista
     return {
         "usernames": {
             "admin": {
@@ -236,7 +235,6 @@ def salvar_novas_credenciais(dados_usuarios):
         json.dump(dados_usuarios, f, indent=4, ensure_ascii=False)
 
 
-# Carrega a base de usuários cadastrados
 config_usuarios = carregar_credenciais_salvas()
 
 authenticator = stauth.Authenticate(
@@ -246,17 +244,14 @@ authenticator = stauth.Authenticate(
     cookie_expiry_days=30
 )
 
-# --- CONTROLE INTERNO DE TELA (LOGIN VS REGISTRO) ---
 if "autenticado" not in st.session_state:
     st.session_state.autenticado = False
 
-# Se o usuário não estiver logado pelo cookie ou sessão ativa, exibe o painel de entrada
 authentication_status = st.session_state.get("authentication_status")
 
 if not authentication_status:
     st.markdown("<h2>🔱 TERMINAL DE ACESSO - JARVIS OS</h2>", unsafe_allow_html=True)
     
-    # Seletor amigável para alternar funções na tela inicial
     modo_tela = st.radio("Selecione o protocolo de entrada:", ["Fazer Login", "Registrar Nova Conta"], horizontal=True)
     
     if modo_tela == "Fazer Login":
@@ -285,14 +280,18 @@ if not authentication_status:
                 if not novo_nome or not novo_user or not nova_senha:
                     st.error("⚠️ Todos os campos operacionais precisam estar preenchidos.")
                 elif novo_user in config_usuarios["usernames"]:
-                    st.error("❌ Este Username já está mapeado no banco de dados corporativo. Escolha outro.")
+                    st.error("❌ Este Username já está mapeado no banco de dados. Escolha outro.")
                 elif nova_senha != confirmar_senha:
                     st.error("❌ As senhas fornecidas não coincidem.")
                 else:
-                    # Gera o hash seguro da senha usando o motor da biblioteca authenticator
-                    senha_criptografada = stauth.Hasher([nova_senha]).generate()[0]
+                    # CORREÇÃO DA CRIPTOGRAFIA DO HASHER (Tratando as mudanças da nova versão do stauth)
+                    try:
+                        senha_criptografada = stauth.Hasher([nova_senha]).generate()[0]
+                    except Exception:
+                        # Fallback caso a classe peça instanciação direta na versão mais recente
+                        hasher_instance = stauth.Hasher(passwords=[nova_senha])
+                        senha_criptografada = hasher_instance.generate()[0]
                     
-                    # Salva no dicionário em memória e persiste no arquivo json
                     config_usuarios["usernames"][novo_user] = {
                         "name": novo_nome,
                         "password": senha_criptografada
@@ -310,6 +309,8 @@ if authentication_status and username:
     
     # Isolar dinamicamente o arquivo de banco de dados por operador
     ARQUIVO_DADOS = f"dados_user_{username}.json"
+    # Isolar dinamicamente o token do Google Agenda para cada usuário não misturar as contas
+    ARQUIVO_TOKEN_GOOGLE = f"token_{username}.json"
 
     def carregar_dados():
         if os.path.exists(ARQUIVO_DADOS):
@@ -321,7 +322,6 @@ if authentication_status and username:
         with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=4, ensure_ascii=False)
 
-    # Inicializar ou alternar o estado do banco para o usuário atual
     if "db" not in st.session_state or st.session_state.get("atual_user") != username:
         st.session_state.db = carregar_dados()
         st.session_state.atual_user = username
@@ -343,11 +343,12 @@ if authentication_status and username:
     st.sidebar.markdown(f"🤖 **Terminal Conectado:** {name}")
     st.sidebar.markdown(f"📂 *Arquivo Ativo:* `{ARQUIVO_DADOS}`")
 
-    # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE ====================
+    # ==================== FUNÇÃO DE AUTENTICAÇÃO DO GOOGLE INDIVIDUALIZADA ====================
     def obter_servico_google_agenda():
         creds = None
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        # Procura o token específico do usuário atual
+        if os.path.exists(ARQUIVO_TOKEN_GOOGLE):
+            creds = Credentials.from_authorized_user_file(ARQUIVO_TOKEN_GOOGLE, SCOPES)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 try: creds.refresh(Request())
@@ -358,7 +359,8 @@ if authentication_status and username:
                     flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
                     creds = flow.run_local_server(port=0)
                 except: return None
-            with open('token.json', 'w') as token: token.write(creds.to_json())
+            # Salva o token correspondente à sessão deste usuário específico
+            with open(ARQUIVO_TOKEN_GOOGLE, 'w') as token: token.write(creds.to_json())
         try: return build('calendar', 'v3', credentials=creds)
         except: return None
 
@@ -436,21 +438,15 @@ if authentication_status and username:
                         id_unico = f"jarvis_{timestamp_base}_{contador_id}"
                         
                         novo_ev = {
-                            "id": id_unico,
-                            "title": ev["titulo"],
-                            "start": start_dt.isoformat(),
-                            "end": end_dt.isoformat(),
-                            "backgroundColor": "#1c1c26",
-                            "borderColor": "#d4af37",
-                            "textColor": "#ffffff"
+                            "id": id_unico, "title": ev["titulo"], "start": start_dt.isoformat(), 
+                            "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"
                         }
                         db["eventos_locais"].append(novo_ev)
                         
                         if service:
                             try:
                                 event_body = {
-                                    'id': id_unico.replace("_", ""), 
-                                    'summary': ev["titulo"],
+                                    'id': id_unico.replace("_", ""), 'summary': ev["titulo"],
                                     'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                     'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                 }
