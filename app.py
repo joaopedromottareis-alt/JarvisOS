@@ -119,7 +119,7 @@ st.markdown("""
         border-radius: 14px !important;
     }
 
-    /* ================= REESTRUTURAÇÃO COMPLETA DO DESIGN DO CALENDÁRIO ================= */
+    /* ================= DESIGN DO CALENDÁRIO ================= */
     iframe[title="streamlit_calendar.calendar"] {
         border: 1px solid #1e1e26 !important;
         border-radius: 20px !important;
@@ -197,14 +197,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    .fc-list-day { background-color: #121218 !important; }
-    .fc-list-day-text, .fc-list-day-side-text { color: #d4af37 !important; font-weight: 600 !important; }
-    .fc-list-event { background-color: #121218 !important; border-radius: 8px !important; }
-    .fc-list-event:hover td { background-color: #1c1c26 !important; }
-    .fc-list-event-dot { border-color: #d4af37 !important; }
-    .fc-list-event-time { color: #8e8e9a !important; font-weight: 500 !important; }
-    .fc-list-event-title { color: #ffffff !important; font-weight: 600 !important; }
-
     /* ================= AJUSTE EXCLUSIVO DE RESPONSIVIDADE PARA CELULAR ================= */
     @media (max-width: 768px) {
         .block-container { 
@@ -221,48 +213,100 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ==================== SISTEMA DE LOGIN E CONTAS (OPÇÃO 2) ====================
-credentials = {
-    "usernames": {
-        "admin": {
-            "name": "Senhor Admin",
-            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
-        },
-        "jarvis": {
-            "name": "Operador Jarvis",
-            "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
+
+# ==================== GERENCIADOR DE USUÁRIOS (SISTEMA DE ARQUIVOS) ====================
+ARQUIVO_CONFIG_USERS = "usuarios_config.json"
+
+def carregar_credenciais_salvas():
+    if os.path.exists(ARQUIVO_CONFIG_USERS):
+        with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
+            return json.load(f)
+    # Contas padrão inicial caso o arquivo não exista
+    return {
+        "usernames": {
+            "admin": {
+                "name": "Senhor Admin",
+                "password": "$2b$12$Mco6XwCH79S452R2gB5PFeIes3G8z9q/XkW9b5iV1zYlWv8iL1PDe" # admin123
+            }
         }
     }
-}
+
+def salvar_novas_credenciais(dados_usuarios):
+    with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
+        json.dump(dados_usuarios, f, indent=4, ensure_ascii=False)
+
+
+# Carrega a base de usuários cadastrados
+config_usuarios = carregar_credenciais_salvas()
 
 authenticator = stauth.Authenticate(
-    credentials,
+    config_usuarios,
     cookie_name="jarvis_os_secure_session",
     key="jarvis_super_secret_key_2026",
     cookie_expiry_days=30
 )
 
-# Tratamento adaptativo da chamada de login para evitar o TypeError
-try:
-    authenticator.login()
-except TypeError:
-    authenticator.login('Login', 'main')
+# --- CONTROLE INTERNO DE TELA (LOGIN VS REGISTRO) ---
+if "autenticado" not in st.session_state:
+    st.session_state.autenticado = False
 
+# Se o usuário não estiver logado pelo cookie ou sessão ativa, exibe o painel de entrada
 authentication_status = st.session_state.get("authentication_status")
-username = st.session_state.get("username")
 
-# Fluxo de contenção se não autenticado
-if authentication_status == False:
-    st.error("❌ Credenciais de segurança incorretas.")
-    st.stop()
-elif authentication_status == None:
-    st.warning("🔒 Protocolo de Segurança Ativo. Insira suas credenciais para acessar o terminal.")
-    st.stop()
+if not authentication_status:
+    st.markdown("<h2>🔱 TERMINAL DE ACESSO - JARVIS OS</h2>", unsafe_allow_html=True)
+    
+    # Seletor amigável para alternar funções na tela inicial
+    modo_tela = st.radio("Selecione o protocolo de entrada:", ["Fazer Login", "Registrar Nova Conta"], horizontal=True)
+    
+    if modo_tela == "Fazer Login":
+        try:
+            authenticator.login()
+        except TypeError:
+            authenticator.login('Login', 'main')
+            
+        authentication_status = st.session_state.get("authentication_status")
+        if authentication_status == False:
+            st.error("❌ Credenciais de segurança incorretas.")
+            st.stop()
+        elif authentication_status == None:
+            st.warning("🔒 Protocolo de Segurança Ativo. Insira suas credenciais.")
+            st.stop()
+            
+    elif modo_tela == "Registrar Nova Conta":
+        with st.container(border=True):
+            st.markdown("### 🔑 Criar Nova Identidade Operacional")
+            novo_nome = st.text_input("Seu Nome Completo / Como o Jarvis deve te chamar:")
+            novo_user = st.text_input("Escolha um Username (Sem espaços ou acentos):").strip().lower()
+            nova_senha = st.text_input("Defina sua Senha de Segurança:", type="password")
+            confirmar_senha = st.text_input("Confirme a Senha:", type="password")
+            
+            if st.button("Finalizar Cadastro de Operador"):
+                if not novo_nome or not novo_user or not nova_senha:
+                    st.error("⚠️ Todos os campos operacionais precisam estar preenchidos.")
+                elif novo_user in config_usuarios["usernames"]:
+                    st.error("❌ Este Username já está mapeado no banco de dados corporativo. Escolha outro.")
+                elif nova_senha != confirmar_senha:
+                    st.error("❌ As senhas fornecidas não coincidem.")
+                else:
+                    # Gera o hash seguro da senha usando o motor da biblioteca authenticator
+                    senha_criptografada = stauth.Hasher([nova_senha]).generate()[0]
+                    
+                    # Salva no dicionário em memória e persiste no arquivo json
+                    config_usuarios["usernames"][novo_user] = {
+                        "name": novo_nome,
+                        "password": senha_criptografada
+                    }
+                    salvar_novas_credenciais(config_usuarios)
+                    st.success(f"✅ Conta para '{novo_nome}' criada com sucesso! Mude para a aba 'Fazer Login' para entrar.")
+        st.stop()
 
 # ==================== INÍCIO DA SESSÃO DO USUÁRIO LOGADO ====================
+username = st.session_state.get("username")
+
 if authentication_status and username:
     
-    name = credentials["usernames"][username]["name"]
+    name = config_usuarios["usernames"][username]["name"]
     
     # Isolar dinamicamente o arquivo de banco de dados por operador
     ARQUIVO_DADOS = f"dados_user_{username}.json"
@@ -547,20 +591,15 @@ if authentication_status and username:
         else:
             st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'> 🟡 Modo Local Operante (Google temporariamente desconectado).</span>", unsafe_allow_html=True)
         
-        # Preparação da lista de eventos
         eventos_para_exibir = [{
             "title": "06:00 - Sistema Inicializado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
-            "backgroundColor": "#121218",
-            "borderColor": "#1e1e26",
-            "textColor": "#8e8e9a",
-            "editable": False
+            "backgroundColor": "#121218", "borderColor": "#1e1e26", "textColor": "#8e8e9a", "editable": False
         }]
         if db.get("eventos_locais"):
             eventos_para_exibir.extend(db["eventos_locais"])
 
-        # Painel Modularizado Superior Simétrico
         with st.expander("🛠️ Central Operacional de Agendamentos (Clique para expandir/recolher)", expanded=False):
             c_add, c_del = st.columns(2)
             
@@ -577,24 +616,17 @@ if authentication_status and username:
                         start_dt = datetime.datetime.combine(data_evento, h_ini)
                         end_dt = datetime.datetime.combine(data_evento, h_fim)
                         id_unico = "jarvis_" + str(int(time.time())) + "_manual"
-                        
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
                         novo_ev = {
-                            "id": id_unico,
-                            "title": titulo_formatado,
-                            "start": start_dt.isoformat(),
-                            "end": end_dt.isoformat(),
-                            "backgroundColor": "#1c1c26",
-                            "borderColor": "#d4af37",
-                            "textColor": "#ffffff"
+                            "id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), 
+                            "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"
                         }
                         
                         if service:
                             try:
                                 event_body = {
-                                    'id': id_unico.replace("_", ""),
-                                    'summary': titulo_formatado,
+                                    'id': id_unico.replace("_", ""), 'summary': titulo_formatado,
                                     'start': {'dateTime': start_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                     'end': {'dateTime': end_dt.isoformat(), 'timeZone': 'America/Sao_Paulo'},
                                 }
@@ -620,14 +652,12 @@ if authentication_status and username:
                     
                     if st.button("Remover Registro Selecionado", key="cal_del_btn"):
                         if service and not evento_para_remover.startswith("antigo_"):
-                            try:
-                                service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
+                            try: service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
                             except: pass
                         
                         if evento_para_remover.startswith("antigo_"):
                             idx_alvo = int(evento_para_remover.split("_")[1]) - 1
-                            if 0 <= idx_alvo < len(db["eventos_locais"]):
-                                db["eventos_locais"].pop(idx_alvo)
+                            if 0 <= idx_alvo < len(db["eventos_locais"]): db["eventos_locais"].pop(idx_alvo)
                         else:
                             db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev.get("id") != evento_para_remover]
                         
@@ -636,37 +666,14 @@ if authentication_status and username:
                         st.rerun()
                 else:
                     st.info("Nenhum compromisso mutável registrado na grade local.")
-                
-                st.markdown("<div style='margin-top: 35px;'></div>", unsafe_allow_html=True)
-                if st.button("⚠️ Limpar Todos os Eventos do Painel Local", key="cal_clear_all_btn"):
-                    db["eventos_locais"] = []
-                    salvar_dados(db)
-                    st.session_state.cal_version += 1
-                    st.rerun()
 
-        # Container Isolado e Estilizado do Calendário
         with st.container(border=True):
             options = {
                 "initialView": "dayGridMonth",
-                "headerToolbar": {
-                    "left": "prev,next today",
-                    "center": "title",
-                    "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
-                },
-                "buttonText": {
-                    "today": "Hoje",
-                    "month": "Mês",
-                    "week": "Semana",
-                    "listDay": "Agenda Diária",
-                    "listWeek": "Compromissos"
-                },
-                "editable": True,
-                "selectable": True,
-                "timeZone": "local",
-                "contentHeight": 660,
-                "handleWindowResize": True
+                "headerToolbar": {"left": "prev,next today", "center": "title", "right": "dayGridMonth,timeGridWeek,listDay,listWeek"},
+                "buttonText": {"today": "Hoje", "month": "Mês", "week": "Semana", "listDay": "Agenda Diária", "listWeek": "Compromissos"},
+                "editable": True, "selectable": True, "timeZone": "local", "contentHeight": 660, "handleWindowResize": True
             }
-            
             calendar(events=eventos_para_exibir, options=options, key=f"jarvis_grid_fixed_final_{st.session_state.cal_version}")
 
     # 5. ABA DE GRÁFICOS
@@ -686,13 +693,5 @@ if authentication_status and username:
                 else:
                     nomes_metas = [m["nome"] for m in metas_filtradas]; tempos_metas = [m["tempo_dedicado"] for m in metas_filtradas]
                     fig = go.Figure(data=[go.Bar(x=nomes_metas, y=tempos_metas, marker_color=cor_barra, text=tempos_metas, textposition='auto', hovertemplate="<b>Alvo:</b> %{x}<br><b>Foco:</b> %{y} min<extra></extra>")])
-                    fig.update_layout(
-                        paper_bgcolor="rgba(0,0,0,0)", 
-                        plot_bgcolor="rgba(0,0,0,0)", 
-                        font=dict(color="#cccccc", size=12), 
-                        xaxis=dict(gridcolor="#1e1e26"), 
-                        yaxis=dict(gridcolor="#1e1e26"), 
-                        margin=dict(l=40, r=40, t=20, b=40), 
-                        height=380
-                    )
+                    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="#cccccc", size=12), xaxis=dict(gridcolor="#1e1e26"), yaxis=dict(gridcolor="#1e1e26"), margin=dict(l=40, r=40, t=20, b=40), height=380)
                     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
