@@ -177,24 +177,20 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
     }
 
-    /* =================================================================
-       CUSTOMIZAÇÃO INJETADA DO NOVO CALENDÁRIO (KANIT THEME)
-       ================================================================= */
+    /* CUSTOMIZAÇÃO INJETADA DO NOVO CALENDÁRIO (KANIT THEME) */
     .calendar-container {
         background-color: #080808 !important;
         border: 1px solid rgba(212, 175, 55, 0.15) !important;
-        border-radius: 20px !important; /* Baseado no seu .calendar-base */
+        border-radius: 20px !important;
         padding: 25px !important;
         font-family: 'Kanit', sans-serif !important;
     }
 
-    /* Forçar a fonte Kanit e o visual limpo dentro do iframe do widget */
     iframe[title="streamlit_calendar.calendar"] {
         border: none !important;
         background-color: transparent !important;
     }
     
-    /* Efeito de hover nos links internos e posts */
     .posts_review {
         text-decoration: underline dotted;
         color: #d4af37;
@@ -491,7 +487,7 @@ if st.session_state.autenticado and username:
         with cs2:
             st.markdown('<div class="titulo-card">🍳 FEED DE NUTRIÇÃO</div>', unsafe_allow_html=True)
             with st.container():
-                refeicao = st.text_input("O que você comeu agora?", placeholder="Ex: Café e Ovos")
+                refeicao = st.text_input("O que você consumiu na última janela?", placeholder="Ex: Patinho, arroz integral e brócolis")
                 if st.button("Postar Refeição no Log"):
                     if refeicao: 
                         db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
@@ -505,7 +501,6 @@ if st.session_state.autenticado and username:
         col_esq_info, col_dir_cal = st.columns([1, 2])
         
         with col_esq_info:
-            # Reconstrução conceitual da "Calendar-Left" (Painel Lateral do modelo enviado)
             dia_num_hoje = datetime.date.today().strftime("%d")
             dia_nome_hoje = datetime.date.today().strftime("%A").upper()
             
@@ -513,8 +508,8 @@ if st.session_state.autenticado and username:
                 <div style='background-color: #101010; padding: 30px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 20px;'>
                     <span style='color: #777777; font-size: 14px; font-weight:600; text-transform:uppercase;'>Data Atual</span>
                     <h1 style='font-size: 90px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:0.9; margin: 10px 0; color: #ffffff;'>{dia_num_hoje}</h1>
-                    <div style='font-size: 20px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; margin-bottom: 25px;'>{dia_name_hoje}</div>
-                    <div style='font-size: 14px; color: #e5e5e5; font-weight: 500;' class='current-events'>
+                    <div style='font-size: 20px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; margin-bottom: 25px;'>{dia_nome_hoje}</div>
+                    <div style='font-size: 14px; color: #e5e5e5; font-weight: 500;'>
                         📌 <span class='posts_review'>{len(db.get("eventos_locais", []))} compromissos</span> agendados no sistema local.
                     </div>
                 </div>
@@ -531,10 +526,10 @@ if st.session_state.autenticado and username:
                         start_dt = datetime.datetime.combine(data_evento, h_ini)
                         end_dt = datetime.datetime.combine(data_evento, h_fim)
                         id_unico = "jarvis_" + str(int(time.time())) + "_manual"
-                        titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
+                        titulo_formatated = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
                         novo_ev = {
-                            "id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), 
+                            "id": id_unico, "title": titulo_formatated, "start": start_dt.isoformat(), "end": end_dt.isoformat(), 
                             "backgroundColor": "#121212", "borderColor": "#d4af37", "textColor": "#d4af37"
                         }
                         db["eventos_locais"].append(novo_ev)
@@ -550,7 +545,6 @@ if st.session_state.autenticado and username:
             }]
             if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
-            # Renderização do Widget envelopado com o container customizado (.calendar-container)
             st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
             calendar(events=eventos_para_exibir, options={
                 "initialView": "dayGridMonth",
