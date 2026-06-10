@@ -20,19 +20,23 @@ MODELO_IA = "llama-3.3-70b-versatile"
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-# ==================== CONFIGURAÇÃO VISUAL EXECUTIVA ====================
-st.set_page_config(page_title="Jarvis OS", page_icon="🤖", layout="wide", initial_sidebar_state="collapsed")
+# ==================== CONFIGURAÇÃO VISUAL MODERNA (ESTILO PREMIUM DESIGN) ====================
+st.set_page_config(page_title="Jarvis OS", page_icon="⚡", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Unificado - Foco em Limpeza, Alta Tecnologia e Fontes Modernas
+# CSS Global Unificado - Estilo Cyberpunk Minimalista e High-Tech Premium
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@300;500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    /* Configuração Base do Sistema */
+    /* 1. PALETA 60% - Fundo imersivo com gradiente suave em mesh */
     .stApp { 
-        background-color: #0a0a0d; 
-        color: #e4e4e9; 
-        font-family: 'Inter', sans-serif; 
+        background-color: #0d0e12 !important; 
+        color: #f3f4f6 !important; 
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background-image: 
+            radial-gradient(circle at 15% 15%, rgba(255, 0, 127, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(122, 0, 255, 0.1) 0%, transparent 50%) !important;
+        background-attachment: fixed !important;
     }
     
     /* Ocultar elementos nativos desnecessários */
@@ -45,122 +49,166 @@ st.markdown("""
         max-width: 100% !important; 
     }
     
-    /* Títulos Executivos e Minimalistas */
-    h1, h2, h3, h4 { 
-        font-family: 'Manrope', sans-serif !important;
-        color: #d4af37 !important; 
-        font-weight: 700 !important; 
+    /* 2. TIPOGRAFIA - Títulos com degradê e forte hierarquia visual */
+    .custom-title {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background: linear-gradient(135deg, #ffffff 30%, #a6a7ab 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important; 
         letter-spacing: -1px !important;
-        text-transform: uppercase;
-        margin-bottom: 18px !important;
+        margin-bottom: 25px !important;
     }
     
-    .titulo-card { 
-        color: #8e8e9a !important; 
-        font-size: 13px !important; 
-        font-weight: 600 !important; 
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 12px;
+    .jarvis-brand {
+        background: linear-gradient(45deg, #ff007f, #7a00ff, #00f2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+    }
+    
+    /* 3. PALETA 30% - Cards estruturais em Glassmorphism responsivo */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(18, 20, 29, 0.5) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.04) !important;
+        border-radius: 24px !important;
+        padding: 24px !important;
+        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    /* Micro-interação: Card brilha sutilmente ao passar o mouse */
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+        border-color: rgba(122, 0, 255, 0.2) !important;
+        box-shadow: 0 16px 48px 0 rgba(122, 0, 255, 0.1) !important;
+        transform: translateY(-2px);
     }
 
-    /* Unificação Total de Inputs (Corrige as diferenças de cor das caixinhas) */
+    .titulo-card { 
+        color: #ff007f !important; /* Cor de Destaque */
+        font-size: 13px !important; 
+        font-weight: 700 !important; 
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0.9;
+    }
+
+    /* Inputs integrados e com foco suavizado */
     div[data-baseweb="select"], 
     div[data-baseweb="input"], 
     .stTextInput>div>div>input, 
     .stDateInput>div>div>input,
     .stTextArea>div>div>textarea {
-        background-color: #16161a !important; 
-        border: 1px solid #2d2d32 !important; 
-        border-radius: 8px !important; 
+        background-color: rgba(30, 32, 44, 0.6) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
+        border-radius: 16px !important; 
         color: #ffffff !important;
-        transition: border-color 0.3s ease;
+        padding: 6px 12px !important;
+        transition: all 0.25s ease;
     }
     
-    div[data-baseweb="input"]:focus-within {
-        border-color: #d4af37 !important;
+    div[data-baseweb="input"]:focus-within, .stTextInput>div>div>input:focus {
+        border-color: #7a00ff !important;
+        background-color: rgba(30, 32, 44, 0.9) !important;
+        box-shadow: 0 0 16px rgba(122, 0, 255, 0.25) !important;
     }
 
-    /* Botões Uniformes e Elegantes */
+    /* 4. PALETA 10% - Botões de Ação Dinâmicos (Gradiente Premium) */
     .stButton>button { 
-        background-color: #16161a !important; 
-        color: #d4af37 !important; 
-        border: 1px solid #d4af37 !important; 
-        border-radius: 8px !important; 
-        padding: 10px 18px !important; 
-        font-weight: 500 !important; 
-        font-family: 'Manrope', sans-serif !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-        font-size: 13px !important;
+        background: linear-gradient(135deg, #7a00ff 0%, #ff007f 100%) !important; 
+        color: #ffffff !important; 
+        border: none !important;
+        border-radius: 16px !important; /* Estilo pílula moderna com leve curvatura */
+        padding: 14px 28px !important; 
+        font-weight: 700 !important; 
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 14px !important;
         width: 100% !important;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 20px rgba(255, 0, 127, 0.2) !important;
+        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     }
     .stButton>button:hover { 
-        background-color: #d4af37 !important; 
-        color: #0a0a0d !important; 
-        border-color: #d4af37 !important;
+        transform: scale(1.02) !important;
+        box-shadow: 0 6px 24px rgba(255, 0, 127, 0.4) !important;
+        filter: brightness(1.1);
+    }
+    .stButton>button:active {
+        transform: scale(0.98) !important;
     }
     
-    /* Abas Superiores Minimalistas Estilo Linha */
+    /* Abas em formato de Cápsulas Flutuantes */
     .stTabs [data-baseweb="tab-list"] { 
-        background-color: transparent !important; 
-        border-bottom: 1px solid #1e1e26 !important;
-        gap: 20px !important;
+        background-color: rgba(255, 255, 255, 0.02) !important; 
+        border-radius: 16px !important;
+        padding: 8px !important;
+        gap: 12px !important;
+        border-bottom: none !important;
         margin-bottom: 40px !important;
-        padding: 0px !important;
+        border: 1px solid rgba(255, 255, 255, 0.03) !important;
     }
     .stTabs [data-baseweb="tab"] { 
-        color: #8e8e9a !important; 
-        font-family: 'Manrope', sans-serif !important;
-        font-weight: 500 !important;
-        font-size: 14px !important;
-        text-transform: uppercase !important;
+        color: #8a8b94 !important; 
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
         border: none !important;
         background-color: transparent !important;
-        padding: 12px 10px !important;
+        padding: 12px 24px !important;
+        border-radius: 12px !important;
+        transition: all 0.25s ease;
     }
     .stTabs [aria-selected="true"] { 
-        color: #d4af37 !important; 
-        border-bottom: 2px solid #d4af37 !important;
-        background-color: transparent !important;
+        color: #ffffff !important; 
+        background-color: rgba(42, 43, 54, 0.8) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
     }
     
     .stExpander {
-        background-color: #16161a !important;
-        border: 1px solid #2d2d32 !important;
-        border-radius: 8px !important;
-    }
-
-    /* Moldura Harmônica do Calendário */
-    .calendar-container {
-        background-color: #111114 !important;
-        border: 1px solid #1e1e26 !important;
+        background-color: rgba(22, 24, 35, 0.4) !important;
+        border: 1px solid rgba(255,255,255,0.04) !important;
         border-radius: 16px !important;
-        padding: 30px !important;
-        margin: 0 auto !important;
-        max-width: 95% !important; 
     }
 
-    /* Reset interno do componente de calendário para flutuar no container */
+    /* Moldura Avançada do Calendário */
+    .calendar-container {
+        background-color: #0f1015 !important;
+        border: 1px solid rgba(255,255,255,0.03) !important;
+        border-radius: 24px !important;
+        padding: 25px !important;
+    }
+
     iframe[title="streamlit_calendar.calendar"] {
         border: none !important;
-        border-radius: 0px !important;
         background-color: transparent !important;
         min-height: 700px !important;
         height: 700px !important;
-        display: block !important;
     }
 
     .logout-container {
         display: flex;
         justify-content: flex-end;
-        align-items: center;
     }
-
-    @media (max-width: 768px) {
-        .block-container { padding: 1rem !important; }
-        iframe[title="streamlit_calendar.calendar"] { min-height: 560px !important; height: 560px !important; }
+    
+    /* Balões de Chat Estilo Bolha Fluida */
+    [data-testid="stChatMessage"] {
+        background-color: rgba(30, 32, 44, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.02) !important;
+        border-radius: 20px !important;
+        padding: 16px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    /* Métrica Destacada com Neon Puro */
+    div[data-testid="stMetricValue"] {
+        font-weight: 800 !important;
+        color: #00f2fe !important;
+        text-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -195,7 +243,7 @@ if "username" not in st.session_state: st.session_state.username = None
 
 # Captura de retorno do OAuth do Google na URL
 query_params = st.query_params
-if "code" in query_params and "state" in st.session_state and st.session_state.get("aguardando_oauth_user"):
+if "code" in query_params and st.session_state.get("aguardando_oauth_user"):
     target_user = st.session_state.aguardando_oauth_user
     try:
         client_config = {
@@ -222,12 +270,12 @@ if "code" in query_params and "state" in st.session_state and st.session_state.g
         st.error(f"ERRO DE VALIDAÇÃO: {e}")
 
 if not st.session_state.autenticado:
-    st.markdown("<h2>TERMINAL DE ACESSO - JARVIS OS</h2>", unsafe_allow_html=True)
-    modo_tela = st.radio("PROTOCOLO DE ENTRADA:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
+    st.markdown("<h2 class='custom-title'>✨ ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>", unsafe_allow_html=True)
+    modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
     
     if modo_tela == "LOGIN":
         with st.container(border=True):
-            st.markdown("### AUTENTICAÇÃO DE OPERADOR")
+            st.markdown("### 🔑 LOGIN DO OPERADOR")
             input_user = st.text_input("USERNAME:", key="login_username").strip().lower()
             input_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", key="login_password")
             
@@ -239,30 +287,30 @@ if not st.session_state.autenticado:
                     if hash_informado == hash_salvo or input_senha == hash_salvo:
                         st.session_state.autenticado = True
                         st.session_state.username = input_user
-                        st.success("ACESSO LIBERADO. INICIALIZANDO JARVIS OS...")
+                        st.success("ACESSO LIBERADO. INICIALIZANDO...")
                         time.sleep(0.5)
                         st.rerun()
                     else:
-                        st.error("CHAVE DE ACESSO INCORRETA PARA ESTE PERFIL OPERACIONAL.")
+                        st.error("CHAVE DE ACESSO INCORRETA.")
                 else:
-                    st.error("USERNAME NÃO LOCALIZADO NA BASE DE DADOS.")
+                    st.error("USERNAME NÃO LOCALIZADO.")
             st.stop()
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
         with st.container(border=True):
-            st.markdown("### CRIAR NOVA IDENTIDADE OPERACIONAL")
-            novo_nome = st.text_input("NOME COMPLETO / COMO O JARVIS DEVE TE CHAMAR:")
-            novo_user = st.text_input("ESCOLA UM USERNAME (SEM ESPAÇOS OU ACENTOS):").strip().lower()
+            st.markdown("### 👋 CRIAR NOVA CONTA")
+            novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
+            novo_user = st.text_input("ESCOLHA UM USERNAME (SEM ESPAÇOS):").strip().lower()
             nova_senha = st.text_input("DEFINA SUA SENHA DE SEGURANÇA:", type="password")
             confirmar_senha = st.text_input("CONFIRME A SENHA:", type="password")
             
             if st.button("FINALIZAR CADASTRO DE OPERADOR"):
                 if not novo_nome or not novo_user or not nova_senha:
-                    st.error("TODOS OS CAMPOS OPERACIONAIS PRECISAM ESTAR PREENCHIDOS.")
+                    st.error("TODOS OS CAMPOS PRECISAM ESTAR PREENCHIDOS.")
                 elif novo_user in usernames_db:
-                    st.error("ESTE USERNAME JÁ ESTÁ MAPEADO NO BANCO DE DADOS.")
+                    st.error("ESTE USERNAME JÁ EXISTE.")
                 elif nova_senha != confirmar_senha:
-                    st.error("AS SENHAS FORNECIDAS NÃO COINCIDEM.")
+                    st.error("AS SENHAS NÃO COINCIDEM.")
                 else:
                     usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
                     salvar_novas_credenciais(usernames_db)
@@ -291,7 +339,7 @@ if st.session_state.autenticado and username:
         
     db = st.session_state.db
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"SISTEMAS ONLINE, {name}. DEFINA SUAS DIRETRIZES E EU CUIDAREI DE ESTRUTURAR OS ALVOS OPERACIONAIS."}]
+        st.session_state.messages = [{"role": "assistant", "content": f"Sistemas prontos, {name}! Diga-me o que deseja planejar hoje."}]
 
     if "cal_version" not in st.session_state: st.session_state.cal_version = 0
     if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
@@ -302,15 +350,15 @@ if st.session_state.autenticado and username:
     # ==================== HEADER OPERACIONAL COM LOGOUT ====================
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     with col_titulo_sistema:
-        st.markdown("""<h1 style='margin-bottom: 0px !important;'>JARVIS OPERATIONAL SYSTEM</h1>""", unsafe_allow_html=True)
+        st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🚀 <span class='jarvis-brand'>JARVIS OS</span></h1>""", unsafe_allow_html=True)
     with col_botao_logout:
         st.markdown("<div class='logout-container'></div>", unsafe_allow_html=True)
-        if st.button("ENCERRAR SESSÃO"):
+        if st.button("SAIR DA SESSÃO"):
             st.session_state.autenticado = False
             st.session_state.username = None
             st.rerun()
 
-    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: #1e1e26;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
 
     # ==================== MOTOR DE AGENDA MULTIUSUÁRIO WEB ====================
     def obter_servico_google_agenda():
@@ -345,7 +393,7 @@ if st.session_state.autenticado and username:
         
         Você DEVE responder ESTRITAMENTE no formato JSON abaixo:
         {{
-            "resposta_chat": "Sua resposta elegante falada com o usuário, tratando-o como 'Senhor'.",
+            "resposta_chat": "Sua resposta estilosa e amigável.",
             "criar_meta": true ou false,
             "novas_metas": [
                 {{ "nome": "Nome curto da meta", "categoria": "Estudos", "Saúde", "Alimentação" ou "Trabalho" }}
@@ -380,7 +428,7 @@ if st.session_state.autenticado and username:
                         "tempo_dedicado": 0
                     })
                 salvar_dados(db)
-                st.toast("🎯 Novas diretrizes acopladas ao painel, Senhor!")
+                st.toast("🎯 Novas metas adicionadas ao seu feed!")
                 
             if resultado.get("criar_agenda") and resultado.get("evento_agenda"):
                 ev = resultado["evento_agenda"]
@@ -401,7 +449,7 @@ if st.session_state.autenticado and username:
                         
                         novo_ev = {
                             "id": id_unico, "title": ev["titulo"], "start": start_dt.isoformat(), 
-                            "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"
+                            "end": end_dt.isoformat(), "backgroundColor": "#7a00ff", "borderColor": "#ff007f", "textColor": "#ffffff"
                         }
                         db["eventos_locais"].append(novo_ev)
                         
@@ -419,127 +467,132 @@ if st.session_state.autenticado and username:
                         contador_id += 1
                     
                     salvar_dados(db)
-                    st.toast("📅 Cronograma mapeado e fixado com sucesso!")
+                    st.toast("📅 Cronograma updated!")
                     st.session_state.cal_version += 1
                 except: pass
                     
-            return resultado.get("resposta_chat", "Comando processado, Senhor.")
+            return resultado.get("resposta_chat", "Comando processado com sucesso!")
         except Exception as e:
-            return "Módulos de IA em espera. Sistemas locais em modo de contingência operante."
+            return "Conexão offline. Sistemas operando localmente."
 
-    # ==================== INTERFACE WORKSTATION ====================
+    # ==================== INTERFACE WORKSTATION INTERATIVA ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
-        "PAINEL DE DIRETRIZES", "MÓDULO DE FOCO TEMPORAL", "PARÂMETROS BIOMÉTRICOS", "CRONOGRAMA OPERACIONAL", "ANÁLISE ESTATÍSTICA"
+        "💬 CONVERSA & METAS", "⏱️ TIMER DE FOCO", "🥗 SAÚDE & FITNESS", "📅 AGENDA", "📊 ESTATÍSTICAS"
     ])
 
     # 1. ABA DE METAS
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">INTERFACE DE LINGUAGEM NATURAL</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🤖 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
             with st.container(border=True):
                 chat_container = st.container(height=340)
                 with chat_container:
                     for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
-                if prompt := st.chat_input("Digite o comando operacional..."):
+                if prompt := st.chat_input("Envie uma mensagem ou peça para agendar algo..."):
                     st.session_state.messages.append({"role": "user", "content": prompt})
                     resposta = processar_comando_e_criar_metas(prompt)
                     st.session_state.messages.append({"role": "assistant", "content": resposta})
                     st.rerun()
         with col_lista:
-            st.markdown('<div class="titulo-card">OBJETIVOS EM EXECUÇÃO</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🎯 SEUS OBJETIVOS ATIVOS</div>', unsafe_allow_html=True)
             with st.container(border=True):
                 metas_ativas = [m for m in db["metas"] if not m["concluida"]]
-                if not metas_ativas: st.info("Nenhuma diretriz ativa em andamento no momento, Senhor.")
+                if not metas_ativas: st.info("Nenhuma diretriz ativa no momento. Que tal começar uma nova?")
                 else:
                     for m in db["metas"]:
                         if not m["concluida"]:
                             c1, c2, c3 = st.columns([3, 1, 1])
-                            c1.markdown(f"⚡ **{m['nome']}**<br><span style='color:#8e8e9a; font-size:13px;'>{m['categoria']}</span>", unsafe_allow_html=True)
-                            c2.markdown(f"<div style='padding-top:10px; color:#d4af37;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
-                            if c3.button("Concluir", key=m["id"]):
+                            c1.markdown(f"🔥 **{m['nome']}**<br><span style='color:#a6a7ab; font-size:13px;'>{m['categoria']}</span>", unsafe_allow_html=True)
+                            c2.markdown(f"<div style='padding-top:10px; color:#00f2fe; font-weight:700;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
+                            if c3.button("✓", key=m["id"]):
                                 m["concluida"] = True
                                 salvar_dados(db)
                                 st.rerun()
-                            st.markdown("<hr style='margin: 12px 0; border-color: #1e1e26;'>", unsafe_allow_html=True)
+                            st.markdown("<hr style='margin: 12px 0; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
 
     # 2. ABA POMODORO
     with aba_pomodoro:
-        st.markdown('<div class="titulo-card">ALOCAÇÃO DE CICLOS DE FOCO</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-card">⏱️ BLOCO DE FOCO ESTILO TIME-LAPSE</div>', unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
-        if not metas_validas: st.warning("Nenhum alvo ativo encontrado. Solicite a criação de metas ao Jarvis primeiro.")
+        if not metas_validas: st.warning("Nenhum alvo ativo encontrado. Crie uma meta com o Jarvis primeiro!")
         else:
             cp1, cp2 = st.columns(2)
             with cp1:
                 with st.container(border=True):
-                    st.markdown("### Configurações de Ciclo")
+                    st.markdown("### ⚙️ Ajustar Foco")
                     meta_alvo = st.selectbox("Vincular foco atual à meta:", [m["nome"] for m in metas_validas])
-                    minutos_slider = st.slider("Configurar duração do bloco (minutos):", min_value=1, max_value=120, value=int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
+                    minutos_slider = st.slider("Duração do bloco (minutos):", min_value=1, max_value=120, value=int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
                     if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_slider:
                         st.session_state.pomo_tempo_inicial_escolhido = minutos_slider
                         st.session_state.pomo_segundos_restantes = minutos_slider * 60
                     st.markdown("<br>", unsafe_allow_html=True)
                     b1, b2 = st.columns(2)
                     if not st.session_state.pomo_rodando:
-                        if b1.button("INICIAR / RETOMAR"): st.session_state.pomo_rodando = True; st.rerun()
+                        if b1.button("▶ INICIAR"): st.session_state.pomo_rodando = True; st.rerun()
                     else:
-                        if b1.button("PAUSAR"): st.session_state.pomo_rodando = False; st.rerun()
-                    if b2.button("Automático" if st.session_state.pomo_rodando else "RESETAR"):
+                        if b1.button("⏸ PAUSAR"): st.session_state.pomo_rodando = False; st.rerun()
+                    if b2.button("Automático" if st.session_state.pomo_rodando else "🔄 RESETAR"):
                         st.session_state.pomo_rodando = False
                         st.session_state.pomo_segundos_restantes = st.session_state.pomo_tempo_inicial_escolhido * 60
                         st.rerun()
             with cp2:
                 with st.container(border=True):
                     m_vis, s_vis = divmod(st.session_state.pomo_segundos_restantes, 60)
-                    st.markdown(f"<div style='text-align: center; padding: 15px 0;'><span style='color:#8e8e9a; font-size:13px; text-transform: uppercase; letter-spacing:1px;'>Cronômetro Ativo</span><h1 style='font-size: 78px; font-family: monospace; margin: 10px 0; color: #ffffff !important;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37; font-size:15px; font-weight:500;'>{meta_alvo}</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; padding: 15px 0;'><span style='color:#a6a7ab; font-size:14px; font-weight:600; text-transform: uppercase;'>Timer Correndo</span><h1 style='font-size: 82px; font-family: system-ui; font-weight:800; margin: 10px 0; background: linear-gradient(45deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#ff007f; font-size:16px; font-weight:700;'>🎯 {meta_alvo}</span></div>", unsafe_allow_html=True)
             
             if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
-                time.sleep(1); st.session_state.pomo_segundos_restantes -= 1
+                time.sleep(1)
+                st.session_state.pomo_segundos_restantes -= 1
                 if st.session_state.pomo_segundos_restantes == 0:
                     st.session_state.pomo_rodando = False
                     tempo_minutos_ganhos = st.session_state.pomo_tempo_inicial_escolhido
                     for m in db["metas"]:
                         if m["nome"] == meta_alvo and not m["concluida"]: m["tempo_dedicado"] += tempo_minutos_ganhos
                     db["historico_pomodoro"] += tempo_minutos_ganhos
-                    salvar_dados(db); st.balloons()
+                    salvar_dados(db)
+                    st.balloons()
                 st.rerun()
 
     # 3. ABA BIOMETRIA
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
-            st.markdown('<div class="titulo-card">MONITORAMENTO DE HIDRATAÇÃO</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">💧 META DE HIDRATAÇÃO (STREAK)</div>', unsafe_allow_html=True)
             with st.container(border=True):
-                peso_texto = st.text_input("Informe seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)).replace('.', ','))
+                peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)).replace('.', ','))
                 try: peso_limpo = float(peso_texto.replace(',', '.'))
                 except ValueError: peso_limpo = 70.0
                 if peso_limpo != db.get("peso_usuario", 70.0) and peso_limpo > 0: 
                     db["peso_usuario"] = peso_limpo; salvar_dados(db); st.rerun()
                 alvo_calculado = int(peso_limpo * 35)
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.metric("Consumo Atual", f"{db['agua']} ml", f"Alvo Recomendado: {alvo_calculado} ml")
+                st.metric("Consumo de Hoje", f"{db['agua']} ml", f"Alvo Recomendado: {alvo_calculado} ml")
                 st.markdown("<br>", unsafe_allow_html=True)
                 c_btn1, c_btn2 = st.columns(2)
-                if c_btn1.button("Ingerir Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
-                if c_btn2.button("Resetar Consumo"): db["agua"] = 0; salvar_dados(db); st.rerun()
+                if c_btn1.button("➕ Beber Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
+                if c_btn2.button("🔄 Zerar Dia"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
-            st.markdown('<div class="titulo-card">LOG DE NUTRIÇÃO</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🍳 FEED DE NUTRIÇÃO</div>', unsafe_allow_html=True)
             with st.container(border=True):
-                refeicao = st.text_input("O que você consumiu na última janela?", placeholder="Ex: Patinho, arroz integral e brócolis")
+                refeicao = st.text_input("O que você comeu agora?", placeholder="Ex: Panqueca de aveia e whey")
                 st.markdown("<br><br>", unsafe_allow_html=True)
-                if st.button("Catalogar Refeição no Sistema"):
-                    if refeicao: db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao}); salvar_dados(db); st.toast("Refeição arquivada com sucesso!")
+                if st.button("Postar Refeição no Log"):
+                    if refeicao: 
+                        db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
+                        salvar_dados(db)
+                        st.toast("Refeição registrada!")
 
     # 4. ABA CRONOGRAMA OPERACIONAL
     with aba_calendario:
-        st.markdown('<div class="titulo-card">ALOCAÇÃO DE ROTINAS E AGENDA INTEGRADA</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         
         if service:
-            st.markdown("<span style='color: #2ecc71; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>Sincronização ativa no perfil de operador atual.</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #00f2fe; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚡ Google Agenda Sincronizado</span>", unsafe_allow_html=True)
         else:
-            st.markdown("<span style='color: #e67e22; font-size: 13px; font-weight:500; margin-bottom:10px; display:inline-block;'>Módulo do Google Agenda offline para este perfil.</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #ff007f; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚠️ Modo Offline Local</span>", unsafe_allow_html=True)
             
-            if st.button("SINCROZINAR CONTA GOOGLE AGENDA"):
+            if st.button("CONECTAR COM GOOGLE AGENDA"):
                 try:
                     client_config = {
                         "web": {
@@ -553,36 +606,37 @@ if st.session_state.autenticado and username:
                     auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
                     
                     st.session_state.aguardando_oauth_user = username
-                    st.markdown(f'<a href="{auth_url}" target="_self"><input type="button" value="Clique aqui para Autorizar o Acesso" style="background-color:#d4af37; color:#0a0a0d; border:none; padding:10px 20px; border-radius:8px; font-weight:bold; cursor:pointer;"></a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{auth_url}" target="_self"><input type="button" value="Autorizar Google" style="background:linear-gradient(45deg, #7a00ff, #ff007f); color:#ffffff; border:none; padding:12px 24px; border-radius:50px; font-weight:bold; cursor:pointer; width:100%;"></a>', unsafe_allow_html=True)
                 except Exception as e:
-                    st.error("Erro ao gerar link de autenticação. Verifique os Secrets do Streamlit.")
+                    st.error("Configure os Secrets do Streamlit para ativar a API.")
 
         eventos_para_exibir = [{
-            "title": "06:00 - Sistema Inicializado",
+            "title": "🎬 Dia Iniciado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
-            "backgroundColor": "#16161a", "borderColor": "#2d2d32", "textColor": "#8e8e9a", "editable": False
+            "backgroundColor": "#1e1f24", "borderColor": "rgba(255,255,255,0.1)", "textColor": "#a6a7ab", "editable": False
         }]
         if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
-        with st.expander("CENTRAL OPERACIONAL DE AGENDAMENTOS", expanded=False):
+        with st.expander("➕ CRIAR OU EXCLUIR COMPROMISSOS MANUALMENTE", expanded=False):
             c_add, c_del = st.columns(2)
             with c_add:
-                st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>Adicionar Novo Evento</h4>", unsafe_allow_html=True)
-                nome_evento = st.text_input("Título da Atividade:", placeholder="Ex: Treino", key="cal_nome_ev")
-                data_evento = st.date_input("Data Selecionada:", datetime.date.today(), key="cal_data_ev")
-                h_ini = st.time_input("Horário de Início:", datetime.time(14, 0), key="cal_hini_ev")
-                h_fim = st.time_input("Horário de Término:", datetime.time(15, 0), key="cal_hfim_ev")
+                st.markdown("#### Adicionar Evento")
+                nome_evento = st.text_input("Título do compromisso:", placeholder="Ex: Gravar conteúdo", key="cal_nome_ev")
+                data_evento = st.date_input("Data:", datetime.date.today(), key="cal_data_ev")
+                h_ini = st.time_input("Início:", datetime.time(14, 0), key="cal_hini_ev")
+                h_fim = st.time_input("Término:", datetime.time(15, 0), key="cal_hfim_ev")
                 recorrente = st.checkbox("Repetir diariamente", key="cal_rec_ev")
                 
-                if st.button("Gravar Compromisso", key="cal_save_btn"):
+                if st.button("Salvar na Agenda", key="cal_save_btn"):
                     if nome_evento:
                         start_dt = datetime.datetime.combine(data_evento, h_ini)
                         end_dt = datetime.datetime.combine(data_evento, h_fim)
                         id_unico = "jarvis_" + str(int(time.time())) + "_manual"
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
-                        novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#1c1c26", "borderColor": "#d4af37", "textColor": "#ffffff"}
+                        novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#7a00ff", "borderColor": "#ff007f", "textColor": "#ffffff"}
+                        db["eventos_locais"].append(novo_ev)
                         
                         if service:
                             try:
@@ -590,65 +644,35 @@ if st.session_state.autenticado and username:
                                 if recorrente: event_body['recurrence'] = ['RRULE:FREQ=DAILY']
                                 service.events().insert(calendarId='primary', body=event_body).execute()
                             except: pass
-                        
-                        db["eventos_locais"].append(novo_ev); salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
-
+                        salvar_dados(db)
+                        st.rerun()
             with c_del:
-                st.markdown("<h4 style='font-size:16px; color:#ffffff !important;'>Desacoplar Compromissos</h4>", unsafe_allow_html=True)
-                opcoes_remocao = {}
-                for idx, ev in enumerate(eventos_para_exibir):
-                    if ev.get("editable") != False:
-                        ev_id = ev.get("id", f"antigo_{idx}")
-                        opcoes_remocao[ev_id] = ev.get("title", f"Compromisso ({idx})")
-                
-                if opcoes_remocao:
-                    evento_para_remover = st.selectbox("Selecione qual compromisso remover:", options=list(opcoes_remocao.keys()), format_func=lambda x: opcoes_remocao[x], key="cal_del_select")
-                    if st.button("Remover Registro Selecionado", key="cal_del_btn"):
-                        if service and not evento_para_remover.startswith("antigo_"):
-                            try: service.events().delete(calendarId='primary', eventId=evento_para_remover.replace("_", "")).execute()
+                st.markdown("#### Excluir Evento")
+                if db["eventos_locais"]:
+                    opcoes_del = {ev["title"]: ev["id"] for ev in db["eventos_locais"]}
+                    selecionado_del = st.selectbox("Escolha o evento para remover:", list(opcoes_del.keys()))
+                    if st.button("Remover Evento", key="cal_del_btn"):
+                        id_remover = opcoes_del[selecionado_del]
+                        db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev["id"] != id_remover]
+                        if service:
+                            try: service.events().delete(calendarId='primary', eventId=id_remover.replace("_", "")).execute()
                             except: pass
-                        if evento_para_remover.startswith("antigo_"):
-                            idx_alvo = int(evento_para_remover.split("_")[1]) - 1
-                            if 0 <= idx_alvo < len(db["eventos_locais"]): db["eventos_locais"].pop(idx_alvo)
-                        else:
-                            db["eventos_locais"] = [ev for ev in db["eventos_locais"] if ev.get("id") != evento_para_remover]
-                        salvar_dados(db); st.session_state.cal_version += 1; st.rerun()
+                        salvar_dados(db)
+                        st.rerun()
                 else:
-                    st.info("Nenhum compromisso mutável registrado na grade local.")
+                    st.info("Nenhum evento local para remover.")
 
-        # Container interno para harmonizar o calendário flutuante longe das bordas
-        st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
-        options = {
-            "initialView": "dayGridMonth", 
-            "headerToolbar": {
-                "left": "prev,next today", 
-                "center": "title", 
-                "right": "dayGridMonth,timeGridWeek,listDay,listWeek"
-            }, 
-            "buttonText": {
-                "today": "Hoje", 
-                "month": "Mês", 
-                "week": "Semana", 
-                "listDay": "Agenda Diária", 
-                "listWeek": "Compromissos"
-            }, 
-            "editable": True, 
-            "selectable": True, 
-            "timeZone": "local", 
-            "contentHeight": 660, 
-            "handleWindowResize": True
-        }
-        calendar(events=eventos_para_exibir, options=options, key=f"jarvis_fixed_grid_system_{st.session_state.cal_version}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        calendar(events=eventos_para_exibir, options={"initialView": "dayGridMonth"}, key=f"cal_widget_{st.session_state.cal_version}")
 
-    # 5. ABA GRÁFICOS
+    # 5. ABA ESTATÍSTICAS
     with aba_graficos:
-        st.markdown('<div class="titulo-card">ANÁLISE DE PERFORMANCE</div>', unsafe_allow_html=True)
-        if db.get("metas"):
-            nomes = [m["nome"] for m in db["metas"]]
-            tempos = [m["tempo_dedicado"] for m in db["metas"]]
-            fig = go.Figure(data=[go.Bar(x=nomes, y=tempos, marker_color='#d4af37')])
-            fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="#8e8e9a"))
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Nenhum dado analítico gerado até o momento.")
+        st.markdown('<div class="titulo-card">📊 SEUS RELATÓRIOS INTEGRADOS</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("### 📈 Resumo do Progresso")
+            if db.get("metas"):
+                concluidas = sum(1 for m in db["metas"] if m["concluida"])
+                total = len(db["metas"])
+                st.progress(concluidas / total if total > 0 else 0)
+                st.metric("Metas Completadas", f"{concluidas}/{total}", f"Foco total acumulado: {db.get('historico_pomodoro', 0)} min")
+            else:
+                st.info("Adicione metas para gerar métricas de estatísticas.")
