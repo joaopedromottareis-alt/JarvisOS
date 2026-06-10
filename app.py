@@ -20,22 +20,22 @@ MODELO_IA = "llama-3.3-70b-versatile"
 
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-# ==================== CONFIGURAÇÃO VISUAL MODERNA (ESTILO PREMIUM DESIGN) ====================
-st.set_page_config(page_title="Jarvis OS", page_icon="⚡", layout="wide", initial_sidebar_state="collapsed")
+# ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
+st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Unificado - Estilo Cyberpunk Minimalista e High-Tech Premium
+# CSS Global Unificado - Estilo Luxo High-Tech Premium Sem Boxes
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    /* 1. PALETA 60% - Fundo imersivo com gradiente suave em mesh */
+    /* 1. PALETA BASE - Preto Puro com Mesh Radial Dourado sutil nas extremidades */
     .stApp { 
-        background-color: #0d0e12 !important; 
-        color: #f3f4f6 !important; 
+        background-color: #050505 !important; 
+        color: #e5e5e5 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         background-image: 
-            radial-gradient(circle at 15% 15%, rgba(255, 0, 127, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 85% 85%, rgba(122, 0, 255, 0.1) 0%, transparent 50%) !important;
+            radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.07) 0%, transparent 60%),
+            radial-gradient(circle at 90% 80%, rgba(184, 134, 11, 0.03) 0%, transparent 40%) !important;
         background-attachment: fixed !important;
     }
     
@@ -49,10 +49,10 @@ st.markdown("""
         max-width: 100% !important; 
     }
     
-    /* 2. TIPOGRAFIA - Títulos com degradê e forte hierarquia visual */
+    /* 2. TIPOGRAFIA - Títulos em Dourado Premium Metálico */
     .custom-title {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        background: linear-gradient(135deg, #ffffff 30%, #a6a7ab 100%);
+        background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800 !important; 
@@ -61,126 +61,124 @@ st.markdown("""
     }
     
     .jarvis-brand {
-        background: linear-gradient(45deg, #ff007f, #7a00ff, #00f2fe);
+        background: linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800 !important;
     }
     
-    /* 3. PALETA 30% - Cards estruturais em Glassmorphism responsivo */
+    /* 3. REMOÇÃO COMPLETA DE BOXES / CARDS (Efeito Flutuante Sem Bordas) */
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(18, 20, 29, 0.5) !important;
-        backdrop-filter: blur(16px) !important;
-        -webkit-backdrop-filter: blur(16px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.04) !important;
-        border-radius: 24px !important;
-        padding: 24px !important;
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border: none !important;
+        border-radius: 0px !important;
+        padding: 10px 0px !important;
+        box-shadow: none !important;
     }
     
-    /* Micro-interação: Card brilha sutilmente ao passar o mouse */
     div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-        border-color: rgba(122, 0, 255, 0.2) !important;
-        box-shadow: 0 16px 48px 0 rgba(122, 0, 255, 0.1) !important;
-        transform: translateY(-2px);
+        border-color: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
     }
 
     .titulo-card { 
-        color: #ff007f !important; /* Cor de Destaque */
+        color: #d4af37 !important; /* Dourado */
         font-size: 13px !important; 
         font-weight: 700 !important; 
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        margin-bottom: 18px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
-        opacity: 0.9;
+        opacity: 0.95;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+        padding-bottom: 8px;
     }
 
-    /* Inputs integrados e com foco suavizado */
+    /* Inputs integrados e discretos sobre o fundo escuro */
     div[data-baseweb="select"], 
     div[data-baseweb="input"], 
     .stTextInput>div>div>input, 
     .stDateInput>div>div>input,
     .stTextArea>div>div>textarea {
-        background-color: rgba(30, 32, 44, 0.6) !important; 
-        border: 1px solid rgba(255, 255, 255, 0.05) !important; 
-        border-radius: 16px !important; 
+        background-color: rgba(20, 20, 20, 0.8) !important; 
+        border: 1px solid rgba(212, 175, 55, 0.15) !important; 
+        border-radius: 12px !important; 
         color: #ffffff !important;
         padding: 6px 12px !important;
         transition: all 0.25s ease;
     }
     
     div[data-baseweb="input"]:focus-within, .stTextInput>div>div>input:focus {
-        border-color: #7a00ff !important;
-        background-color: rgba(30, 32, 44, 0.9) !important;
-        box-shadow: 0 0 16px rgba(122, 0, 255, 0.25) !important;
+        border-color: #d4af37 !important;
+        background-color: #0f0f0f !important;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
     }
 
-    /* 4. PALETA 10% - Botões de Ação Dinâmicos (Gradiente Premium) */
+    /* 4. BOTÕES DE AÇÃO - Dourado Escovado com Texto Preto para alto contraste */
     .stButton>button { 
-        background: linear-gradient(135deg, #7a00ff 0%, #ff007f 100%) !important; 
-        color: #ffffff !important; 
+        background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
+        color: #000000 !important; 
         border: none !important;
-        border-radius: 16px !important; /* Estilo pílula moderna com leve curvatura */
-        padding: 14px 28px !important; 
+        border-radius: 12px !important; 
+        padding: 12px 24px !important; 
         font-weight: 700 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-size: 14px !important;
         width: 100% !important;
-        box-shadow: 0 4px 20px rgba(255, 0, 127, 0.2) !important;
-        transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1) !important;
+        transition: all 0.25s ease !important;
     }
     .stButton>button:hover { 
-        transform: scale(1.02) !important;
-        box-shadow: 0 6px 24px rgba(255, 0, 127, 0.4) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25) !important;
         filter: brightness(1.1);
     }
     .stButton>button:active {
-        transform: scale(0.98) !important;
+        transform: translateY(0px) !important;
     }
     
-    /* Abas em formato de Cápsulas Flutuantes */
+    /* Abas Minimalistas sem moldura externa */
     .stTabs [data-baseweb="tab-list"] { 
-        background-color: rgba(255, 255, 255, 0.02) !important; 
-        border-radius: 16px !important;
-        padding: 8px !important;
-        gap: 12px !important;
-        border-bottom: none !important;
-        margin-bottom: 40px !important;
-        border: 1px solid rgba(255, 255, 255, 0.03) !important;
+        background-color: transparent !important; 
+        border-radius: 0px !important;
+        padding: 0px !important;
+        gap: 20px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        margin-bottom: 30px !important;
     }
     .stTabs [data-baseweb="tab"] { 
-        color: #8a8b94 !important; 
+        color: #777777 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-weight: 600 !important;
         font-size: 13px !important;
         border: none !important;
         background-color: transparent !important;
-        padding: 12px 24px !important;
-        border-radius: 12px !important;
+        padding: 12px 4px !important;
+        border-radius: 0px !important;
         transition: all 0.25s ease;
     }
     .stTabs [aria-selected="true"] { 
-        color: #ffffff !important; 
-        background-color: rgba(42, 43, 54, 0.8) !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+        color: #d4af37 !important; 
+        border-bottom: 2px solid #d4af37 !important;
     }
     
     .stExpander {
-        background-color: rgba(22, 24, 35, 0.4) !important;
-        border: 1px solid rgba(255,255,255,0.04) !important;
-        border-radius: 16px !important;
+        background-color: rgba(15, 15, 15, 0.6) !important;
+        border: 1px solid rgba(212, 175, 55, 0.1) !important;
+        border-radius: 12px !important;
     }
 
-    /* Moldura Avançada do Calendário */
+    /* Moldura escura integrada para o Calendário */
     .calendar-container {
-        background-color: #0f1015 !important;
-        border: 1px solid rgba(255,255,255,0.03) !important;
-        border-radius: 24px !important;
-        padding: 25px !important;
+        background-color: #050505 !important;
+        border: 1px solid rgba(212, 175, 55, 0.1) !important;
+        border-radius: 16px !important;
+        padding: 15px !important;
     }
 
     iframe[title="streamlit_calendar.calendar"] {
@@ -189,26 +187,24 @@ st.markdown("""
         min-height: 700px !important;
         height: 700px !important;
     }
-
-    .logout-container {
-        display: flex;
-        justify-content: flex-end;
-    }
     
-    /* Balões de Chat Estilo Bolha Fluida */
+    /* Balões de Chat Estilo Linha de Comando Discreta */
     [data-testid="stChatMessage"] {
-        background-color: rgba(30, 32, 44, 0.4) !important;
-        border: 1px solid rgba(255, 255, 255, 0.02) !important;
-        border-radius: 20px !important;
-        padding: 16px !important;
-        margin-bottom: 12px !important;
+        background-color: rgba(20, 20, 20, 0.5) !important;
+        border-left: 3px solid #d4af37 !important;
+        border-top: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        border-radius: 0px 12px 12px 0px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 16px !important;
     }
     
-    /* Métrica Destacada com Neon Puro */
+    /* Métrica Destacada com Brilho de Ouro Fino */
     div[data-testid="stMetricValue"] {
         font-weight: 800 !important;
-        color: #00f2fe !important;
-        text-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+        color: #d4af37 !important;
+        text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -274,7 +270,7 @@ if not st.session_state.autenticado:
     modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
     
     if modo_tela == "LOGIN":
-        with st.container(border=True):
+        with st.container():
             st.markdown("### 🔑 LOGIN DO OPERADOR")
             input_user = st.text_input("USERNAME:", key="login_username").strip().lower()
             input_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", key="login_password")
@@ -297,7 +293,7 @@ if not st.session_state.autenticado:
             st.stop()
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
-        with st.container(border=True):
+        with st.container():
             st.markdown("### 👋 CRIAR NOVA CONTA")
             novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
             novo_user = st.text_input("ESCOLHA UM USERNAME (SEM ESPAÇOS):").strip().lower()
@@ -350,7 +346,7 @@ if st.session_state.autenticado and username:
     # ==================== HEADER OPERACIONAL COM LOGOUT ====================
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     with col_titulo_sistema:
-        st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🚀 <span class='jarvis-brand'>JARVIS OS</span></h1>""", unsafe_allow_html=True)
+        st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🔱 <span class='jarvis-brand'>JARVIS OS</span></h1>""", unsafe_allow_html=True)
     with col_botao_logout:
         st.markdown("<div class='logout-container'></div>", unsafe_allow_html=True)
         if st.button("SAIR DA SESSÃO"):
@@ -358,7 +354,7 @@ if st.session_state.autenticado and username:
             st.session_state.username = None
             st.rerun()
 
-    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
     # ==================== MOTOR DE AGENDA MULTIUSUÁRIO WEB ====================
     def obter_servico_google_agenda():
@@ -449,7 +445,7 @@ if st.session_state.autenticado and username:
                         
                         novo_ev = {
                             "id": id_unico, "title": ev["titulo"], "start": start_dt.isoformat(), 
-                            "end": end_dt.isoformat(), "backgroundColor": "#7a00ff", "borderColor": "#ff007f", "textColor": "#ffffff"
+                            "end": end_dt.isoformat(), "backgroundColor": "#aa7c11", "borderColor": "#d4af37", "textColor": "#000000"
                         }
                         db["eventos_locais"].append(novo_ev)
                         
@@ -467,7 +463,7 @@ if st.session_state.autenticado and username:
                         contador_id += 1
                     
                     salvar_dados(db)
-                    st.toast("📅 Cronograma updated!")
+                    st.toast("📅 Cronograma atualizado!")
                     st.session_state.cal_version += 1
                 except: pass
                     
@@ -484,8 +480,8 @@ if st.session_state.autenticado and username:
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🤖 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
-            with st.container(border=True):
+            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
+            with st.container():
                 chat_container = st.container(height=340)
                 with chat_container:
                     for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -496,30 +492,30 @@ if st.session_state.autenticado and username:
                     st.rerun()
         with col_lista:
             st.markdown('<div class="titulo-card">🎯 SEUS OBJETIVOS ATIVOS</div>', unsafe_allow_html=True)
-            with st.container(border=True):
+            with st.container():
                 metas_ativas = [m for m in db["metas"] if not m["concluida"]]
                 if not metas_ativas: st.info("Nenhuma diretriz ativa no momento. Que tal começar uma nova?")
                 else:
                     for m in db["metas"]:
                         if not m["concluida"]:
                             c1, c2, c3 = st.columns([3, 1, 1])
-                            c1.markdown(f"🔥 **{m['nome']}**<br><span style='color:#a6a7ab; font-size:13px;'>{m['categoria']}</span>", unsafe_allow_html=True)
-                            c2.markdown(f"<div style='padding-top:10px; color:#00f2fe; font-weight:700;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
+                            c1.markdown(f"✨ **{m['nome']}**<br><span style='color:#777777; font-size:13px;'>{m['categoria']}</span>", unsafe_allow_html=True)
+                            c2.markdown(f"<div style='padding-top:10px; color:#d4af37; font-weight:700;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
                             if c3.button("✓", key=m["id"]):
                                 m["concluida"] = True
                                 salvar_dados(db)
                                 st.rerun()
-                            st.markdown("<hr style='margin: 12px 0; border-color: rgba(255,255,255,0.05);'>", unsafe_allow_html=True)
+                            st.markdown("<hr style='margin: 12px 0; border-color: rgba(212,175,55,0.1);'>", unsafe_allow_html=True)
 
     # 2. ABA POMODORO
     with aba_pomodoro:
-        st.markdown('<div class="titulo-card">⏱️ BLOCO DE FOCO ESTILO TIME-LAPSE</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-card">⏱️ BLOCO DE FOCO INTEGRADO</div>', unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
         if not metas_validas: st.warning("Nenhum alvo ativo encontrado. Crie uma meta com o Jarvis primeiro!")
         else:
             cp1, cp2 = st.columns(2)
             with cp1:
-                with st.container(border=True):
+                with st.container():
                     st.markdown("### ⚙️ Ajustar Foco")
                     meta_alvo = st.selectbox("Vincular foco atual à meta:", [m["nome"] for m in metas_validas])
                     minutos_slider = st.slider("Duração do bloco (minutos):", min_value=1, max_value=120, value=int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
@@ -537,9 +533,9 @@ if st.session_state.autenticado and username:
                         st.session_state.pomo_segundos_restantes = st.session_state.pomo_tempo_inicial_escolhido * 60
                         st.rerun()
             with cp2:
-                with st.container(border=True):
+                with st.container():
                     m_vis, s_vis = divmod(st.session_state.pomo_segundos_restantes, 60)
-                    st.markdown(f"<div style='text-align: center; padding: 15px 0;'><span style='color:#a6a7ab; font-size:14px; font-weight:600; text-transform: uppercase;'>Timer Correndo</span><h1 style='font-size: 82px; font-family: system-ui; font-weight:800; margin: 10px 0; background: linear-gradient(45deg, #00f2fe, #4facfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#ff007f; font-size:16px; font-weight:700;'>🎯 {meta_alvo}</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align: center; padding: 15px 0;'><span style='color:#777777; font-size:14px; font-weight:600; text-transform: uppercase;'>Timer Correndo</span><h1 style='font-size: 82px; font-family: system-ui; font-weight:800; margin: 10px 0; background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37; font-size:16px; font-weight:700;'>🎯 {meta_alvo}</span></div>", unsafe_allow_html=True)
             
             if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
                 time.sleep(1)
@@ -558,8 +554,8 @@ if st.session_state.autenticado and username:
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
-            st.markdown('<div class="titulo-card">💧 META DE HIDRATAÇÃO (STREAK)</div>', unsafe_allow_html=True)
-            with st.container(border=True):
+            st.markdown('<div class="titulo-card">💧 META DE HIDRATAÇÃO</div>', unsafe_allow_html=True)
+            with st.container():
                 peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)).replace('.', ','))
                 try: peso_limpo = float(peso_texto.replace(',', '.'))
                 except ValueError: peso_limpo = 70.0
@@ -574,7 +570,7 @@ if st.session_state.autenticado and username:
                 if c_btn2.button("🔄 Zerar Dia"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
             st.markdown('<div class="titulo-card">🍳 FEED DE NUTRIÇÃO</div>', unsafe_allow_html=True)
-            with st.container(border=True):
+            with st.container():
                 refeicao = st.text_input("O que você comeu agora?", placeholder="Ex: Panqueca de aveia e whey")
                 st.markdown("<br><br>", unsafe_allow_html=True)
                 if st.button("Postar Refeição no Log"):
@@ -588,9 +584,9 @@ if st.session_state.autenticado and username:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         
         if service:
-            st.markdown("<span style='color: #00f2fe; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚡ Google Agenda Sincronizado</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d4af37; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚡ Google Agenda Sincronizado</span>", unsafe_allow_html=True)
         else:
-            st.markdown("<span style='color: #ff007f; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚠️ Modo Offline Local</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #777777; font-size: 14px; font-weight:600; margin-bottom:10px; display:inline-block;'>⚠️ Modo Offline Local</span>", unsafe_allow_html=True)
             
             if st.button("CONECTAR COM GOOGLE AGENDA"):
                 try:
@@ -606,7 +602,7 @@ if st.session_state.autenticado and username:
                     auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
                     
                     st.session_state.aguardando_oauth_user = username
-                    st.markdown(f'<a href="{auth_url}" target="_self"><input type="button" value="Autorizar Google" style="background:linear-gradient(45deg, #7a00ff, #ff007f); color:#ffffff; border:none; padding:12px 24px; border-radius:50px; font-weight:bold; cursor:pointer; width:100%;"></a>', unsafe_allow_html=True)
+                    st.markdown(f'<a href="{auth_url}" target="_self"><input type="button" value="Autorizar Google" style="background:linear-gradient(135deg, #d4af37, #aa7c11); color:#000000; border:none; padding:12px 24px; border-radius:12px; font-weight:bold; cursor:pointer; width:100%;"></a>', unsafe_allow_html=True)
                 except Exception as e:
                     st.error("Configure os Secrets do Streamlit para ativar a API.")
 
@@ -614,7 +610,7 @@ if st.session_state.autenticado and username:
             "title": "🎬 Dia Iniciado",
             "start": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 0)).isoformat(),
             "end": datetime.datetime.combine(datetime.date.today(), datetime.time(6, 30)).isoformat(),
-            "backgroundColor": "#1e1f24", "borderColor": "rgba(255,255,255,0.1)", "textColor": "#a6a7ab", "editable": False
+            "backgroundColor": "#141414", "borderColor": "rgba(212,175,55,0.2)", "textColor": "#ffffff", "editable": False
         }]
         if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
@@ -622,7 +618,7 @@ if st.session_state.autenticado and username:
             c_add, c_del = st.columns(2)
             with c_add:
                 st.markdown("#### Adicionar Evento")
-                nome_evento = st.text_input("Título do compromisso:", placeholder="Ex: Gravar conteúdo", key="cal_nome_ev")
+                nome_evento = st.text_input("Título do compromisso:", placeholder="Ex: Treino de pernas", key="cal_nome_ev")
                 data_evento = st.date_input("Data:", datetime.date.today(), key="cal_data_ev")
                 h_ini = st.time_input("Início:", datetime.time(14, 0), key="cal_hini_ev")
                 h_fim = st.time_input("Término:", datetime.time(15, 0), key="cal_hfim_ev")
@@ -635,7 +631,7 @@ if st.session_state.autenticado and username:
                         id_unico = "jarvis_" + str(int(time.time())) + "_manual"
                         titulo_formatado = f"{h_ini.strftime('%H:%M')} - {nome_evento}"
                         
-                        novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#7a00ff", "borderColor": "#ff007f", "textColor": "#ffffff"}
+                        novo_ev = {"id": id_unico, "title": titulo_formatado, "start": start_dt.isoformat(), "end": end_dt.isoformat(), "backgroundColor": "#aa7c11", "borderColor": "#d4af37", "textColor": "#000000"}
                         db["eventos_locais"].append(novo_ev)
                         
                         if service:
@@ -667,7 +663,7 @@ if st.session_state.autenticado and username:
     # 5. ABA ESTATÍSTICAS
     with aba_graficos:
         st.markdown('<div class="titulo-card">📊 SEUS RELATÓRIOS INTEGRADOS</div>', unsafe_allow_html=True)
-        with st.container(border=True):
+        with st.container():
             st.markdown("### 📈 Resumo do Progresso")
             if db.get("metas"):
                 concluidas = sum(1 for m in db["metas"] if m["concluida"])
