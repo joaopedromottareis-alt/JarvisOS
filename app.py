@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Estrutural - Blindagem total contra caixas cinzas e estilização do calendário customizado
+# CSS Global Estrutural - Garante inputs pretos/dourados e zera os blocos cinzas nativos
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -66,7 +66,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* 3. INPUTS MODERNOS - SEM CAIXAS CINZAS */
+    /* 3. CORREÇÃO DOS INPUTS (TEXTO, SENHA E SELEÇÃO) - RETIRA AS CAIXAS CINZAS */
     div[data-baseweb="base-input"], div[data-baseweb="input"], div[data-baseweb="input"] > div,
     .stTextInput > div, .stTextInput > div > div, .stDateInput > div, .stTextArea > div, .stSelectbox > div {
         border: none !important;
@@ -75,8 +75,8 @@ st.markdown("""
         outline: none !important;
     }
 
-    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"] {
-        background-color: rgba(15, 15, 15, 0.9) !important; 
+    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"] {
+        background-color: #0b0b0b !important; 
         border: 1px solid rgba(212, 175, 55, 0.15) !important; 
         border-radius: 12px !important; 
         color: #ffffff !important;
@@ -150,12 +150,12 @@ st.markdown("""
     }
     
     .stExpander {
-        background-color: rgba(15, 15, 15, 0.6) !important;
-        border: 1px solid rgba(212, 175, 55, 0.1) !important;
+        background-color: rgba(11, 11, 11, 0.9) !important;
+        border: 1px solid rgba(212, 175, 55, 0.15) !important;
         border-radius: 12px !important;
     }
 
-    /* ==================== NOVO CALENDÁRIO DESIGN OS INTEGRADO ==================== */
+    /* ==================== CALENDÁRIO VISUAL INTEGRADO (CYBERPUNK OS) ==================== */
     .jarvis-calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -179,19 +179,19 @@ st.markdown("""
     }
     
     .calendar-cell {
-        background-color: rgba(20, 20, 20, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        background-color: rgba(16, 16, 16, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.02);
         border-radius: 14px;
-        min-height: 95px;
-        padding: 10px;
+        min-height: 100px;
+        padding: 12px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        justify-content: flex-start;
+        transition: all 0.25s ease;
     }
     
     .calendar-cell:hover {
-        background-color: rgba(212, 175, 55, 0.05);
+        background-color: rgba(212, 175, 55, 0.04);
         border-color: rgba(212, 175, 55, 0.3);
         transform: translateY(-2px);
     }
@@ -211,8 +211,9 @@ st.markdown("""
     .cell-number {
         font-family: 'Kanit', sans-serif;
         font-weight: 700;
-        font-size: 16px;
-        color: #888888;
+        font-size: 15px;
+        color: #666666;
+        margin-bottom: 5px;
     }
     
     .cell-today .cell-number {
@@ -222,19 +223,18 @@ st.markdown("""
     .cell-events-container {
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        margin-top: 6px;
+        gap: 5px;
         overflow-y: auto;
-        max-height: 60px;
+        max-height: 70px;
     }
     
     .calendar-event-tag {
-        background-color: rgba(212, 175, 55, 0.15);
+        background-color: rgba(212, 175, 55, 0.12);
         color: #d4af37;
         border-left: 2px solid #d4af37;
         font-size: 10px;
         font-weight: 600;
-        padding: 2px 6px;
+        padding: 3px 6px;
         border-radius: 4px;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -384,7 +384,7 @@ if st.session_state.autenticado and username:
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🔱 CONVERSAR WITH JARVIS</div>', unsafe_allow_html=True)
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -447,25 +447,25 @@ if st.session_state.autenticado and username:
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
-            st.markdown('<div class="titulo-card">💧 METRICAS DE HIDRATAÇÃO</div>', unsafe_allow_html=True)
-            peso_texto = st.text_input("Peso (kg):", value=str(db.get("peso_usuario", 70.0)))
+            st.markdown('<div class="titulo-card">💧 DIRETRIZES DE HIDRATAÇÃO</div>', unsafe_allow_html=True)
+            peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)))
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
             db["peso_usuario"] = peso_limpo
             alvo_calc = int(peso_limpo * 35)
-            st.metric("Consumido", f"{db['agua']} ml", f"Alvo: {alvo_calc} ml")
+            st.metric("Consumido", f"{db['agua']} ml", f"Alvo do Jarvis: {alvo_calc} ml")
             cb1, cb2 = st.columns(2)
             if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
-            if cb2.button("🔄 Limpar"): db["agua"] = 0; salvar_dados(db); st.rerun()
+            if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
-            st.markdown('<div class="titulo-card">🍳 ALIMENTAÇÃO</div>', unsafe_allow_html=True)
-            refeicao = st.text_input("O que comeu?", placeholder="Ex: Frango e Arroz")
-            if st.button("Registrar Refeição"):
+            st.markdown('<div class="titulo-card">🍳 REFEIÇÕES DO DIA</div>', unsafe_allow_html=True)
+            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Panqueca de aveia e whey")
+            if st.button("Registrar MacroAlimento"):
                 if refeicao:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
-                    salvar_dados(db); st.toast("Salvo!")
+                    salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA CRONOGRAMA OPERACIONAL (RECONSTRUIDA EM HTML/CSS DO ZERO)
+    # 4. ABA CRONOGRAMA OPERACIONAL (RECONSTRUIDA E TOTALMENTE PROTEGIDA CONTRA ERROS DE SINTAXE)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -479,15 +479,17 @@ if st.session_state.autenticado and username:
         dia_name_hoje = dias_traduzidos.get(hoje.strftime("%A"), "HOJE")
         
         with col_esq_info:
-            st.markdown(f"""
-                <div style='background-color: #101010; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px;'>
-                    <span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>
-                    <h1 style='font-size: 75px; font-family: "Kanit", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{dia_num_hoje}</h1>
-                    <div style='font-size: 16px; color: #d4af37; font-weight:500;'>{dia_name_hoje}</div>
-                </div>
-            """, unsafe_allow_html=True)
+            # Renderização limpa e segura usando concatenação para evitar conflito com CSS inline
+            st.markdown(
+                "<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px; border-top: 1px solid rgba(212,175,55,0.1); border-right: 1px solid rgba(212,175,55,0.1); border-bottom: 1px solid rgba(212,175,55,0.1);'>"
+                "<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
+                "<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>" + str(dia_num_hoje) + "</h1>"
+                "<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>" + str(dia_name_hoje) + "</div>"
+                "</div>", 
+                unsafe_allow_html=True
+            )
             
-            with st.expander("➕ CRIAR EVENTO LOCAL", expanded=False):
+            with st.expander("➕ GERENCIAR EVENTOS MANUALMENTE", expanded=False):
                 nome_ev = st.text_input("Título do compromisso:")
                 data_ev = st.date_input("Data do evento:", hoje)
                 h_ini = st.time_input("Início da atividade:", datetime.time(9, 0))
@@ -504,18 +506,13 @@ if st.session_state.autenticado and username:
                         salvar_dados(db); st.rerun()
 
         with col_dir_cal:
-            # --- CONSTRUÇÃO DA GRADE DINÂMICA DO CALENDÁRIO VIA HTML ---
             mes_atual = hoje.month
             ano_atual = hoje.year
-            
-            # Cabeçalhos da semana
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
-            # Geração da matriz de dias do mês
-            cal_objeto = pycalendar.Calendar(firstweekday=6) # Inicia no Domingo
+            cal_objeto = pycalendar.Calendar(firstweekday=6)
             mes_dias = cal_objeto.monthdayscalendar(ano_atual, mes_atual)
             
-            # Mapeamento dos eventos locais por dia string para otimizar a busca
             dict_eventos = {}
             for ev in db.get("eventos_locais", []):
                 ev_date_str = ev.get("date")
@@ -524,27 +521,25 @@ if st.session_state.autenticado and username:
                         dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
 
-            # Início da montagem do HTML
-            html_calendario = f"<div style='text-align: center; margin-bottom: 15px; font-family: \"Kanit\", sans-serif; font-size: 18px; color: #ffffff; font-weight: 600;'>{hoje.strftime('%B de %Y').upper()}</div>"
+            # Cabeçalho do mês corrente
+            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
+            nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
+            
+            html_calendario = "<div style='text-align: center; margin-bottom: 15px; font-family: \"Kanit\", sans-serif; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>" + nome_do_mes + " " + str(ano_atual) + "</div>"
             html_calendario += "<div class='jarvis-calendar-grid'>"
             
-            # Inserindo os cabeçalhos
             for hd in dias_semana_headers:
                 html_calendario += f"<div class='calendar-header-day'>{hd}</div>"
                 
-            # Preenchendo as células de dias
             for semana in mes_dias:
-                for dia in semana:
+                for dia in Array_dia := semana:
                     if dia == 0:
                         html_calendario += "<div class='calendar-cell cell-empty'></div>"
                     else:
                         data_corrente = datetime.date(ano_atual, mes_atual, dia)
                         data_corrente_str = data_corrente.isoformat()
-                        
-                        # Verifica se o bloco analisado é a data de hoje
                         classe_hoje = "cell-today" if data_corrente == hoje else ""
                         
-                        # Busca se existem eventos marcados para esse dia específico
                         html_tags_eventos = ""
                         if data_corrente_str in dict_eventos:
                             for ev in dict_eventos[data_corrente_str]:
@@ -560,13 +555,11 @@ if st.session_state.autenticado and username:
                         """
                         
             html_calendario += "</div>"
-            
-            # Exibição direta do HTML puro estilizado na tela do Streamlit
             st.markdown(html_calendario, unsafe_allow_html=True)
 
     # 5. GRÁFICOS
     with aba_graficos:
-        st.markdown('<div class="titulo-card">📊 DESEMPENHO</div>', unsafe_allow_html=True)
+        st.markdown('<div class="titulo-card">📊 DESEMPENHO OPERACIONAL</div>', unsafe_allow_html=True)
         if db.get("metas"):
             concluidas = sum(1 for m in db["metas"] if m["concluida"])
             total = len(db["metas"])
