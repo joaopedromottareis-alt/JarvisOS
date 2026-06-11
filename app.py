@@ -66,7 +66,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* 3. CORREÇÃO DOS INPUTS (TEXTO, SENHA E SELEÇÃO) - RETIRA AS CAIXAS CINZAS */
+    /* 3. CORREÇÃO DOS INPUTS (TEXTO, SENHA E SELEÇÃO) */
     div[data-baseweb="base-input"], div[data-baseweb="input"], div[data-baseweb="input"] > div,
     .stTextInput > div, .stTextInput > div > div, .stDateInput > div, .stTextArea > div, .stSelectbox > div {
         border: none !important;
@@ -155,7 +155,7 @@ st.markdown("""
         border-radius: 12px !important;
     }
 
-    /* ==================== CALENDÁRIO VISUAL INTEGRADO (CYBERPUNK OS) ==================== */
+    /* ==================== CALENDÁRIO VISUAL INTEGRADO HTML/CSS ==================== */
     .jarvis-calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
@@ -384,7 +384,7 @@ if st.session_state.autenticado and username:
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🔱 CONVERSAR WITH JARVIS</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -465,7 +465,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA CRONOGRAMA OPERACIONAL (RECONSTRUIDA E TOTALMENTE PROTEGIDA CONTRA ERROS DE SINTAXE)
+    # 4. ABA AGENDA (CORRIGIDA TOTALMENTE)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -479,7 +479,6 @@ if st.session_state.autenticado and username:
         dia_name_hoje = dias_traduzidos.get(hoje.strftime("%A"), "HOJE")
         
         with col_esq_info:
-            # Renderização limpa e segura usando concatenação para evitar conflito com CSS inline
             st.markdown(
                 "<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px; border-top: 1px solid rgba(212,175,55,0.1); border-right: 1px solid rgba(212,175,55,0.1); border-bottom: 1px solid rgba(212,175,55,0.1);'>"
                 "<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
@@ -521,8 +520,7 @@ if st.session_state.autenticado and username:
                         dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
 
-            # Cabeçalho do mês corrente
-            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
+            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "COMENTÁRIOS", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
             html_calendario = "<div style='text-align: center; margin-bottom: 15px; font-family: \"Kanit\", sans-serif; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>" + nome_do_mes + " " + str(ano_atual) + "</div>"
@@ -532,7 +530,7 @@ if st.session_state.autenticado and username:
                 html_calendario += f"<div class='calendar-header-day'>{hd}</div>"
                 
             for semana in mes_dias:
-                for dia in Array_dia := semana:
+                for dia in semana:
                     if dia == 0:
                         html_calendario += "<div class='calendar-cell cell-empty'></div>"
                     else:
