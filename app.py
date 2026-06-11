@@ -4,6 +4,7 @@ import time
 import json
 import os
 import hashlib
+import re
 import calendar as pycalendar
 from groq import Groq
 
@@ -212,20 +213,20 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- FUNÇÃO DO JARVIS BLINDADA (RESOLVE A INSTABILIDADE) ---
+    # --- FUNÇÃO DO JARVIS ULTRA-EXTRATORA E BLINDADA ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
         prompt_sistema = (
             f"Você é o Jarvis, o assistente virtual executivo do usuário. Hoje é exatamente {data_hoje_str}.\n"
-            "Interprete o comando do usuário e responda OBRIGATORIAMENTE em formato JSON válido. "
-            "Não adicione nenhuma introdução, saudação ou texto fora do JSON. Retorne APENAS o objeto estruturado.\n\n"
+            "Interprete o comando do usuário e responda APENAS em formato JSON válido e cru.\n"
+            "Não adicione marcações de bloco de código como ```json, e absolutamente nenhum texto descritivo antes ou depois.\n"
             "Se o usuário pedir para criar objetivos ou metas gerais de longo prazo, defina 'criar_meta': true.\n"
-            "Se o usuário pedir para agendar um compromisso com horário, aula, atividade ou tarefa na agenda para um dia específico (como hoje, amanhã ou uma data), "
+            "Se o usuário pedir para agendar um compromisso com horário ou tarefa na agenda para um dia específico (como hoje, amanhã ou uma data), "
             "defina 'criar_evento': true, determinando a data no formato 'YYYY-MM-DD' e o horário em 'HH:MM'.\n\n"
             "Estrutura estrita do JSON esperado:\n"
             "{\n"
-            "  \"resposta_chat\": \"Frase curta e imponente confirmando a ação no estilo Jarvis\",\n"
+            "  \"resposta_chat\": \"Frase curta confirmando a ação no estilo Jarvis\",\n"
             "  \"criar_meta\": false,\n"
             "  \"novas_metas\": [],\n"
             "  \"criar_evento\": false,\n"
@@ -237,13 +238,19 @@ if st.session_state.autenticado and username:
             completion = client.chat.completions.create(
                 model=MODELO_IA,
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": comando}],
-                temperature=0.1, response_format={ "type": "json_object" }
+                temperature=0.0
             )
             
             conteudo_resposta = completion.choices[0].message.content.strip()
+            
+            # Sanitização Avançada: Extrai estritamente o conteúdo entre a primeira chapa { e a última }
+            match = re.search(r'\{.*\}', conteudo_resposta, re.DOTALL)
+            if match:
+                conteudo_resposta = match.group(0)
+                
             resultado = json.loads(conteudo_resposta)
             
-            # Validação de Meta comum (com .get seguro)
+            # Validação de Meta comum
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -256,7 +263,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Validação de Compromisso/Agenda (com .get seguro)
+            # Validação de Compromisso/Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -270,7 +277,7 @@ if st.session_state.autenticado and username:
                 
             return resultado.get("resposta_chat", "Diretrizes sincronizadas nos servidores locais, Senhor.")
         except Exception as e: 
-            return "Os sistemas de análise inteligente encontraram uma instabilidade na estrutura dos dados."
+            return "Os sistemas de análise inteligente encontraram uma instabilidade e redefiniram as variáveis."
 
     # --- NAVEGAÇÃO POR ABAS ---
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -362,7 +369,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA (CALENDÁRIO INTEGRADO RENDERIZANDO PERFEITAMENTE)
+    # 4. ABA AGENDA
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -418,7 +425,7 @@ if st.session_state.autenticado and username:
             
             html_estilos_calendario = """
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+                @import url('[https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap)');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
                 .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; background-color: #0a0a0a; padding: 20px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 5px; }
