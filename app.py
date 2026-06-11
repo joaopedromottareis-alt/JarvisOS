@@ -23,12 +23,11 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Estrutural - Garante inputs pretos/dourados e zera os blocos cinzas nativos
+# CSS Global Estrutural
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght=300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
     
-    /* 1. PALETA BASE */
     .stApp { 
         background-color: #050505 !important; 
         color: #e5e5e5 !important; 
@@ -48,7 +47,6 @@ st.markdown("""
         max-width: 100% !important; 
     }
     
-    /* 2. TIPOGRAFIA */
     .custom-title {
         font-family: 'Kanit', sans-serif !important;
         background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
@@ -66,7 +64,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* 3. CORREÇÃO DOS INPUTS (TEXTO, SENHA E SELEÇÃO) */
     div[data-baseweb="base-input"], div[data-baseweb="input"], div[data-baseweb="input"] > div,
     .stTextInput > div, .stTextInput > div > div, .stDateInput > div, .stTextArea > div, .stSelectbox > div {
         border: none !important;
@@ -90,14 +87,6 @@ st.markdown("""
         box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
     }
 
-    div[data-testid="stVerticalBlockBorderWrapper"], div[data-testid="stVerticalBlock"], 
-    div[data-testid="element-container"], div[data-testid="stColumn"],
-    div[data-testid="stHorizontalBlock"], div[data-testid="stBlock"], .stElementContainer {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
-
     .titulo-card { 
         color: #d4af37 !important; 
         font-family: 'Kanit', sans-serif !important;
@@ -113,7 +102,6 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    /* Botões */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -125,12 +113,7 @@ st.markdown("""
         width: 100% !important;
         transition: all 0.25s ease !important;
     }
-    .stButton>button:hover { 
-        transform: translateY(-1px) !important;
-        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25) !important;
-    }
     
-    /* Abas */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: transparent !important; 
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -149,98 +132,6 @@ st.markdown("""
         border-bottom: 2px solid #d4af37 !important;
     }
     
-    .stExpander {
-        background-color: rgba(11, 11, 11, 0.9) !important;
-        border: 1px solid rgba(212, 175, 55, 0.15) !important;
-        border-radius: 12px !important;
-    }
-
-    /* ==================== CALENDÁRIO VISUAL INTEGRADO HTML/CSS ==================== */
-    .jarvis-calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 10px;
-        background-color: #0a0a0a;
-        padding: 25px;
-        border-radius: 24px;
-        border: 1px solid rgba(212, 175, 55, 0.15);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    }
-    
-    .calendar-header-day {
-        text-align: center;
-        font-family: 'Kanit', sans-serif;
-        font-weight: 600;
-        font-size: 13px;
-        color: #777777;
-        text-transform: uppercase;
-        padding-bottom: 10px;
-        letter-spacing: 1px;
-    }
-    
-    .calendar-cell {
-        background-color: rgba(16, 16, 16, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.02);
-        border-radius: 14px;
-        min-height: 100px;
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        transition: all 0.25s ease;
-    }
-    
-    .calendar-cell:hover {
-        background-color: rgba(212, 175, 55, 0.04);
-        border-color: rgba(212, 175, 55, 0.3);
-        transform: translateY(-2px);
-    }
-    
-    .calendar-cell.cell-today {
-        background-color: rgba(212, 175, 55, 0.08) !important;
-        border: 1px solid #d4af37 !important;
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
-    }
-    
-    .calendar-cell.cell-empty {
-        background-color: transparent;
-        border: none;
-        pointer-events: none;
-    }
-    
-    .cell-number {
-        font-family: 'Kanit', sans-serif;
-        font-weight: 700;
-        font-size: 15px;
-        color: #666666;
-        margin-bottom: 5px;
-    }
-    
-    .cell-today .cell-number {
-        color: #d4af37;
-    }
-    
-    .cell-events-container {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        overflow-y: auto;
-        max-height: 70px;
-    }
-    
-    .calendar-event-tag {
-        background-color: rgba(212, 175, 55, 0.12);
-        color: #d4af37;
-        border-left: 2px solid #d4af37;
-        font-size: 10px;
-        font-weight: 600;
-        padding: 3px 6px;
-        border-radius: 4px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-    }
-
     [data-testid="stChatMessage"] {
         background-color: rgba(20, 20, 20, 0.5) !important;
         border-left: 3px solid #d4af37 !important;
@@ -465,7 +356,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA (SINTAXE CORRIGIDA E REMOÇÃO DO WALRUS OPERATOR)
+    # 4. ABA AGENDA - REESTRUTURADA COM IFRAME SEGURO DE ALTA PERFORMANCE
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -523,17 +414,33 @@ if st.session_state.autenticado and username:
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
-            html_calendario = "<div style='text-align: center; margin-bottom: 15px; font-family: \"Kanit\", sans-serif; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>" + nome_do_mes + " " + str(ano_atual) + "</div>"
-            html_calendario += "<div class='jarvis-calendar-grid'>"
+            # Encapsulamento completo de estilo e tags isoladas (Previne quebra de strings)
+            html_estilos_calendario = """
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+                body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
+                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; background-color: #0a0a0a; padding: 20px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
+                .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 5px; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 10px; display: flex; flex-direction: column; }
+                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.08); border: 1px solid #d4af37; }
+                .calendar-cell.cell-empty { background-color: transparent; border: none; }
+                .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; }
+                .cell-today .cell-number { color: #d4af37; }
+                .cell-events-container { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+                .calendar-event-tag { background-color: rgba(212, 175, 55, 0.12); color: #d4af37; border-left: 2px solid #d4af37; font-size: 9px; font-weight: 600; padding: 2px 4px; border-radius: 3px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+            </style>
+            """
+            
+            html_corpo = "<div style='text-align: center; margin-bottom: 15px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>" + nome_do_mes + " " + str(ano_atual) + "</div>"
+            html_corpo += "<div class='jarvis-calendar-grid'>"
             
             for hd in dias_semana_headers:
-                html_calendario += f"<div class='calendar-header-day'>{hd}</div>"
+                html_corpo += "<div class='calendar-header-day'>" + hd + "</div>"
                 
-            # Iteração direta sem atribuição inline problemática
             for semana in mes_dias:
                 for dia in semana:
                     if dia == 0:
-                        html_calendario += "<div class='calendar-cell cell-empty'></div>"
+                        html_corpo += "<div class='calendar-cell cell-empty'></div>"
                     else:
                         data_corrente = datetime.date(ano_atual, mes_atual, dia)
                         data_corrente_str = data_corrente.isoformat()
@@ -542,19 +449,17 @@ if st.session_state.autenticado and username:
                         html_tags_eventos = ""
                         if data_corrente_str in dict_eventos:
                             for ev in dict_eventos[data_corrente_str]:
-                                html_tags_eventos += f"<div class='calendar-event-tag' title='{ev['time']} - {ev['title']}'>{ev['time']} - {ev['title']}</div>"
+                                html_tags_eventos += "<div class='calendar-event-tag'>" + ev['time'] + " - " + ev['title'] + "</div>"
                                 
-                        html_calendario += f"""
-                            <div class='calendar-cell {classe_hoje}'>
-                                <div class='cell-number'>{dia}</div>
-                                <div class='cell-events-container'>
-                                    {html_tags_eventos}
-                                </div>
-                            </div>
-                        """
+                        html_corpo += "<div class='calendar-cell " + classe_hoje + "'>"
+                        html_corpo += "<div class='cell-number'>" + str(dia) + "</div>"
+                        html_corpo += "<div class='cell-events-container'>" + html_tags_eventos + "</div>"
+                        html_corpo += "</div>"
                         
-            html_calendario += "</div>"
-            st.markdown(html_calendario, unsafe_allow_html=True)
+            html_corpo += "</div>"
+            
+            # Injeção via Componente Nativo do Streamlit (Cria sandbox segura independente de f-strings)
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=620, scrolling=False)
 
     # 5. GRÁFICOS
     with aba_graficos:
@@ -563,4 +468,4 @@ if st.session_state.autenticado and username:
             concluidas = sum(1 for m in db["metas"] if m["concluida"])
             total = len(db["metas"])
             st.progress(concluidas / total if total > 0 else 0)
-            st.metric("Completadas", f"{concluidas}/{total}", f"{db.get('historico_pomodoro', 0)} minutes em foco.")
+            st.metric("Completadas", f"{concluidas}/{total}", f"{db.get('historico_pomodoro', 0)} minutos em foco.")
