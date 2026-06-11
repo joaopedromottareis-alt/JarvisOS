@@ -11,7 +11,8 @@ from groq import Groq
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
 API_KEY = "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"
 client = Groq(api_key=API_KEY)
-MODELO_IA = "llama-3.3-70b-versatile" 
+MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
+MODELO_EXTRATOR = "llama3-8b-8192"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
@@ -213,44 +214,53 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- FUNÇÃO DO JARVIS ULTRA-EXTRATORA E BLINDADA ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (SISTEMA INFALÍVEL) ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
-        prompt_sistema = (
-            f"Você é o Jarvis, o assistente virtual executivo do usuário. Hoje é exatamente {data_hoje_str}.\n"
-            "Interprete o comando do usuário e responda APENAS em formato JSON válido e cru.\n"
-            "Não adicione marcações de bloco de código como ```json, e absolutamente nenhum texto descritivo antes ou depois.\n"
-            "Se o usuário pedir para criar objetivos ou metas gerais de longo prazo, defina 'criar_meta': true.\n"
-            "Se o usuário pedir para agendar um compromisso com horário ou tarefa na agenda para um dia específico (como hoje, amanhã ou uma data), "
-            "defina 'criar_evento': true, determinando a data no formato 'YYYY-MM-DD' e o horário em 'HH:MM'.\n\n"
-            "Estrutura estrita do JSON esperado:\n"
-            "{\n"
-            "  \"resposta_chat\": \"Frase curta confirmando a ação no estilo Jarvis\",\n"
-            "  \"criar_meta\": false,\n"
-            "  \"novas_metas\": [],\n"
-            "  \"criar_evento\": false,\n"
-            "  \"novos_eventos\": []\n"
-            "}"
+        # Etapa 1: A IA responde textualmente de forma fluida no Chat
+        prompt_sistema_chat = (
+            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
+            "Responda ao usuário com extrema imponência, elegância e eficiência britânica. "
+            "Se o usuário pedir para marcar uma atividade, compromisso ou meta, confirme orgulhosamente que vai agendar ou processar isso nos sistemas locais."
         )
         
         try:
-            completion = client.chat.completions.create(
-                model=MODELO_IA,
-                messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": comando}],
-                temperature=0.0
+            # Chamada de conversa principal
+            conversa_principal = client.chat.completions.create(
+                model=MODELO_PRINCIPAL,
+                messages=[{"role": "system", "content": prompt_sistema_chat}, {"role": "user", "content": comando}],
+                temperature=0.7
+            )
+            resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
+            
+            # Etapa 2: Analisador em segundo plano estruturando o pedido em JSON real
+            prompt_sistema_extrator = (
+                f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
+                "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
+                "Regras:\n"
+                "1. Se o usuário quiser criar uma meta geral de longo prazo, mude 'criar_meta' para true e preencha 'novas_metas'.\n"
+                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda, mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
+                "Modelo estrutural padrão de saída esperado:\n"
+                "{\n"
+                "  \"criar_meta\": false,\n"
+                "  \"novas_metas\": [{\"nome\": \"Exemplo de meta\", \"categoria\": \"Estudos\"}],\n"
+                "  \"criar_evento\": false,\n"
+                "  \"novos_eventos\": [{\"title\": \"Nome do Evento\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}]\n"
+                "}"
             )
             
-            conteudo_resposta = completion.choices[0].message.content.strip()
+            extracao_dados = client.chat.completions.create(
+                model=MODELO_EXTRATOR,
+                messages=[{"role": "system", "content": prompt_sistema_extrator}, {"role": "user", "content": comando}],
+                temperature=0.0,
+                response_format={"type": "json_object"}
+            )
             
-            # Sanitização Avançada: Extrai estritamente o conteúdo entre a primeira chapa { e a última }
-            match = re.search(r'\{.*\}', conteudo_resposta, re.DOTALL)
-            if match:
-                conteudo_resposta = match.group(0)
-                
-            resultado = json.loads(conteudo_resposta)
+            dados_brutos = extracao_dados.choices[0].message.content.strip()
+            resultado = json.loads(dados_brutos)
             
-            # Validação de Meta comum
+            # Executa a gravação de Metas se houverem
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -263,7 +273,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Validação de Compromisso/Agenda
+            # Executa a gravação de Eventos na Agenda se houverem
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -275,9 +285,10 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            return resultado.get("resposta_chat", "Diretrizes sincronizadas nos servidores locais, Senhor.")
-        except Exception as e: 
-            return "Os sistemas de análise inteligente encontraram uma instabilidade e redefiniram as variáveis."
+            return resposta_texto_jarvis
+            
+        except Exception as e:
+            return f"Sistemas principais online. Contudo, identifiquei uma falha na consolidação estrutural dos servidores locais."
 
     # --- NAVEGAÇÃO POR ABAS ---
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -425,7 +436,7 @@ if st.session_state.autenticado and username:
             
             html_estilos_calendario = """
             <style>
-                @import url('[https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap](https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap)');
+                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
                 .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; background-color: #0a0a0a; padding: 20px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 5px; }
