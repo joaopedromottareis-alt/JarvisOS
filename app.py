@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Cirúrgico - Almejando os contornos internos dos inputs e wrappers nativos do Streamlit
+# CSS Global Cirúrgico - Integrando o conceito do Calendário SCSS adaptado ao Jarvis OS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -66,8 +66,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* 3. REMOÇÃO DE TODAS AS BORDAS E CAIXAS DOS INPUTS (TEXT_INPUT / TEXTAREA) */
-    /* Remove a borda cinza externa e sombra que o Streamlit injeta nos inputs */
+    /* 3. REMOÇÃO DE BORDAS NATIVAS E CAIXAS ESTRUTURAIS */
     div[data-baseweb="base-input"],
     div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
@@ -82,7 +81,6 @@ st.markdown("""
         outline: none !important;
     }
 
-    /* Aplica o estilo customizado diretamente na caixinha do input real */
     .stTextInput input, 
     .stDateInput input,
     .stTextArea textarea,
@@ -97,7 +95,6 @@ st.markdown("""
         transition: all 0.25s ease;
     }
     
-    /* Estado ativo / focado do input */
     .stTextInput input:focus, 
     .stDateInput input:focus,
     .stTextArea textarea:focus {
@@ -107,7 +104,6 @@ st.markdown("""
         outline: none !important;
     }
 
-    /* Desativa os contêineres e colunas estruturais do Streamlit */
     div[data-testid="stVerticalBlockBorderWrapper"], 
     div[data-testid="stVerticalBlock"], 
     div[data-testid="element-container"],
@@ -121,7 +117,6 @@ st.markdown("""
         box-shadow: none !important;
     }
 
-    /* Estilo limpo para títulos de seções */
     .titulo-card { 
         color: #d4af37 !important; 
         font-family: 'Kanit', sans-serif !important;
@@ -138,7 +133,7 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    /* Botões Dourados Sólidos */
+    /* Botões Dourados */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -185,7 +180,76 @@ st.markdown("""
         border: 1px solid rgba(212, 175, 55, 0.1) !important;
         border-radius: 12px !important;
     }
+
+    /* ==================== TRANSFORMAÇÃO DO CALENDÁRIO (CONCEITO SCSS INTEGRADO) ==================== */
+    .calendar-container {
+        background-color: #0a0a0a !important;
+        /* Customizações vindas das variáveis do SCSS: --border-radius e --side-padding */
+        border-radius: 34px !important; 
+        padding: 24px 20px !important;
+        border: 1px solid rgba(212, 175, 55, 0.15) !important;
+        max-width: 100%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Forçando estilos internos do FullCalendar injetado pelo Streamlit via Iframe */
+    iframe[title="streamlit_calendar.calendar"] {
+        border: none !important;
+        background-color: transparent !important;
+    }
+
+    /* Estilização das células de dias, cabeçalhos e efeitos Hover/Active simulados por CSS global */
+    .fc {
+        font-family: 'Kanit', sans-serif !important;
+        background-color: transparent !important;
+    }
     
+    /* Customização dos botões superiores do calendário (estilo __button do SCSS) */
+    .fc .fc-button-primary {
+        background-color: #141414 !important;
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
+        color: #e5e5e5 !important;
+        border-radius: 15px !important; /* accent-br do SCSS */
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .fc .fc-button-primary:hover {
+        background-color: #d4af37 !important;
+        color: #000000 !important;
+        box-shadow: 0 8px 15px rgba(212, 175, 55, 0.2) !important;
+    }
+
+    /* Customização da grade de dias (estilos das datas e hovers do SCSS) */
+    .fc .fc-daygrid-day {
+        transition: background-color 0.2s ease !important;
+        cursor: pointer !important;
+    }
+
+    /* Efeito Hover nas células de data - Inspirado no &:hover::before do seu código */
+    .fc .fc-daygrid-day:hover {
+        background-color: rgba(212, 175, 55, 0.06) !important;
+    }
+
+    /* Elemento hoje / selecionado - Inspirado nas propriedades do &--selected */
+    .fc .fc-day-today {
+        background-color: rgba(212, 175, 55, 0.12) !important;
+        border: 1px solid #d4af37 !important;
+    }
+
+    .fc .fc-col-header-cell {
+        background-color: transparent !important;
+        padding: 10px 0 !important;
+        color: #777777 !important; /* Cor cinza do __days do SCSS */
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .fc-theme-standard td, .fc-theme-standard th {
+        border: 1px solid rgba(255, 255, 255, 0.03) !important;
+    }
+
     /* Mensagens do Chat */
     [data-testid="stChatMessage"] {
         background-color: rgba(20, 20, 20, 0.5) !important;
@@ -200,20 +264,6 @@ st.markdown("""
         font-family: 'Kanit', sans-serif !important;
         color: #d4af37 !important;
         text-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
-    }
-
-    /* Estilo do Calendário */
-    .calendar-container {
-        background-color: #080808 !important;
-        border: 1px solid rgba(212, 175, 55, 0.15) !important;
-        border-radius: 20px !important;
-        padding: 25px !important;
-        font-family: 'Kanit', sans-serif !important;
-    }
-
-    iframe[title="streamlit_calendar.calendar"] {
-        border: none !important;
-        background-color: transparent !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -273,7 +323,7 @@ if "code" in query_params and st.session_state.get("aguardando_oauth_user"):
     except Exception as e:
         st.error(f"ERRO DE VALIDAÇÃO: {e}")
 
-# --- TELA DE LOGIN MINIMALISTA SEM BOXES ---
+# --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
     st.markdown("<h2 class='custom-title'>✨ ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>", unsafe_allow_html=True)
     modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
@@ -320,7 +370,7 @@ if not st.session_state.autenticado:
                 st.success(f"CONTA PARA '{novo_nome.upper()}' CRIADA COM SUCESSO!")
         st.stop()
 
-# ==================== INÍCIO DA SESSÃO DO USUÁRIO LOGADO ====================
+# ==================== SESSÃO OPERACIONAL DE USUÁRIO ====================
 username = st.session_state.username
 
 if st.session_state.autenticado and username:
@@ -350,7 +400,7 @@ if st.session_state.autenticado and username:
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # ==================== HEADER OPERACIONAL COM LOGOUT ====================
+    # --- HEADER ---
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     with col_titulo_sistema:
         st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🔱 <span class='jarvis-brand'>JARVIS OS</span></h1>""", unsafe_allow_html=True)
@@ -408,7 +458,7 @@ if st.session_state.autenticado and username:
         except:
             return "Sistemas operando localmente."
 
-    # ==================== INTERFACE WORKSTATION INTERATIVA ====================
+    # ==================== INTERFACE INTERATIVA ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
         "💬 CONVERSA & METAS", "⏱️ TIMER DE FOCO", "🥗 SAÚDE & FITNESS", "📅 AGENDA", "📊 ESTATÍSTICAS"
     ])
@@ -417,7 +467,7 @@ if st.session_state.autenticado and username:
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🔱 CONVERSAR WITH JARVIS</div>', unsafe_allow_html=True)
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -479,7 +529,7 @@ if st.session_state.autenticado and username:
                     st.balloons()
                 st.rerun()
 
-    # 3. ABA BIOMETRIA
+    # 3. ABA SAÚDE
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
@@ -503,14 +553,14 @@ if st.session_state.autenticado and username:
                     salvar_dados(db)
                     st.toast("Refeição registrada!")
 
-    # 4. ABA CRONOGRAMA OPERACIONAL
+    # 4. ABA CRONOGRAMA OPERACIONAL (CALENDÁRIO MODERNO)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2])
         
         with col_esq_info:
             dia_num_hoje = datetime.date.today().strftime("%d")
-            dia_name_hoje = datetime.date.today().strftime("%A").upper()  # Variável definida corretamente aqui para evitar o NameError
+            dia_name_hoje = datetime.date.today().strftime("%A").upper()
             
             st.markdown(f"""
                 <div style='background-color: #101010; padding: 30px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 20px;'>
@@ -553,6 +603,7 @@ if st.session_state.autenticado and username:
             }]
             if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
+            # Renderização do contêiner com estilo encapsulado e arredondado estilo SCSS
             st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
             calendar(events=eventos_para_exibir, options={
                 "initialView": "dayGridMonth",
