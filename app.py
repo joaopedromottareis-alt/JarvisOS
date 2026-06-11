@@ -6,27 +6,18 @@ import os
 import hashlib
 import calendar as pycalendar
 from groq import Groq
-import plotly.graph_objects as go
-
-# --- Importações para OAuth Web ---
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
 
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
 API_KEY = "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"
 client = Groq(api_key=API_KEY)
 MODELO_IA = "llama-3.3-70b-versatile" 
 
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-
-# ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
+# ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Estrutural
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght=300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
     
     .stApp { 
         background-color: #050505 !important; 
@@ -64,27 +55,12 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    div[data-baseweb="base-input"], div[data-baseweb="input"], div[data-baseweb="input"] > div,
-    .stTextInput > div, .stTextInput > div > div, .stDateInput > div, .stTextArea > div, .stSelectbox > div {
-        border: none !important;
-        box-shadow: none !important;
-        background-color: transparent !important;
-        outline: none !important;
-    }
-
     .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"] {
         background-color: #0b0b0b !important; 
         border: 1px solid rgba(212, 175, 55, 0.15) !important; 
         border-radius: 12px !important; 
         color: #ffffff !important;
         padding: 10px 16px !important;
-        transition: all 0.25s ease;
-    }
-    
-    .stTextInput input:focus, .stDateInput input:focus, .stTextArea textarea:focus {
-        border-color: #d4af37 !important;
-        background-color: #0f0f0f !important;
-        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2) !important;
     }
 
     .titulo-card { 
@@ -109,33 +85,27 @@ st.markdown("""
         border-radius: 12px !important; 
         padding: 12px 24px !important; 
         font-weight: 700 !important; 
-        font-family: 'Kanit', sans-serif !important;
         width: 100% !important;
-        transition: all 0.25s ease !important;
     }
     
     .stTabs [data-baseweb="tab-list"] { 
         background-color: transparent !important; 
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         margin-bottom: 30px !important;
-        gap: 20px !important;
     }
+    
     .stTabs [data-baseweb="tab"] { 
         color: #777777 !important; 
         font-family: 'Kanit', sans-serif !important;
-        font-weight: 500;
-        background-color: transparent !important;
-        padding: 12px 4px !important;
     }
+    
     .stTabs [aria-selected="true"] { 
         color: #d4af37 !important; 
-        border-bottom: 2px solid #d4af37 !important;
     }
     
     [data-testid="stChatMessage"] {
         background-color: rgba(20, 20, 20, 0.5) !important;
         border-left: 3px solid #d4af37 !important;
-        border-radius: 0px 12px 12px 0px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -150,17 +120,13 @@ def carregar_credenciais_salvas():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
             dados = json.load(f)
-            if "credentials" in dados and "usernames" in dados["credentials"]:
-                return dados["credentials"]["usernames"]
-            if "usernames" in dados:
-                return dados["usernames"]
+            if "usernames" in dados: return dados["usernames"]
             return dados
     return {"admin": {"name": "SENHOR ADMIN", "password": gerar_hash_sha256("admin123")}}
 
 def salvar_novas_credenciais(dicionario_usernames):
-    estrutura = {"usernames": dicionario_usernames}
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
-        json.dump(estrutura, f, indent=4, ensure_ascii=False)
+        json.dump({"usernames": dicionario_usernames}, f, indent=4, ensure_ascii=False)
 
 usernames_db = carregar_credenciais_salvas()
 
@@ -248,14 +214,32 @@ if st.session_state.autenticado and username:
 
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
-        prompt_sistema = f"Você é o Jarvis. O usuário pode pedir metas. Hoje é {data_hoje_str}. Responda em JSON."
+        
+        prompt_sistema = (
+            f"Você é o Jarvis, o assistente virtual executivo do usuário. Hoje é exatamente {data_hoje_str}.\n"
+            "Interprete o comando do usuário e responda OBRIGATORIAMENTE em formato JSON válido.\n\n"
+            "Se o usuário pedir para criar objetivos ou metas gerais de longo prazo, defina 'criar_meta': true.\n"
+            "Se o usuário pedir para agendar um compromisso com horário, aula, atividade ou tarefa na agenda para um dia específico (como hoje, amanhã ou uma data), "
+            "defina 'criar_evento': true, determinando a data no formato 'YYYY-MM-DD' e o horário em 'HH:MM'.\n\n"
+            "Estrutura estrita do JSON esperado:\n"
+            "{\n"
+            "  \"resposta_chat\": \"Frase curta e imponente confirmando a ação no estilo Jarvis\",\n"
+            "  \"criar_meta\": false,\n"
+            "  \"novas_metas\": [{\"nome\": \"Nome da meta\", \"categoria\": \"Trabalho/Saúde/Estudos\"}],\n"
+            "  \"criar_evento\": false,\n"
+            "  \"novos_eventos\": [{\"title\": \"Nome do Evento\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}]\n"
+            "}"
+        )
+        
         try:
             completion = client.chat.completions.create(
                 model=MODELO_IA,
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": comando}],
-                temperature=0.3, response_format={ "type": "json_object" }
+                temperature=0.2, response_format={ "type": "json_object" }
             )
             resultado = json.loads(completion.choices[0].message.content)
+            
+            # Validação de Meta comum
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado["novas_metas"]:
                     db["metas"].append({
@@ -263,8 +247,21 @@ if st.session_state.autenticado and username:
                         "categoria": nova_m["categoria"], "concluida": False, "tempo_dedicado": 0
                     })
                 salvar_dados(db)
-            return resultado.get("resposta_chat", "Comando processado.")
-        except: return "Processado localmente."
+                
+            # Validação de Compromisso/Agenda
+            if resultado.get("criar_evento") and resultado.get("novos_eventos"):
+                for novo_ev in resultado["novos_eventos"]:
+                    db["eventos_locais"].append({
+                        "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
+                        "title": novo_ev["title"],
+                        "date": novo_ev["date"],
+                        "time": novo_ev["time"]
+                    })
+                salvar_dados(db)
+                
+            return resultado.get("resposta_chat", "Diretrizes sincronizadas nos servidores locais, Senhor.")
+        except Exception as e: 
+            return "Os sistemas de análise inteligente encontraram uma instabilidade na requisição."
 
     # --- NAVEGAÇÃO POR ABAS ---
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -356,7 +353,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA - REESTRUTURADA COM IFRAME SEGURO DE ALTA PERFORMANCE
+    # 4. ABA AGENDA (CALENDÁRIO INTEGRADO CORRIGIDO)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -371,11 +368,11 @@ if st.session_state.autenticado and username:
         
         with col_esq_info:
             st.markdown(
-                "<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px; border-top: 1px solid rgba(212,175,55,0.1); border-right: 1px solid rgba(212,175,55,0.1); border-bottom: 1px solid rgba(212,175,55,0.1);'>"
-                "<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
-                "<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>" + str(dia_num_hoje) + "</h1>"
-                "<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>" + str(dia_name_hoje) + "</div>"
-                "</div>", 
+                f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px; border: 1px solid rgba(212,175,55,0.1);'>"
+                f"<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
+                f"<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{dia_num_hoje}</h1>"
+                f"<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>{dia_name_hoje}</div>"
+                f"</div>", 
                 unsafe_allow_html=True
             )
             
@@ -388,10 +385,7 @@ if st.session_state.autenticado and username:
                     if nome_ev:
                         id_unico = f"manual_{int(time.time())}"
                         db["eventos_locais"].append({
-                            "id": id_unico,
-                            "title": nome_ev, 
-                            "date": data_ev.isoformat(),
-                            "time": h_ini.strftime('%H:%M')
+                            "id": id_unico, "title": nome_ev, "date": data_ev.isoformat(), "time": h_ini.strftime('%H:%M')
                         })
                         salvar_dados(db); st.rerun()
 
@@ -407,14 +401,12 @@ if st.session_state.autenticado and username:
             for ev in db.get("eventos_locais", []):
                 ev_date_str = ev.get("date")
                 if ev_date_str:
-                    if ev_date_str not in dict_eventos:
-                        dict_eventos[ev_date_str] = []
+                    if ev_date_str not in dict_eventos: dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
 
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
-            # Encapsulamento completo de estilo e tags isoladas (Previne quebra de strings)
             html_estilos_calendario = """
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
@@ -431,34 +423,32 @@ if st.session_state.autenticado and username:
             </style>
             """
             
-            html_corpo = "<div style='text-align: center; margin-bottom: 15px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>" + nome_do_mes + " " + str(ano_atual) + "</div>"
+            html_corpo = f"<div style='text-align: center; margin-bottom: 15px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
             
             for hd in dias_semana_headers:
-                html_corpo += "<div class='calendar-header-day'>" + hd + "</div>"
+                html_corpo += f"<div class='calendar-header-day'>{hd}</div>"
                 
             for semana in mes_dias:
-                for dia in semana:
-                    if dia == 0:
+                for dia_num in semana:
+                    if dia_num == 0:
                         html_corpo += "<div class='calendar-cell cell-empty'></div>"
                     else:
-                        data_corrente = datetime.date(ano_atual, mes_atual, dia)
+                        data_corrente = datetime.date(ano_atual, mes_atual, dia_num)
                         data_corrente_str = data_corrente.isoformat()
                         classe_hoje = "cell-today" if data_corrente == hoje else ""
                         
                         html_tags_eventos = ""
                         if data_corrente_str in dict_eventos:
                             for ev in dict_eventos[data_corrente_str]:
-                                html_tags_eventos += "<div class='calendar-event-tag'>" + ev['time'] + " - " + ev['title'] + "</div>"
+                                html_tags_eventos += f"<div class='calendar-event-tag'>{ev['time']} - {ev['title']}</div>"
                                 
-                        html_corpo += "<div class='calendar-cell " + classe_hoje + "'>"
-                        html_corpo += "<div class='cell-number'>" + str(dia) + "</div>"
-                        html_corpo += "<div class='cell-events-container'>" + html_tags_eventos + "</div>"
+                        html_corpo += f"<div class='calendar-cell {classe_hoje}'>"
+                        html_corpo += f"<div class='cell-number'>{dia_num}</div>"
+                        html_corpo += f"<div class='cell-events-container'>{html_tags_eventos}</div>"
                         html_corpo += "</div>"
                         
             html_corpo += "</div>"
-            
-            # Injeção via Componente Nativo do Streamlit (Cria sandbox segura independente de f-strings)
             st.components.v1.html(html_estilos_calendario + html_corpo, height=620, scrolling=False)
 
     # 5. GRÁFICOS
