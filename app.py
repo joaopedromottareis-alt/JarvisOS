@@ -23,7 +23,7 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 # ==================== CONFIGURAÇÃO VISUAL MODERNA (PRETO E DOURADO MINIMALISTA) ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# CSS Global Cirúrgico - Integrando o conceito do Calendário SCSS adaptado ao Jarvis OS
+# CSS Global Cirúrgico - Removendo bordas fantasmas e aplicando o conceito de calendário SCSS adaptado
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -66,7 +66,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* 3. REMOÇÃO DE BORDAS NATIVAS E CAIXAS ESTRUTURAIS */
+    /* 3. REMOÇÃO DE TODAS AS BORDAS INTERNAS E EXTERNAS DOS INPUTS */
     div[data-baseweb="base-input"],
     div[data-baseweb="input"],
     div[data-baseweb="input"] > div,
@@ -81,6 +81,7 @@ st.markdown("""
         outline: none !important;
     }
 
+    /* Estilo limpo flutuante para a caixa real de digitação */
     .stTextInput input, 
     .stDateInput input,
     .stTextArea textarea,
@@ -181,35 +182,32 @@ st.markdown("""
         border-radius: 12px !important;
     }
 
-    /* ==================== TRANSFORMAÇÃO DO CALENDÁRIO (CONCEITO SCSS INTEGRADO) ==================== */
+    /* ==================== CALENDÁRIO COM CONCEITO SCSS INTEGRADO ==================== */
     .calendar-container {
         background-color: #0a0a0a !important;
-        /* Customizações vindas das variáveis do SCSS: --border-radius e --side-padding */
-        border-radius: 34px !important; 
-        padding: 24px 20px !important;
+        border-radius: 34px !important; /* Herdado do seu código SCSS (--border-radius) */
+        padding: 24px 20px !important;  /* Herdado do seu código SCSS (--side-padding) */
         border: 1px solid rgba(212, 175, 55, 0.15) !important;
         max-width: 100%;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
     }
 
-    /* Forçando estilos internos do FullCalendar injetado pelo Streamlit via Iframe */
     iframe[title="streamlit_calendar.calendar"] {
         border: none !important;
         background-color: transparent !important;
     }
 
-    /* Estilização das células de dias, cabeçalhos e efeitos Hover/Active simulados por CSS global */
     .fc {
         font-family: 'Kanit', sans-serif !important;
         background-color: transparent !important;
     }
     
-    /* Customização dos botões superiores do calendário (estilo __button do SCSS) */
+    /* Botões Superiores do Calendário (Estilo __button do SCSS) */
     .fc .fc-button-primary {
         background-color: #141414 !important;
         border: 1px solid rgba(212, 175, 55, 0.2) !important;
         color: #e5e5e5 !important;
-        border-radius: 15px !important; /* accent-br do SCSS */
+        border-radius: 15px !important; /* Arredondamento secundário do SCSS */
         font-weight: 600 !important;
         transition: all 0.2s ease !important;
     }
@@ -220,18 +218,16 @@ st.markdown("""
         box-shadow: 0 8px 15px rgba(212, 175, 55, 0.2) !important;
     }
 
-    /* Customização da grade de dias (estilos das datas e hovers do SCSS) */
+    /* Efeito Hover nas datas - Inspirado no &:hover::before do SCSS */
     .fc .fc-daygrid-day {
         transition: background-color 0.2s ease !important;
         cursor: pointer !important;
     }
-
-    /* Efeito Hover nas células de data - Inspirado no &:hover::before do seu código */
     .fc .fc-daygrid-day:hover {
         background-color: rgba(212, 175, 55, 0.06) !important;
     }
 
-    /* Elemento hoje / selecionado - Inspirado nas propriedades do &--selected */
+    /* Elemento hoje / selecionado - Inspirado no &--selected */
     .fc .fc-day-today {
         background-color: rgba(212, 175, 55, 0.12) !important;
         border: 1px solid #d4af37 !important;
@@ -240,7 +236,7 @@ st.markdown("""
     .fc .fc-col-header-cell {
         background-color: transparent !important;
         padding: 10px 0 !important;
-        color: #777777 !important; /* Cor cinza do __days do SCSS */
+        color: #777777 !important; /* Cor cinza do cabeçalho __days */
         font-weight: 700 !important;
         text-transform: uppercase;
         font-size: 0.9rem;
@@ -467,7 +463,7 @@ if st.session_state.autenticado and username:
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🔱 CONVERSAR WITH JARVIS</div>', unsafe_allow_html=True)
+            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -553,20 +549,27 @@ if st.session_state.autenticado and username:
                     salvar_dados(db)
                     st.toast("Refeição registrada!")
 
-    # 4. ABA CRONOGRAMA OPERACIONAL (CALENDÁRIO MODERNO)
+    # 4. ABA CRONOGRAMA OPERACIONAL (CORRIGIDA E LOCALIZADA)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2])
         
+        # --- Tratamento de Variáveis Antecipado para Evitar o NameError ---
+        dia_num_hoje = datetime.date.today().strftime("%d")
+        
+        dias_semana_pt = {
+            "Monday": "SEGUNDA-FEIRA", "Tuesday": "TERÇA-FEIRA", "Wednesday": "QUARTA-FEIRA",
+            "Thursday": "QUINTA-FEIRA", "Friday": "SEXTA-FEIRA", "Saturday": "SÁBADO", "Sunday": "DOMINGO"
+        }
+        dia_en = datetime.date.today().strftime("%A")
+        dia_name_hoje = dias_semana_pt.get(dia_en, dia_en.upper())
+        
         with col_esq_info:
-            dia_num_hoje = datetime.date.today().strftime("%d")
-            dia_name_hoje = datetime.date.today().strftime("%A").upper()
-            
             st.markdown(f"""
                 <div style='background-color: #101010; padding: 30px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 20px;'>
                     <span style='color: #777777; font-size: 14px; font-weight:600; text-transform:uppercase;'>Data Atual</span>
-                    <h1 style='font-size: 90px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:0.9; margin: 10px 0; color: #ffffff;'>{dia_num_hoje}</h1>
-                    <div style='font-size: 20px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; margin-bottom: 25px;'>{dia_name_hoje}</div>
+                    <h1 style='font-size: 90px; font-family: "Kanit", sans-serif; font-weight: 700; line-height:0.9; margin: 10px 0; color: #ffffff;'>{dia_num_hoje}</h1>
+                    <div style='font-size: 18px; font-family: "Kanit", sans-serif; color: #d4af37; font-weight:500; margin-bottom: 25px;'>{dia_name_hoje}</div>
                     <div style='font-size: 14px; color: #e5e5e5; font-weight: 500;'>
                         📌 <span>{len(db.get("eventos_locais", []))} compromissos</span> agendados no sistema local.
                     </div>
@@ -603,11 +606,12 @@ if st.session_state.autenticado and username:
             }]
             if db.get("eventos_locais"): eventos_para_exibir.extend(db["eventos_locais"])
 
-            # Renderização do contêiner com estilo encapsulado e arredondado estilo SCSS
+            # Renderização com contêiner estilizado baseado no SCSS
             st.markdown('<div class="calendar-container">', unsafe_allow_html=True)
             calendar(events=eventos_para_exibir, options={
                 "initialView": "dayGridMonth",
                 "headerToolbar": {"left": "prev,next today", "center": "title", "right": ""},
+                "locale": "pt-br"
             }, key=f"cal_widget_{st.session_state.cal_version}")
             st.markdown('</div>', unsafe_allow_html=True)
 
