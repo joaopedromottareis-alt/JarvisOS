@@ -212,12 +212,14 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
+    # --- FUNÇÃO DO JARVIS BLINDADA (RESOLVE A INSTABILIDADE) ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
         prompt_sistema = (
             f"Você é o Jarvis, o assistente virtual executivo do usuário. Hoje é exatamente {data_hoje_str}.\n"
-            "Interprete o comando do usuário e responda OBRIGATORIAMENTE em formato JSON válido.\n\n"
+            "Interprete o comando do usuário e responda OBRIGATORIAMENTE em formato JSON válido. "
+            "Não adicione nenhuma introdução, saudação ou texto fora do JSON. Retorne APENAS o objeto estruturado.\n\n"
             "Se o usuário pedir para criar objetivos ou metas gerais de longo prazo, defina 'criar_meta': true.\n"
             "Se o usuário pedir para agendar um compromisso com horário, aula, atividade ou tarefa na agenda para um dia específico (como hoje, amanhã ou uma data), "
             "defina 'criar_evento': true, determinando a data no formato 'YYYY-MM-DD' e o horário em 'HH:MM'.\n\n"
@@ -225,9 +227,9 @@ if st.session_state.autenticado and username:
             "{\n"
             "  \"resposta_chat\": \"Frase curta e imponente confirmando a ação no estilo Jarvis\",\n"
             "  \"criar_meta\": false,\n"
-            "  \"novas_metas\": [{\"nome\": \"Nome da meta\", \"categoria\": \"Trabalho/Saúde/Estudos\"}],\n"
+            "  \"novas_metas\": [],\n"
             "  \"criar_evento\": false,\n"
-            "  \"novos_eventos\": [{\"title\": \"Nome do Evento\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}]\n"
+            "  \"novos_eventos\": []\n"
             "}"
         )
         
@@ -235,33 +237,40 @@ if st.session_state.autenticado and username:
             completion = client.chat.completions.create(
                 model=MODELO_IA,
                 messages=[{"role": "system", "content": prompt_sistema}, {"role": "user", "content": comando}],
-                temperature=0.2, response_format={ "type": "json_object" }
+                temperature=0.1, response_format={ "type": "json_object" }
             )
-            resultado = json.loads(completion.choices[0].message.content)
             
-            # Validação de Meta comum
+            conteudo_resposta = completion.choices[0].message.content.strip()
+            resultado = json.loads(conteudo_resposta)
+            
+            # Validação de Meta comum (com .get seguro)
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
-                for nova_m in resultado["novas_metas"]:
-                    db["metas"].append({
-                        "id": str(time.time() + len(db["metas"])), "nome": nova_m["nome"],
-                        "categoria": nova_m["categoria"], "concluida": False, "tempo_dedicado": 0
-                    })
+                for nova_m in resultado.get("novas_metas", []):
+                    if isinstance(nova_m, dict) and "nome" in nova_m:
+                        db["metas"].append({
+                            "id": str(time.time() + len(db["metas"])), 
+                            "nome": nova_m["nome"],
+                            "categoria": nova_m.get("categoria", "Geral"), 
+                            "concluida": False, 
+                            "tempo_dedicado": 0
+                        })
                 salvar_dados(db)
                 
-            # Validação de Compromisso/Agenda
+            # Validação de Compromisso/Agenda (com .get seguro)
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
-                for novo_ev in resultado["novos_eventos"]:
-                    db["eventos_locais"].append({
-                        "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
-                        "title": novo_ev["title"],
-                        "date": novo_ev["date"],
-                        "time": novo_ev["time"]
-                    })
+                for novo_ev in resultado.get("novos_eventos", []):
+                    if isinstance(novo_ev, dict) and "title" in novo_ev:
+                        db["eventos_locais"].append({
+                            "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
+                            "title": novo_ev["title"],
+                            "date": novo_ev.get("date", data_hoje_str),
+                            "time": novo_ev.get("time", "12:00")
+                        })
                 salvar_dados(db)
                 
             return resultado.get("resposta_chat", "Diretrizes sincronizadas nos servidores locais, Senhor.")
         except Exception as e: 
-            return "Os sistemas de análise inteligente encontraram uma instabilidade na requisição."
+            return "Os sistemas de análise inteligente encontraram uma instabilidade na estrutura dos dados."
 
     # --- NAVEGAÇÃO POR ABAS ---
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -353,7 +362,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA (CALENDÁRIO INTEGRADO CORRIGIDO)
+    # 4. ABA AGENDA (CALENDÁRIO INTEGRADO RENDERIZANDO PERFEITAMENTE)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
