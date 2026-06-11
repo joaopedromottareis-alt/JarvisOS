@@ -214,26 +214,30 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (TOTALMENTE CORRIGIDO) ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
             "Responda ao usuário com extrema imponência, elegância e eficiência britânica. "
-            "Se o usuário pedir para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme que os sistemas locais registraram."
+            "Se o usuário pediu para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme elegantemente na resposta."
         )
         
+        # 1. Obter a resposta de conversação fluida da IA principal
         try:
-            # Chamada de conversa principal
             conversa_principal = client.chat.completions.create(
                 model=MODELO_PRINCIPAL,
                 messages=[{"role": "system", "content": prompt_sistema_chat}, {"role": "user", "content": comando}],
                 temperature=0.7
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
-            
-            # Etapa 2: Analisador secundário para montagem do JSON estruturado
+        except Exception as e:
+            resposta_texto_jarvis = f"⚠️ Falha de comunicação com os sistemas centrais: {str(e)}"
+            return resposta_texto_jarvis
+
+        # 2. Executar o analisador secundário em background para alimentar a agenda/metas
+        try:
             prompt_sistema_extrator = (
                 f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
@@ -259,7 +263,7 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Executa a gravação de Metas se existirem
+            # Gravação de Metas
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -272,7 +276,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Executa a gravação de Eventos na Agenda se existirem
+            # Gravação de Eventos na Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -284,17 +288,18 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            return resposta_texto_jarvis
-            
         except Exception as e:
-            return "Diretrizes processadas e integradas com sucesso aos bancos de dados internos, Senhor."
+            # Imprime falhas de análise no console local sem estragar a experiência de conversa
+            print(f"[Erro de Extração Local]: {str(e)}")
+            
+        return resposta_texto_jarvis
 
-    # --- NAVEGAÇÃO POR ABAS ---
+    # ==================== NAVEGAÇÃO POR ABAS ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
         "💬 CONVERSA & METAS", "⏱️ TIMER DE FOCO", "🥗 SAÚDE & FITNESS", "📅 AGENDA", "📊 ESTATÍSTICAS"
     ])
 
-    # 1. METAS
+    # 1. CONVERSA & METAS
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
@@ -357,7 +362,7 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE
+    # 3. SAÚDE & FITNESS
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
@@ -379,7 +384,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA (CALENDÁRIO TOTALMENTE CORRIGIDO)
+    # 4. AGENDA (CALENDÁRIO REESTRUTURADO E LIMPO)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
@@ -477,7 +482,7 @@ if st.session_state.autenticado and username:
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=620, scrolling=False)
 
-    # 5. GRÁFICOS
+    # 5. ESTATÍSTICAS
     with aba_graficos:
         st.markdown('<div class="titulo-card">📊 DESEMPENHO OPERACIONAL</div>', unsafe_allow_html=True)
         if db.get("metas"):
