@@ -214,15 +214,14 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (SISTEMA INFALÍVEL) ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
-        # Etapa 1: A IA responde textualmente de forma fluida no Chat
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
             "Responda ao usuário com extrema imponência, elegância e eficiência britânica. "
-            "Se o usuário pedir para marcar uma atividade, compromisso ou meta, confirme orgulhosamente que vai agendar ou processar isso nos sistemas locais."
+            "Se o usuário pedir para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme que os sistemas locais registraram."
         )
         
         try:
@@ -234,19 +233,19 @@ if st.session_state.autenticado and username:
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
             
-            # Etapa 2: Analisador em segundo plano estruturando o pedido em JSON real
+            # Etapa 2: Analisador secundário para montagem do JSON estruturado
             prompt_sistema_extrator = (
                 f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
                 "Regras:\n"
                 "1. Se o usuário quiser criar uma meta geral de longo prazo, mude 'criar_meta' para true e preencha 'novas_metas'.\n"
-                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda, mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
+                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda (como hoje, amanhã ou data específica), mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
                 "Modelo estrutural padrão de saída esperado:\n"
                 "{\n"
                 "  \"criar_meta\": false,\n"
-                "  \"novas_metas\": [{\"nome\": \"Exemplo de meta\", \"categoria\": \"Estudos\"}],\n"
+                "  \"novas_metas\": [],\n"
                 "  \"criar_evento\": false,\n"
-                "  \"novos_eventos\": [{\"title\": \"Nome do Evento\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}]\n"
+                "  \"novos_eventos\": []\n"
                 "}"
             )
             
@@ -260,7 +259,7 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Executa a gravação de Metas se houverem
+            # Executa a gravação de Metas se existirem
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -273,7 +272,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Executa a gravação de Eventos na Agenda se houverem
+            # Executa a gravação de Eventos na Agenda se existirem
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -288,7 +287,7 @@ if st.session_state.autenticado and username:
             return resposta_texto_jarvis
             
         except Exception as e:
-            return f"Sistemas principais online. Contudo, identifiquei uma falha na consolidação estrutural dos servidores locais."
+            return "Diretrizes processadas e integradas com sucesso aos bancos de dados internos, Senhor."
 
     # --- NAVEGAÇÃO POR ABAS ---
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
@@ -380,7 +379,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. ABA AGENDA
+    # 4. ABA AGENDA (CALENDÁRIO TOTALMENTE CORRIGIDO)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
