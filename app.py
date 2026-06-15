@@ -285,7 +285,7 @@ if st.session_state.autenticado and username:
                 "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
-                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
                 "Esquema JSON estrito:\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
@@ -428,7 +428,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. AGENDA (Ajustado de [1.2, 2.3] para ocupar igualmente [1, 1] ou [1, 2] se preferir manter o calendário maior)
+    # 4. AGENDA (Ajustado igualmente [1, 1])
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -483,6 +483,7 @@ if st.session_state.autenticado and username:
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
+            # ATUALIZAÇÃO CSS: Removidos quaisquer componentes brancos extras ou seletores internos
             html_estilos_calendario = """
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
@@ -495,7 +496,7 @@ if st.session_state.autenticado and username:
                 .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; align-self: flex-end; }
                 .cell-today .cell-number { color: #d4af37; font-size: 15px; }
                 .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; max-height: 42px; }
-                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 2px 4px; border-radius: 4px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; block-size: fit-content; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; box-sizing: border-box; }
             </style>
             """
             
