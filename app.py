@@ -1,25 +1,34 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Configuração da página do Streamlit
+st.set_page_config(
+    page_title="Jarvis OS",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Toda a interface unificada (HTML + CSS Premium + JavaScript Avançado)
+jarvis_interface = """
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jarvis OS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ==========================================================================
-           1. VARIÁVEIS DE DESIGN & RESET
-           ========================================================================== */
         :root {
-            --bg-main: #0a0a0a;
-            --bg-card: #121212;
-            --bg-card-hover: #1a1a1a;
+            --bg-main: #080705;
+            --bg-card: #110e0a;
+            --bg-card-hover: #1a150e;
             --gold-primary: #d4af37;
             --gold-secondary: #aa8416;
             --gold-gradient: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
             --text-main: #ffffff;
-            --text-muted: #888888;
-            --border-radius: 16px;
-            --transition: all 0.3s ease;
+            --text-muted: #8e8271;
+            --border-radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -37,656 +46,668 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
+            padding: 20px;
         }
 
-        /* ==========================================================================
-           2. CABEÇALHO & NAVEGAÇÃO (Tabs superiores no estilo Jarvis OS)
-           ========================================================================== */
-        header {
-            background-color: rgba(10, 10, 10, 0.95);
-            border-bottom: 1px solid #222;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 15px 5%;
+        /* --- LOGO & HEADER COMPLETO --- */
+        .jarvis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px 20px 20px;
+            border-bottom: 1px solid #231c12;
+            margin-bottom: 30px;
         }
 
-        .brand-container {
+        .brand-wrapper {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
         }
 
-        .brand-logo {
-            font-size: 24px;
+        .brand-icon {
+            background: var(--gold-gradient);
+            width: 14px;
+            height: 14px;
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        }
+
+        .brand-title {
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .brand-sub {
-            font-size: 14px;
-            color: var(--text-main);
-            font-weight: 500;
+        .brand-status {
+            font-size: 11px;
+            color: #ff4a4a;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: rgba(255, 74, 74, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 74, 74, 0.2);
         }
 
-        nav .nav-tabs {
-            display: flex;
-            gap: 25px;
-            list-style: none;
-            overflow-x: auto;
-            padding-bottom: 5px;
+        /* --- NAVEGAÇÃO DE ABAS INTERATIVAS --- */
+        .nav-container {
+            background: #14110a;
+            border: 1px solid #261f12;
+            padding: 6px;
+            border-radius: 30px;
+            display: inline-flex;
+            gap: 5px;
+            margin-bottom: 30px;
         }
 
-        nav .nav-tabs::-webkit-scrollbar {
-            height: 4px;
-        }
-
-        nav .nav-tabs::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 2px;
-        }
-
-        .tab-item {
+        .nav-btn {
+            background: transparent;
+            border: none;
             color: var(--text-muted);
-            cursor: pointer;
-            font-size: 13px;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 8px 0;
-            position: relative;
+            cursor: pointer;
             transition: var(--transition);
-            white-space: nowrap;
         }
 
-        .tab-item:hover {
+        .nav-btn:hover {
             color: var(--text-main);
         }
 
-        .tab-item.active {
-            color: var(--gold-primary);
+        .nav-btn.active {
+            background: var(--gold-gradient);
+            color: #000000;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
         }
 
-        .tab-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background-color: #ff4a4a; /* Linha de realce vermelha sob o menu ativo conforme a imagem */
-        }
-
-        /* ==========================================================================
-           3. CONTAINER PRINCIPAL & SEÇÕES
-           ========================================================================== */
-        main {
-            flex: 1;
-            padding: 30px 5%;
-            max-width: 1400px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .app-section {
+        /* --- CONTEÚDO E SEÇÕES --- */
+        .content-section {
             display: none;
-            animation: fadeIn 0.4s ease forwards;
+            animation: fadeIn 0.5s ease forwards;
         }
 
-        .app-section.active {
+        .content-section.active {
             display: block;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Grid Layout para Painéis Mistos */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background-color: var(--bg-card);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            border: 1px solid #1e1e1e;
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            border-color: #2a2a2a;
-            background-color: var(--bg-card-hover);
-        }
-
-        /* ==========================================================================
-           4. COMPONENTE: CALENDÁRIO COMPACTO (Fiel à Imagem 1 e 5)
-           ========================================================================== */
-        .calendar-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .calendar-header-days {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            text-align: center;
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 12px;
-        }
-
-        .calendar-day {
-            background-color: #0f0f0f;
-            border: 1px solid #1a1a1a;
-            border-radius: 12px;
-            aspect-ratio: 1.5;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 10px;
-            position: relative;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .calendar-day:hover {
-            background-color: #161616;
-            border-color: #333;
-        }
-
-        .calendar-day .day-number {
-            font-size: 14px;
-            font-weight: 700;
-            color: #a0a0a0;
-        }
-
-        /* Destaque do Dia Atual (Dia 15 na imagem) */
-        .calendar-day.current-day {
-            border: 2px solid var(--gold-primary);
-            background-color: #14130e;
-        }
-
-        .calendar-day.current-day .day-number {
-            color: var(--gold-primary);
-        }
-
-        /* Evento Especial (Dia 19 na imagem) */
-        .calendar-event {
-            background-color: #221d11;
-            border-left: 3px solid var(--gold-primary);
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #e0d0b0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 5px;
-        }
-
-        .event-indicator-dot {
-            width: 6px;
-            height: 6px;
-            background-color: var(--gold-primary);
-            border-radius: 50%;
-            margin: 4px auto 0 auto;
-        }
-
-        /* ==========================================================================
-           5. COMPONENTE: INTERFACE DE GERENCIAMENTO (Estilo App Mobile Gold/Space)
-           ========================================================================== */
-        .mobile-preview-container {
+        /* --- INTERFACE MOBILE (FIEL À IMAGEM 1) --- */
+        .phone-showcase {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 40px;
             flex-wrap: wrap;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
-        .mock-phone {
-            width: 340px;
-            height: 680px;
-            background: linear-gradient(180deg, #16120b 0%, #0c0a07 100%);
-            border-radius: 40px;
-            border: 8px solid #222;
-            padding: 25px 18px;
+        .phone-frame {
+            width: 350px;
+            height: 720px;
+            background: radial-gradient(circle at top, #1c160e 0%, #070604 100%);
+            border-radius: 45px;
+            border: 10px solid #231c12;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
-            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(214,175,55,0.05);
         }
 
-        .phone-header {
+        .phone-top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 25px;
+            font-weight: 500;
+            margin-bottom: 30px;
         }
 
-        .phone-user-greeting {
-            font-size: 14px;
+        .phone-greeting {
+            font-size: 15px;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            font-weight: 400;
         }
 
-        .phone-user-name {
-            font-size: 22px;
+        .phone-username {
+            font-size: 26px;
             font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
         }
 
-        .phone-card-highlight {
-            background: linear-gradient(135deg, #2c2213 0%, #17120a 100%);
-            border: 1px solid #42331c;
-            border-radius: 20px;
-            padding: 20px;
+        /* Card de Progresso Semanal */
+        .phone-card {
+            background: linear-gradient(145deg, #1d170f 0%, #110e0a 100%);
+            border: 1px solid #362a18;
+            border-radius: 24px;
+            padding: 22px;
             margin-bottom: 20px;
             position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
         }
 
         .phone-card-title {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: #d4af37;
-            margin-bottom: 8px;
+            color: var(--gold-primary);
+            margin-bottom: 10px;
         }
 
-        .progress-bar-container {
+        .phone-card-desc {
+            font-size: 12px;
+            color: #c9beaf;
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .phone-file-tag {
+            font-size: 11px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.03);
+            padding: 6px 12px;
+            border-radius: 8px;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px;
+        }
+
+        .phone-progress-container {
             width: 100%;
             height: 6px;
-            background-color: #2a2217;
-            border-radius: 3px;
-            margin: 12px 0;
+            background: #231b10;
+            border-radius: 10px;
+            margin-bottom: 8px;
             overflow: hidden;
         }
 
-        .progress-bar-fill {
-            height: 100%;
+        .phone-progress-fill {
             width: 65%;
+            height: 100%;
             background: var(--gold-gradient);
-            border-radius: 3px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(212,175,55,0.5);
         }
 
-        .phone-input-wrapper {
+        .phone-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--gold-primary);
+            font-weight: 600;
+        }
+
+        /* Recomendações Inteligentes */
+        .ai-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .ai-recommendation-box {
+            background: rgba(20, 17, 10, 0.6);
+            border: 1px solid #231b10;
+            padding: 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #d1c7bd;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .ai-check {
+            color: var(--gold-primary);
+            font-weight: bold;
+        }
+
+        /* Barra de Entrada de Comando Inferior */
+        .phone-input-container {
             margin-top: auto;
             position: relative;
         }
 
-        .phone-input {
+        .phone-input-field {
             width: 100%;
-            background-color: #1a150e;
-            border: 1px solid #3a2f1c;
-            border-radius: 14px;
-            padding: 14px 45px 14px 16px;
+            background: #17130c;
+            border: 1px solid #3d301b;
+            border-radius: 16px;
+            padding: 16px 50px 16px 18px;
             color: var(--text-main);
-            font-size: 12px;
+            font-size: 13px;
             outline: none;
+            transition: var(--transition);
         }
 
-        .phone-input-icon {
+        .phone-input-field:focus {
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        .phone-input-submit {
             position: absolute;
-            right: 15px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
+            background: none;
+            border: none;
             color: var(--gold-primary);
+            font-size: 18px;
             cursor: pointer;
         }
 
-        /* ==========================================================================
-           6. OUTROS MÓDULOS (Timer, Saúde e Estatísticas)
-           ========================================================================== */
-        /* Timer de Foco */
-        .timer-display {
-            font-size: 64px;
-            font-weight: 700;
+        /* --- TELA DA NOVA META (ORBE CENTRAL) --- */
+        .orbe-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        .orbe-glow {
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.05) 50%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .orbe-core {
+            width: 70px;
+            height: 70px;
+            background: #080705;
+            border-radius: 50%;
+            border: 2px solid var(--gold-primary);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
+            animation: pulseOrbe 3s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseOrbe {
+            0% { transform: scale(0.95); box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
+            100% { transform: scale(1.05); box-shadow: 0 0 40px rgba(212, 175, 55, 0.6); }
+        }
+
+        .orbe-title {
+            font-size: 18px;
+            font-weight: 600;
             text-align: center;
-            margin: 30px 0;
-            font-variant-numeric: tabular-nums;
+            margin-top: -10px;
+        }
+
+        .meta-field {
+            background: #14110a;
+            border: 1px solid #2d2314;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .meta-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        /* --- CALENDÁRIO COMPACTO --- */
+        .calendar-wrapper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #110e0a;
+            border: 1px solid #231c12;
+            padding: 30px;
+            border-radius: 24px;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 14px;
+        }
+
+        .calendar-cell {
+            background: #0b0906;
+            border: 1px solid #1f1910;
+            border-radius: 14px;
+            aspect-ratio: 1.4;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .calendar-cell:hover {
+            background: #17130c;
+            border-color: #443721;
+        }
+
+        .cell-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: #706556;
+        }
+
+        /* Dia Atual Destacado com Dourado */
+        .calendar-cell.active-day {
+            border: 2px solid var(--gold-primary);
+            background: #1c160e;
+        }
+
+        .calendar-cell.active-day .cell-number {
+            color: var(--gold-primary);
+        }
+
+        /* Estilização do Evento no Dia 19 */
+        .event-banner {
+            background: #2b2111;
+            border-left: 3px solid var(--gold-primary);
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #f1e5d2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 6px;
+        }
+
+        .event-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 2px;
+            margin-top: 4px;
+        }
+
+        .event-arrow {
+            color: #888;
+            font-size: 10px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .event-indicator-pill {
+            width: 35px;
+            height: 6px;
+            background: #cccccc;
+            border-radius: 3px;
+        }
+
+        /* --- SESSÕES COMPLEMENTARES --- */
+        .pomodoro-box {
+            max-width: 450px;
+            margin: 40px auto;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid #231c12;
+            padding: 40px;
+            border-radius: var(--border-radius);
+        }
+
+        .timer-numeric {
+            font-size: 72px;
+            font-weight: 300;
+            letter-spacing: -2px;
+            margin: 20px 0;
             background: var(--gold-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .timer-controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .btn {
-            background: #1a1a1a;
-            color: var(--text-main);
-            border: 1px solid #333;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .btn:hover {
-            background-color: #222;
-            border-color: var(--gold-primary);
-        }
-
-        .btn-primary {
+        .control-btn {
             background: var(--gold-gradient);
             color: #000;
             border: none;
-        }
-
-        .btn-primary:hover {
-            background: #e5bf43;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
-        }
-
-        /* Saúde & Métrica Cardíaca */
-        .heart-rate-box {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 15px;
-        }
-
-        .heart-icon-svg {
-            width: 45px;
-            height: 45px;
-            fill: none;
-            stroke: #ff4a4a;
-            stroke-width: 2;
-            animation: pulse 1s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.08); }
-        }
-
-        .metric-value {
-            font-size: 32px;
+            padding: 14px 32px;
+            border-radius: 12px;
             font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover {
+            box-shadow: 0 0 20px rgba(212,175,55,0.4);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand-container">
-            <span class="brand-logo">A JARVIS OS</span>
-            <span class="brand-sub">// SISTEMA OPERACIONAL ATIVO</span>
+    <header class="jarvis-header">
+        <div class="brand-wrapper">
+            <div class="brand-icon"></div>
+            <h1 class="brand-title">JARVIS OS</h1>
         </div>
-        <nav>
-            <ul class="nav-tabs">
-                <li class="tab-item active" onclick="switchTab('conversa')">Conversa & Metas</li>
-                <li class="tab-item" onclick="switchTab('timer')">Timer de Foco</li>
-                <li class="tab-item" onclick="switchTab('saude')">Saúde & Fitness</li>
-                <li class="tab-item" onclick="switchTab('agenda')">Agenda</li>
-                <li class="tab-item" onclick="switchTab('estatisticas')">Estatísticas</li>
-            </ul>
-        </nav>
+        <div class="brand-status">SISTEMA ATIVO</div>
     </header>
 
-    <main>
+    <center>
+        <div class="nav-container">
+            <button class="nav-btn active" onclick="navigate('conversa')">Gerenciamento</button>
+            <button class="nav-btn" onclick="navigate('agenda')">Calendário</button>
+            <button class="nav-btn" onclick="navigate('timer')">Foco</button>
+        </div>
+    </center>
 
-        <section id="conversa" class="app-section active">
-            <h2 style="margin-bottom: 20px; font-weight: 600;">Painel de Controle Inteligente</h2>
-            <div class="mobile-preview-container">
+    <section id="conversa" class="content-section active">
+        <div class="phone-showcase">
+            
+            <div class="phone-frame">
+                <div class="phone-top-bar">
+                    <span>9:41</span>
+                    <span>JARVIS v4.5</span>
+                </div>
+                <div class="phone-greeting">Olá,</div>
+                <div class="phone-username">Alex Smith</div>
                 
-                <div class="mock-phone">
-                    <div class="phone-header">
-                        <span>9:41</span>
-                        <span>JARVIS v4.2</span>
-                    </div>
-                    <div class="phone-user-greeting">Olá,</div>
-                    <div class="phone-user-name">Alex Smith</div>
+                <div class="phone-card">
+                    <div class="phone-card-title">Relatório Semanal & Atualizações</div>
+                    <div class="phone-card-desc">Eu sugiro revisar os arquivos pendentes de hoje.</div>
+                    <div class="phone-file-tag">Arquivos: Relatorio_Jan.zip +5</div>
                     
-                    <div class="phone-card-highlight">
-                        <div class="phone-card-title">Relatório Semanal & Atualizações</div>
-                        <p style="font-size: 11px; color: #bba27a; line-height: 1.4;">Eu sugiro revisar os arquivos pendentes de hoje.</p>
-                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">Arquivos: Relatorio_Jan.zip +5</div>
-                        
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-fill"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #d4af37;">
-                            <span>Progresso</span>
-                            <span>65%</span>
-                        </div>
+                    <div class="phone-progress-container">
+                        <div class="phone-progress-fill"></div>
                     </div>
-
-                    <div style="margin-top: 10px;">
-                        <span style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Recomendações da IA</span>
-                        <div style="background-color: #14110a; border: 1px solid #261f12; padding: 12px; border-radius: 12px; margin-top: 8px; font-size: 11px;">
-                            ✔️ Verificar mensagens importantes à noite.
-                        </div>
-                    </div>
-
-                    <div class="phone-input-wrapper">
-                        <input type="text" class="phone-input" placeholder="O que deseja gerenciar hoje?">
-                        <span class="phone-input-icon">✦</span>
+                    <div class="phone-progress-labels">
+                        <span>Progresso</span>
+                        <span>65%</span>
                     </div>
                 </div>
 
-                <div class="mock-phone">
-                    <div class="phone-header">
-                        <span>9:41</span>
-                        <span>Nova Meta</span>
-                    </div>
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <div style="width: 130px; height: 130px; background: radial-gradient(circle, #d4af37 0%, transparent 70%); margin: 0 auto; opacity: 0.6; filter: blur(5px);"></div>
-                        <h3 style="font-size: 18px; margin-top: -80px; position: relative; z-index: 2;">O que quer planejar?</h3>
-                    </div>
-                    
-                    <div style="margin-top: 60px; display: flex; flex-direction: column; gap: 12px;">
-                        <div style="background: #1c170f; border: 1px solid #3a2f1c; padding: 15px; border-radius: 14px; font-size: 12px;">
-                            <span style="color: var(--text-muted);">Tarefa:</span> Enviar relatório ao cliente
-                        </div>
-                        <div style="background: #1c170f; border: 1px solid #3a2f1c; padding: 15px; border-radius: 14px; font-size: 12px;">
-                            <span style="color: var(--text-muted);">Horário Aconselhável:</span> 20:30, Hoje
-                        </div>
+                <div style="margin-top: 10px; margin-bottom: 30px;">
+                    <span class="ai-section-title">Recomendações da IA</span>
+                    <div class="ai-recommendation-box">
+                        <span class="ai-check">✓</span>
+                        <span>Verificar mensagens importantes à noite.</span>
                     </div>
                 </div>
 
-            </div>
-        </section>
-
-        <section id="timer" class="app-section">
-            <div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
-                <h3>Timer de Foco Jarvis</h3>
-                <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Mantenha a produtividade máxima</p>
-                <div class="timer-display" id="timerDisplay">25:00</div>
-                <div class="timer-controls">
-                    <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">Iniciar</button>
-                    <button class="btn" onclick="resetTimer()">Resetar</button>
+                <div class="phone-input-container">
+                    <input type="text" class="phone-input-field" placeholder="O que deseja gerenciar hoje?">
+                    <button class="phone-input-submit">✦</button>
                 </div>
             </div>
-        </section>
 
-        <section id="saude" class="app-section">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>Frequência Cardíaca</h3>
-                    <div class="heart-rate-box">
-                        <svg class="heart-icon-svg" viewBox="0 0 24 24">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                        <div>
-                            <span class="metric-value" id="bpmValue">72</span> <span style="color: var(--text-muted); font-size: 14px;">BPM</span>
-                        </div>
-                    </div>
-                    <p style="color: var(--text-muted); font-size: 12px; margin-top: 15px;">// Monitoramento em tempo real ativo</p>
+            <div class="phone-frame">
+                <div class="phone-top-bar">
+                    <span>9:41</span>
+                    <span>Nova Meta</span>
                 </div>
-            </div>
-        </section>
-
-        <section id="agenda" class="app-section">
-            <div class="calendar-container">
-                <h2 style="margin-bottom: 25px; font-weight: 600; text-align: center;">Calendário Mensal</h2>
                 
-                <div class="calendar-header-days">
-                    <div>Dom</div>
-                    <div>Seg</div>
-                    <div>Ter</div>
-                    <div>Qua</div>
-                    <div>Qui</div>
-                    <div>Sex</div>
-                    <div>Sáb</div>
-                </div>
-
-                <div class="calendar-grid" id="calendarGrid">
+                <div class="orbe-container">
+                    <div class="orbe-glow">
+                        <div class="orbe-core"></div>
                     </div>
-            </div>
-        </section>
+                    <h3 class="orbe-title">O que quer<br>planejar hoje?</h3>
+                </div>
 
-        <section id="estatisticas" class="app-section">
-            <div class="card">
-                <h3>Análise de Desempenho</h3>
-                <p style="color: var(--text-muted); margin-top: 10px;">Todos os sistemas operando dentro dos parâmetros ideais estabelecidos.</p>
-                <div style="margin-top: 20px; height: 150px; background-color: #151515; border-radius: 8px; display: flex; align-items: flex-end; padding: 10px; gap: 10px;">
-                    <div style="width: 100%; height: 40%; background: var(--gold-gradient); border-radius: 4px;"></div>
-                    <div style="width: 100%; height: 65%; background: var(--gold-gradient); border-radius: 4px;"></div>
-                    <div style="width: 100%; height: 85%; background: var(--gold-gradient); border-radius: 4px;"></div>
-                    <div style="width: 100%; height: 60%; background: var(--gold-gradient); border-radius: 4px;"></div>
+                <div style="display: flex; flex-direction: column; margin-top: 20px;">
+                    <div class="meta-field">
+                        <span class="meta-label">Tarefa:</span> Enviar relatório ao cliente
+                    </div>
+                    <div class="meta-field">
+                        <span class="meta-label">Horário Aconselhável:</span> 20:30, Hoje
+                    </div>
                 </div>
             </div>
-        </section>
 
-    </main>
+        </div>
+    </section>
+
+    <section id="agenda" class="content-section">
+        <div class="calendar-wrapper">
+            <h2 style="text-align: center; margin-bottom: 30px; font-weight: 500; letter-spacing: 1px;">CRONOGRAMA MENSAL</h2>
+            <div class="calendar-weekdays">
+                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+            </div>
+            <div class="calendar-days-grid" id="calendarGrid"></div>
+        </div>
+    </section>
+
+    <section id="timer" class="content-section">
+        <div class="pomodoro-box">
+            <h3 style="font-weight: 600; letter-spacing: 0.5px;">PRODUTIVIDADE MÁXIMA</h3>
+            <div class="timer-numeric" id="timerValue">25:00</div>
+            <button class="control-btn" id="timerAction" onclick="actionTimer()">Iniciar Sessão</button>
+        </div>
+    </section>
 
     <script>
-        // --- GERENCIADOR DE ABAS ---
-        function switchTab(tabId) {
-            // Remove classe active de todas as abas e seções
-            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+        // Sistema de abas nativo
+        function navigate(sectionId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             
-            // Adiciona classe active na aba clicada
-            const targetTab = Array.from(document.querySelectorAll('.tab-item')).find(tab => tab.textContent.toLowerCase().includes(tabId.substring(0,4)));
-            if(targetTab) targetTab.classList.add('active');
-            
-            // Mostra a seção correspondente
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        // --- GERADOR DO CALENDÁRIO MENSAL DIRETORIZADO ---
-        function buildCalendar() {
+        // Construção cirúrgica do calendário
+        function generateCalendar() {
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '';
-
-            // O mês da imagem começa na segunda-feira (Seg = 1). Deixamos o primeiro espaço vazio para o Domingo.
-            const emptySpaces = 1;
-            for (let i = 0; i < emptySpaces; i++) {
-                const emptyDiv = document.createElement('div');
-                grid.appendChild(emptyDiv);
+            
+            // Espaçamento inicial para alinhar os dias da semana corretamente
+            const offset = 1; 
+            for(let i=0; i<offset; i++) {
+                grid.appendChild(document.createElement('div'));
             }
 
-            // Renderizar os dias de 1 a 28 (conforme visível na imagem)
-            for (let day = 1; day <= 27; day++) {
-                const dayCard = document.createElement('div');
-                dayCard.classList.add('calendar-day');
+            // Gerando os blocos numéricos do calendário
+            for(let day=1; day<=28; day++) {
+                const cell = document.createElement('div');
+                cell.classList.add('calendar-cell');
+                
+                const num = document.createElement('div');
+                num.classList.add('cell-number');
+                num.textContent = day;
+                cell.appendChild(num);
 
-                // Div do Número
-                const numDiv = document.createElement('div');
-                numDiv.classList.add('day-number');
-                numDiv.textContent = day;
-                dayCard.appendChild(numDiv);
-
-                // Destaque condicional do Dia Atual (Dia 15)
-                if (day === 15) {
-                    dayCard.classList.add('current-day');
+                // Destaque do dia 15
+                if(day === 15) {
+                    cell.classList.add('active-day');
                 }
 
-                // Inserção da Meta/Prova do Dia 19
-                if (day === 19) {
-                    const eventDiv = document.createElement('div');
-                    eventDiv.classList.add('calendar-event');
-                    eventDiv.textContent = 'Prova de Geo...';
-                    dayCard.appendChild(eventDiv);
+                // Inserção da Prova de Geografia no Dia 19
+                if(day === 19) {
+                    const banner = document.createElement('div');
+                    banner.classList.add('event-banner');
+                    banner.textContent = 'Prova de Geo...';
+                    cell.appendChild(banner);
 
-                    const dot = document.createElement('div');
-                    dot.classList.add('event-indicator-dot');
-                    dayCard.appendChild(dot);
+                    const controls = document.createElement('div');
+                    controls.classList.add('event-controls');
+                    controls.innerHTML = `
+                        <a class="event-arrow" href="#">&lt;</a>
+                        <div class="event-indicator-pill"></div>
+                        <a class="event-arrow" href="#">&gt;</a>
+                    `;
+                    cell.appendChild(controls);
                 }
 
-                grid.appendChild(dayCard);
+                grid.appendChild(cell);
             }
         }
 
-        // --- TIMER DE FOCO (POMODORO EXTRA) ---
-        let timerInterval;
-        let isRunning = false;
-        let timeRemaining = 25 * 60;
+        // Cronômetro funcional do Jarvis
+        let timerSeconds = 25 * 60;
+        let timerActive = false;
+        let countdown;
 
-        function toggleTimer() {
-            const startBtn = document.getElementById('startBtn');
-            if (isRunning) {
-                clearInterval(timerInterval);
-                startBtn.textContent = 'Iniciar';
-                isRunning = false;
+        function actionTimer() {
+            const btn = document.getElementById('timerAction');
+            if(timerActive) {
+                clearInterval(countdown);
+                btn.textContent = "Iniciar Sessão";
+                timerActive = false;
             } else {
-                isRunning = true;
-                startBtn.textContent = 'Pausar';
-                timerInterval = setInterval(() => {
-                    if (timeRemaining > 0) {
-                        timeRemaining--;
-                        updateTimerDisplay();
+                timerActive = true;
+                btn.textContent = "Pausar";
+                countdown = setInterval(() => {
+                    if(timerSeconds > 0) {
+                        timerSeconds--;
+                        let min = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+                        let sec = (timerSeconds % 60).toString().padStart(2, '0');
+                        document.getElementById('timerValue').textContent = min + ":" + sec;
                     } else {
-                        clearInterval(timerInterval);
-                        alert("Sessão de foco concluída com sucesso!");
-                        resetTimer();
+                        clearInterval(countdown);
+                        alert("Sessão finalizada!");
+                        timerSeconds = 25 * 60;
+                        document.getElementById('timerValue').textContent = "25:00";
+                        btn.textContent = "Iniciar Sessão";
+                        timerActive = false;
                     }
                 }, 1000);
             }
         }
 
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            timeRemaining = 25 * 60;
-            document.getElementById('startBtn').textContent = 'Iniciar';
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
-            const seconds = (timeRemaining % 60).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
-        }
-
-        // --- SIMULADOR DE FREQUÊNCIA CARDÍACA ---
-        setInterval(() => {
-            if(document.getElementById('saude').classList.contains('active')) {
-                const randomBpm = Math.floor(Math.random() * (85 - 68 + 1)) + 68;
-                document.getElementById('bpmValue').textContent = randomBpm;
-            }
-        }, 3000);
-
-        // Inicialização do sistema
-        window.onload = () => {
-            buildCalendar();
-        };
+        window.onload = generateCalendar;
     </script>
 </body>
 </html>
+"""
+
+# Método seguro do Streamlit para renderizar toda a aplicação sem erros de compilação
+components.html(jarvis_interface, height=850, scrolling=True)
