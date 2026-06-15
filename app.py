@@ -9,8 +9,14 @@ import calendar as pycalendar
 from groq import Groq
 
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
-API_KEY = "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"
-client = Groq(api_key=API_KEY)
+# 🔴 ATENÇÃO: Substitua a string abaixo pela sua NOVA chave gerada em: https://console.groq.com/keys
+API_KEY = "SUA_NOVA_CHAVE_DO_GROQ_AQUI"
+
+try:
+    client = Groq(api_key=API_KEY)
+except Exception:
+    client = None
+
 MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
 MODELO_EXTRATOR = "llama3-8b-8192"
 
@@ -214,17 +220,23 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (TOTALMENTE CORRIGIDO) ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (BLINDADO CONTRA ERRO 401) ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
+        if not API_KEY or API_KEY == "SUA_NOVA_CHAVE_DO_GROQ_AQUI":
+            return "⚠️ Chave de API do Groq não configurada. Por favor, adicione uma chave válida na linha 11 do script."
+            
+        if client is None:
+            return "⚠️ O cliente Groq não pôde ser inicializado. Verifique suas dependências ou credenciais."
+
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
             "Responda ao usuário com extrema imponência, elegância e eficiência britânica. "
             "Se o usuário pediu para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme elegantemente na resposta."
         )
         
-        # 1. Obter a resposta de conversação fluida da IA principal
+        # 1. Obter a resposta da IA principal
         try:
             conversa_principal = client.chat.completions.create(
                 model=MODELO_PRINCIPAL,
@@ -233,17 +245,18 @@ if st.session_state.autenticado and username:
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
         except Exception as e:
-            resposta_texto_jarvis = f"⚠️ Falha de comunicação com os sistemas centrais: {str(e)}"
-            return resposta_texto_jarvis
+            if "401" in str(e) or "api_key" in str(e).lower():
+                return "⚠️ Acesso Negado (Erro 401): A sua Chave de API do Groq inserida no código é inválida ou expirou. Por favor, gere uma nova em https://console.groq.com/keys e atualize seu código."
+            return f"⚠️ Falha de comunicação com os sistemas centrais: {str(e)}"
 
-        # 2. Executar o analisador secundário em background para alimentar a agenda/metas
+        # 2. Executar o analisador secundário para a agenda
         try:
             prompt_sistema_extrator = (
                 f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
                 "Regras:\n"
                 "1. Se o usuário quiser criar uma meta geral de longo prazo, mude 'criar_meta' para true e preencha 'novas_metas'.\n"
-                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda (como hoje, amanhã ou data específica), mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
+                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda, mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
                 "Modelo estrutural padrão de saída esperado:\n"
                 "{\n"
                 "  \"criar_meta\": false,\n"
@@ -263,7 +276,7 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Gravação de Metas
+            # Salvar metas se houver
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -276,7 +289,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Gravação de Eventos na Agenda
+            # Salvar eventos se houver
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -289,8 +302,7 @@ if st.session_state.autenticado and username:
                 salvar_dados(db)
                 
         except Exception as e:
-            # Imprime falhas de análise no console local sem estragar a experiência de conversa
-            print(f"[Erro de Extração Local]: {str(e)}")
+            print(f"[Erro Oculto de Extração]: {str(e)}")
             
         return resposta_texto_jarvis
 
@@ -378,13 +390,13 @@ if st.session_state.autenticado and username:
             if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
             st.markdown('<div class="titulo-card">🍳 REFEIÇÕES DO DIA</div>', unsafe_allow_html=True)
-            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Panqueca de aveia e whey")
+            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche da tarde")
             if st.button("Registrar MacroAlimento"):
                 if refeicao:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. AGENDA (CALENDÁRIO REESTRUTURADO E LIMPO)
+    # 4. AGENDA (CALENDÁRIO REESTRUTURADO)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1, 2.5])
