@@ -27,7 +27,7 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG Atualizado
+# Dicionário de Ícones SVG Corrigido (Fechamentos </svg>)
 ICONES = {
     "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -42,10 +42,10 @@ ICONES = {
         <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
         <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
     </svg>""",
-    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/>/svg>""",
-    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/>/svg>""",
-    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/>/svg>""",
-    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/>/svg>""",
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
     "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad-caderno" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -176,7 +176,7 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* ESTILOS EXCLUSIVOS PARA AS BOXES DE ALIMENTOS (GLASSMORPHISM INTEGRADOR) */
+    /* ESTILOS EXCLUSIVOS PARA AS BOXES DE ALIMENTOS */
     .jarvis-food-container {
         display: flex;
         flex-direction: column;
@@ -207,7 +207,7 @@ st.markdown("""
     .jarvis-food-name {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #ffffff !important; /* Contraste máximo em branco puro */
+        color: #ffffff !important;
         margin: 0;
         text-transform: capitalize;
     }
@@ -215,7 +215,7 @@ st.markdown("""
     .jarvis-food-details {
         font-size: 0.85rem;
         font-weight: 500;
-        color: #ffd700 !important; /* Dourado claro para destacar as informações adicionais */
+        color: #ffd700 !important;
         margin: 0;
     }
 
@@ -226,7 +226,7 @@ st.markdown("""
     .jarvis-cal-number {
         font-size: 1.3rem;
         font-weight: 800;
-        color: #ffffff !important; /* Número com contraste máximo */
+        color: #ffffff !important;
         margin: 0;
     }
 
@@ -343,22 +343,23 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO ---
+    # --- MOTOR DE EXECUÇÃO DUPLO COM CORREÇÃO DE GÊNERO DINÂMICA ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
         if not API_KEY or client is None:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
+        # Prompt do sistema atualizado para analisar dinamicamente quem está interagindo com o MacBook no momento
         prompt_sistema_chat = (
-            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário cadastrado sob o nome de: '{name}'). Hoje é {data_hoje_str}.\n"
-            f"DIRETRIZES OBRIGATÓRIAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
-            f"1. Analise cuidadosamente o nome '{name}' para identificar o gênero do operador.\n"
-            f"   - Se o nome indicar gênero feminino (ex: Maria, Ana, Mãe, Paula, etc), use SEMPRE os pronomes e tratamentos femininos: 'Senhora', 'atendê-la', 'pronta', 'comissionada', 'minha senhora'. Nunca a chame de senhor.\n"
-            f"   - Se indicar gênero masculino (ex: João, Pedro, admin), use 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
-            f"   - Se o nome foi ambíguo, use um tom polido e executivo referindo-se diretamente pelo nome ou tratamentos neutros com extrema sofisticação britânica.\n"
-            f"2. Responda ao usuário com extrema imponência, elegância e eficiência britânica.\n"
-            f"3. Se o usuário pediu para marcar uma atividade, confirme elegantemente na resposta."
+            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao operador atual no sistema). O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
+            f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
+            f"Antes de responder, analise o texto digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
+            f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
+            f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"3. Responda com extrema imponência, elegância corporativa e formalidade britânica.\n"
+            f"4. Se for solicitado o agendamento ou a marcação de tarefas, confirme de forma polida que a diretriz foi integrada aos sistemas de mapeamento."
         )
         
         try:
@@ -498,7 +499,7 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE & FITNESS (REESTRUTURADA COM AS BOXES INTEGRADAS)
+    # 3. SAÚDE & FITNESS
     with aba_saude:
         cs1, cs2 = st.columns([1, 1])
         with cs1:
@@ -518,7 +519,6 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} REFEIÇÕES DO DIA</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Form de entrada rápido
             refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Sopa de abóbora")
             porcao = st.text_input("Quantidade / Porção:", placeholder="Ex: 1 porção (300ml)")
             calorias_input = st.text_input("Calorias estimadas (kcal):", placeholder="Ex: 150")
@@ -538,7 +538,6 @@ if st.session_state.autenticado and username:
                     st.toast("Nutrientes Catalogados com Sucesso!")
                     st.rerun()
             
-            # HISTÓRICO VISUAL INJETADO NO GRADIENTE (GLASSMORPHISM)
             st.markdown("<div style='margin-top: 20px; font-size: 13px; color: #777777; font-weight: 600; text-transform: uppercase;'>Histórico Recente</div>", unsafe_allow_html=True)
             
             refeicoes_hoje = [r for r in db.get("refeicoes", []) if r.get("data") == str(datetime.date.today())]
@@ -546,7 +545,6 @@ if st.session_state.autenticado and username:
             if not refeicoes_hoje:
                 st.markdown("<p style='color: #777777; font-style: italic; margin-top: 10px;'>Nenhum alimento catalogado para hoje.</p>", unsafe_allow_html=True)
             else:
-                # Montando o bloco HTML dinâmico integrado perfeitamente ao gradiente de fundo
                 html_boxes = "<div class='jarvis-food-container'>"
                 for ref in refeicoes_hoje:
                     nome_ref = ref.get("item", "Alimento")
@@ -620,7 +618,7 @@ if st.session_state.autenticado and username:
                     if ev_date_str not in dict_eventos: dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
 
-            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
+            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "RENOVAR", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
             html_estilos_calendario = """
