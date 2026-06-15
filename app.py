@@ -27,9 +27,9 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG (Atualizado: Ícone Jarvis principal aumentado para 34 para se destacar do texto)
+# Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a Nova Logo do Reator)
 ICONES = {
-    "jarvis": """<svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
+    "jarvis": """<svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -202,7 +202,7 @@ if not st.session_state.autenticado:
                 if hash_informado == hash_salvo or input_senha == hash_salvo:
                     st.session_state.autenticado = True
                     st.session_state.username = input_user
-                    st.rerun()
+                    st.session_state.rerun()
                 else: st.error("CHAVE INCORRETA.")
             else: st.error("OPERADOR NÃO ENCONTRADO.")
         st.stop()
@@ -329,7 +329,7 @@ if st.session_state.autenticado and username:
                 salvar_dados(db)
                 
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
-                for定位_ev in resultado.get("novos_eventos", []):
+                for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
                         db["eventos_locais"].append({
                             "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
