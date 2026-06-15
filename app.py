@@ -27,9 +27,21 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a nova Logo)
+# Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a Nova Logo do Reator)
 ICONES = {
-    "jarvis": """<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25c-.27-.17-.4-.49-.31-.8.09-.31.35-.53.67-.53h14.48c.32 0 .58.22.67.53.09.31-.04.63-.31.8z" fill="url(#gold-grad)"/><path d="M12 14.25c-.34 0-.67-.09-.96-.26L3.1 9.05V18c0 .55.45 1 1 1h15.8c.55 0 1-.45 1-1V9.05l-7.94 4.94c-.29.17-.62.26-.96.26z" fill="url(#gold-grad)"/><circle cx="12" cy="11.5" r="1.5" fill="url(#gold-grad)"/></svg>""",
+    "jarvis": """<svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd700"/>
+                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#8a6d1c"/>
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="42" stroke="url(#gold-grad)" stroke-width="5" stroke-dasharray="4 2" fill="none" />
+        <circle cx="50" cy="50" r="28" stroke="url(#gold-grad)" stroke-width="3" fill="none" opacity="0.8"/>
+        <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
+        <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
+    </svg>""",
     "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
     "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
     "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
@@ -190,7 +202,7 @@ if not st.session_state.autenticado:
                 if hash_informado == hash_salvo or input_senha == hash_salvo:
                     st.session_state.autenticado = True
                     st.session_state.username = input_user
-                    st.rerun()
+                    st.session_state.rerun()
                 else: st.error("CHAVE INCORRETA.")
             else: st.error("OPERADOR NÃO ENCONTRADO.")
         st.stop()
@@ -284,7 +296,7 @@ if st.session_state.autenticado and username:
                 "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
-                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD and o horário HH:MM correspondentes.\n\n"
                 "Esquema JSON estrito:\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
@@ -553,13 +565,3 @@ if st.session_state.autenticado and username:
                         db["eventos_locais"] = [item for item in db["eventos_locais"] if item.get("id") != ev.get("id")]
                         salvar_dados(db)
                         st.rerun()
-
-    # 5. ESTATÍSTICAS
-    with aba_graficos:
-        card_html = f'<div class="titulo-card">{ICONES["estatisticas"]} DESEMPENHO OPERACIONAL</div>'
-        st.markdown(card_html, unsafe_allow_html=True)
-        if db.get("metas"):
-            concluidas = sum(1 for m in db["metas"] if m["concluida"])
-            total = len(db["metas"])
-            st.progress(concluidas / total if total > 0 else 0)
-            st.metric("Completadas", f"{concluidas}/{total}", f"{db.get('historico_pomodoro', 0)} minutos em foco.")
