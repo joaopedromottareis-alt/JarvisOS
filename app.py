@@ -21,15 +21,16 @@ if API_KEY:
     except Exception:
         client = None
 
+# Centralizando no modelo mais potente para garantir estabilidade na geração de JSON
 MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
-MODELO_EXTRATOR = "llama3-8b-8192"
+MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
     
     .stApp { 
         background-color: #050505 !important; 
@@ -249,19 +250,20 @@ if st.session_state.autenticado and username:
                 return "⚠️ **Falha Crítica:** A chave configurada nos Secrets foi considerada INVÁLIDA ou BLOQUEADA pelo Groq. Por favor, gere uma nova chave no painel do Groq e atualize seus Secrets."
             return f"⚠️ **Instabilidade nos Servidores:** {str(e)}"
 
+        # Módulo de extração aprimorado para garantir que novos itens entrem na lista
         try:
             prompt_sistema_extrator = (
-                f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
-                "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
-                "Importante: se o usuário disser 'as 17 hrs de hj' ou qualquer variação de horário de hoje, mude 'criar_evento' para true, coloque a data de hoje no formato YYYY-MM-DD e o horário correspondente.\n"
-                "Modelo estrutural padrão de saída esperado:\n"
+                f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
+                "Regras Obrigatórias:\n"
+                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'. Isso fará com que o item apareça nos Objetivos Ativos e no Timer Pomodoro.\n"
+                "2. Se o comando contiver referências de tempo ou data (como hoje, amanhã, determinado horário, às X horas), você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD correta e o horário HH:MM correspondente.\n\n"
+                "Esquema JSON estrito que você deve retornar:\n"
                 "{\n"
-                "  \"criar_meta\": false,\n"
-                "  \"novas_metas\": [],\n"
-                "  \"criar_evento\": false,\n"
-                "  \"novos_eventos\": [\n"
-                "     {{\"title\": \"Nome da Atividade\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}}\n"
-                "  ]\n"
+                "  \"criar_meta\": true/false,\n"
+                "  \"novas_metas\": [ {\"nome\": \"Estudar Geografia\", \"categoria\": \"Estudos\"} ],\n"
+                "  \"criar_evento\": true/false,\n"
+                "  \"novos_eventos\": [ {\"title\": \"Estudar Geografia\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"} ]\n"
                 "}"
             )
             
@@ -275,6 +277,7 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
+            # Gravação de Metas / Objetivos do Pomodoro
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -287,6 +290,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
+            # Gravação de Eventos na Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -338,11 +342,11 @@ if st.session_state.autenticado and username:
     with aba_pomodoro:
         st.markdown('<div class="titulo-card">⏱️ TIMER DE FOCO</div>', unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
-        if not metas_validas: st.warning("Adicione uma meta primeiro.")
+        if not metas_validas: st.warning("Nenhum objetivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
             cp1, cp2 = st.columns(2)
             with cp1:
-                meta_alvo = st.selectbox("Meta alvo:", [m["nome"] for m in metas_validas])
+                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 minutos_slider = st.slider("Duração:", 1, 120, int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
                 if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_slider:
                     st.session_state.pomo_tempo_inicial_escolhido = minutos_slider
@@ -393,7 +397,7 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. AGENDA (CALENDÁRIO OTIMIZADO COM INDICAÇÃO VISUAL)
+    # 4. AGENDA
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1.2, 2.3])
@@ -437,7 +441,6 @@ if st.session_state.autenticado and username:
             cal_objeto = pycalendar.Calendar(firstweekday=6)
             mes_dias = cal_objeto.monthdayscalendar(ano_atual, mes_atual)
             
-            # Agrupar eventos por dia
             dict_eventos = {}
             for ev in db.get("eventos_locais", []):
                 ev_date_str = ev.get("date")
@@ -490,7 +493,6 @@ if st.session_state.autenticado and username:
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=440, scrolling=False)
 
-        # --- NOVA SEÇÃO: DETALHES DA AGENDA LOGO ABAIXO ---
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="titulo-card">📋 LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>', unsafe_allow_html=True)
         
@@ -498,7 +500,6 @@ if st.session_state.autenticado and username:
         if not eventos_cadastrados:
             st.info("Nenhum compromisso agendado até o momento.")
         else:
-            # Ordenar eventos por data e hora
             eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
             
             for idx, ev in enumerate(eventos_ordenados):
@@ -509,9 +510,7 @@ if st.session_state.autenticado and username:
                 
                 col_info_ev, col_acao_ev = st.columns([5, 1])
                 with col_info_ev:
-                    st.markdown(
-                        f"🔹 **{ev['title']}** — 📅 `{data_convertida}` às ⏰ `{ev['time']}`"
-                    )
+                    st.markdown(f"🔹 **{ev['title']}** — 📅 `{data_convertida}` às ⏰ `{ev['time']}`")
                 with col_acao_ev:
                     if st.button("Remover", key=f"del_{ev.get('id', idx)}"):
                         db["eventos_locais"] = [item for item in db["eventos_locais"] if item.get("id") != ev.get("id")]
