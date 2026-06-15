@@ -8,12 +8,19 @@ import re
 import calendar as pycalendar
 from groq import Groq
 
-# ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
-# 🔴 ATENÇÃO: Substitua a string abaixo pela sua NOVA chave gerada em: https://console.groq.com/keys
-API_KEY = "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"
+# ==================== CONFIGURAÇÃO DA IA (BLINDADA) ====================
+# O Jarvis agora busca a chave de forma oculta e segura.
+# Você NÃO precisa escrever sua chave gsk_ aqui! O sistema puxa do GitHub/Streamlit.
+API_KEY = os.environ.get("GROQ_API_KEY")
+
+if not API_KEY and "GROQ_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GROQ_API_KEY"]
 
 try:
-    client = Groq(api_key=API_KEY)
+    if API_KEY:
+        client = Groq(api_key=API_KEY)
+    else:
+        client = None
 except Exception:
     client = None
 
@@ -220,15 +227,15 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (BLINDADO CONTRA ERRO 401) ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (SISTEMA INTEGRADO) ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
-        if not API_KEY or API_KEY == "SUA_NOVA_CHAVE_DO_GROQ_AQUI":
-            return "⚠️ Chave de API do Groq não configurada. Por favor, adicione uma chave válida na linha 11 do script."
+        if not API_KEY:
+            return "⚠️ Erro de Autenticação: Nenhuma chave de API válida encontrada. Certifique-se de configurar a variável 'GROQ_API_KEY' no seu painel de Secrets."
             
         if client is None:
-            return "⚠️ O cliente Groq não pôde ser inicializado. Verifique suas dependências ou credenciais."
+            return "⚠️ O cliente de IA não pôde ser instanciado. Verifique a configuração dos seus servidores."
 
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
@@ -236,7 +243,7 @@ if st.session_state.autenticado and username:
             "Se o usuário pediu para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme elegantemente na resposta."
         )
         
-        # 1. Obter a resposta da IA principal
+        # 1. Obter a resposta de conversação fluida da IA principal
         try:
             conversa_principal = client.chat.completions.create(
                 model=MODELO_PRINCIPAL,
@@ -245,18 +252,18 @@ if st.session_state.autenticado and username:
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
         except Exception as e:
-            if "401" in str(e) or "api_key" in str(e).lower():
-                return "⚠️ Acesso Negado (Erro 401): A sua Chave de API do Groq inserida no código é inválida ou expirou. Por favor, gere uma nova em https://console.groq.com/keys e atualize seu código."
+            if "401" in str(e):
+                return "⚠️ Falha crítica: A chave configurada nos Secrets é considerada inválida pelo Groq. Por favor, gere uma nova chave."
             return f"⚠️ Falha de comunicação com os sistemas centrais: {str(e)}"
 
-        # 2. Executar o analisador secundário para a agenda
+        # 2. Executar o analisador secundário em background para alimentar a agenda/metas
         try:
             prompt_sistema_extrator = (
                 f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
                 "Regras:\n"
                 "1. Se o usuário quiser criar uma meta geral de longo prazo, mude 'criar_meta' para true e preencha 'novas_metas'.\n"
-                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda, mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
+                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda (como hoje, amanhã ou data específica), mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
                 "Modelo estrutural padrão de saída esperado:\n"
                 "{\n"
                 "  \"criar_meta\": false,\n"
@@ -276,7 +283,7 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Salvar metas se houver
+            # Gravação de Metas
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -289,7 +296,7 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Salvar eventos se houver
+            # Gravação de Eventos na Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -302,7 +309,7 @@ if st.session_state.autenticado and username:
                 salvar_dados(db)
                 
         except Exception as e:
-            print(f"[Erro Oculto de Extração]: {str(e)}")
+            print(f"[Erro de Extração Oculto]: {str(e)}")
             
         return resposta_texto_jarvis
 
@@ -390,7 +397,7 @@ if st.session_state.autenticado and username:
             if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
             st.markdown('<div class="titulo-card">🍳 REFEIÇÕES DO DIA</div>', unsafe_allow_html=True)
-            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche da tarde")
+            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche")
             if st.button("Registrar MacroAlimento"):
                 if refeicao:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
