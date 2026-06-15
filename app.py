@@ -29,7 +29,7 @@ st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", init
 
 # Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a Nova Logo do Reator)
 ICONES = {
-    "jarvis": """<svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "jarvis": """<svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -53,6 +53,10 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
+    :root {
+        --gold-gradient: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+    }
+
     .stApp { 
         background-color: #050505 !important; 
         color: #e5e5e5 !important; 
@@ -202,7 +206,7 @@ if not st.session_state.autenticado:
                 if hash_informado == hash_salvo or input_senha == hash_salvo:
                     st.session_state.autenticado = True
                     st.session_state.username = input_user
-                    st.session_state.rerun()
+                    st.rerun()
                 else: st.error("CHAVE INCORRETA.")
             else: st.error("OPERADOR NÃO ENCONTRADO.")
         st.stop()
@@ -329,13 +333,13 @@ if st.session_state.autenticado and username:
                 salvar_dados(db)
                 
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
-                for novo_ev in resultado.get("novos_eventos", []):
-                    if isinstance(novo_ev, dict) and "title" in novo_ev:
+                for ev in resultado.get("novos_eventos", []):
+                    if isinstance(ev, dict) and "title" in ev:
                         db["eventos_locais"].append({
                             "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
-                            "title": novo_ev["title"],
-                            "date": novo_ev.get("date", data_hoje_str),
-                            "time": novo_ev.get("time", "12:00")
+                            "title": ev["title"],
+                            "date": ev.get("date", data_hoje_str),
+                            "time": ev.get("time", "12:00")
                         })
                 salvar_dados(db)
                 
