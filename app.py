@@ -4,7 +4,6 @@ import time
 import json
 import os
 import hashlib
-import re
 import calendar as pycalendar
 from groq import Groq
 
@@ -19,242 +18,241 @@ except:
     client = None
 
 MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
-MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 LOGO_PATH = "logo.png"
 
-# ==================== INTERFACE ADAPTATIVA (CSS AVANÇADO) ====================
-st.set_page_config(page_title="Jarvis OS | Command Center", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
+# ==================== CODIFICAÇÃO DA INTERFACE HUD STARK ====================
+st.set_page_config(page_title="JARVIS OS | HUD SYSTEM", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&family=Space+Grotesk:wght@300;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@500;600;700&display=swap');
     
-    /* Fundo imersivo com padrão de grade tática */
+    /* Reset e Fundo Cibernético */
     .stApp { 
-        background-color: #030303 !important; 
-        color: #e0e0e0 !important; 
-        font-family: 'Space Grotesk', sans-serif !important;
+        background-color: #020408 !important; 
+        color: #00f0ff !important; 
+        font-family: 'Rajdhani', sans-serif !important;
         background-image: 
-            radial-gradient(circle at 2px 2px, rgba(212, 175, 55, 0.05) 1px, transparent 0),
-            radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%) !important;
-        background-size: 40px 40px, 100% 100% !important;
+            linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+            radial-gradient(circle at 50% 50%, #050e1e 0%, #010408 100%) !important;
+        background-size: 30px 30px, 30px 30px, 100% 100% !important;
+        background-attachment: fixed !important;
     }
 
-    /* Esconder elementos padrão do Streamlit */
     [data-testid="stSidebarCollapsedControl"], [data-testid="stHeader"], footer { display: none !important; }
-    .block-container { padding: 1.5rem 2rem !important; max-width: 95% !important; }
+    .block-container { padding: 1rem 1.5rem !important; max-width: 98% !important; }
 
-    /* Containers estilo Glassmorphism (Visto no Slide) */
-    .glass-card {
-        background: rgba(15, 15, 15, 0.6) !important;
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(212, 175, 55, 0.2);
-        border-radius: 15px;
-        padding: 20px;
+    /* Módulos Holográficos (Efeito Idêntico à Imagem) */
+    .hud-box {
+        background: rgba(4, 12, 24, 0.65) !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid #00f0ff;
+        border-radius: 4px;
+        padding: 18px;
         margin-bottom: 15px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-        transition: all 0.3s ease;
+        position: relative;
+        box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.1), 0 4px 20px rgba(0,0,0,0.6);
     }
     
-    .glass-card:hover {
-        border: 1px solid rgba(212, 175, 55, 0.4);
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
+    /* Cantoneiras Estilo Interface Militar/Ficção Científica */
+    .hud-box::before {
+        content: ''; position: absolute; top: -1px; left: -1px; width: 10px; height: 10px;
+        border-top: 2px solid #d4af37; border-left: 2px solid #d4af37;
+    }
+    .hud-box::after {
+        content: ''; position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px;
+        border-bottom: 2px solid #d4af37; border-right: 2px solid #d4af37;
     }
 
-    /* Títulos e Gradientes */
-    .glitch-title {
-        font-family: 'Kanit', sans-serif;
-        background: linear-gradient(135deg, #fff 30%, #d4af37 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
+    /* Tipografia Avançada */
+    .hud-header {
+        font-family: 'Orbitron', sans-serif;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        font-size: 13px;
+        font-weight: 600;
         letter-spacing: 2px;
         text-transform: uppercase;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .system-label {
-        color: #d4af37;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        font-weight: 700;
-        margin-bottom: 5px;
-        display: block;
-    }
-
-    /* Input Styling */
-    .stTextInput>div>div>input {
-        background: rgba(255,255,255,0.05) !important;
-        border: 1px solid rgba(212, 175, 55, 0.2) !important;
-        color: white !important;
-        border-radius: 8px !important;
-    }
-
-    /* Botão Jarvis */
-    .stButton>button {
-        background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important;
-        color: black !important;
-        font-weight: 700 !important;
-        text-transform: uppercase;
-        border: none !important;
-        width: 100%;
-        border-radius: 8px !important;
-        letter-spacing: 1px;
-    }
-
-    /* Ajuste de abas para o novo design */
-    .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-    .stTabs [data-baseweb="tab"] {
-        background: rgba(212, 175, 55, 0.05);
-        border: 1px solid rgba(212, 175, 55, 0.1);
-        padding: 10px 20px;
-        border-radius: 8px 8px 0 0;
-        color: #888;
-    }
-    .stTabs [aria-selected="true"] {
-        background: rgba(212, 175, 55, 0.15) !important;
+    .gold-glow {
         color: #d4af37 !important;
-        border: 1px solid #d4af37 !important;
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Input e Formulários HUD */
+    .stTextInput>div>div>input {
+        background: rgba(0, 240, 255, 0.03) !important;
+        border: 1px solid rgba(0, 240, 255, 0.3) !important;
+        color: #fff !important;
+        font-family: 'Rajdhani', sans-serif !important;
+        font-size: 16px !important;
+        border-radius: 2px !important;
+    }
+    .stTextInput>div>div>input:focus {
+        border-color: #d4af37 !important;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2) !important;
+    }
+
+    /* Botões Interativos */
+    .stButton>button {
+        background: transparent !important;
+        color: #00f0ff !important;
+        border: 1px solid #00f0ff !important;
+        font-family: 'Orbitron', sans-serif !important;
+        font-size: 11px !important;
+        letter-spacing: 2px;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        width: 100%;
+        border-radius: 2px !important;
+        transition: all 0.2s ease;
+    }
+    .stButton>button:hover {
+        background: rgba(0, 240, 255, 0.1) !important;
+        color: #fff !important;
+        box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Elementos Estilizados */
+    .progress-bar-fill {
+        height: 6px; background: #00f0ff;
+        box-shadow: 0 0 10px #00f0ff;
+        border-radius: 2px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ==================== ÍCONES SVG ====================
-ICONES = {
-    "terminal": """<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>""",
-    "vitals": """<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>""",
-    "foco": """<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>"""
-}
-
-# ==================== LÓGICA DE USUÁRIO ====================
+# ==================== SISTEMA DE SEGURANÇA E ARQUIVOS ====================
 ARQUIVO_CONFIG_USERS = "usuarios_config.json"
 
-def carregar_credenciais():
+def carregar_usuarios():
     if os.path.exists(ARQUIVO_CONFIG_USERS):
         with open(ARQUIVO_CONFIG_USERS, "r") as f: return json.load(f)["usernames"]
-    return {"admin": {"name": "ADMIN", "password": hashlib.sha256("admin123".encode()).hexdigest()}}
+    return {"admin": {"name": "DIRETOR", "password": hashlib.sha256("admin123".encode()).hexdigest()}}
 
-usernames_db = carregar_credenciais()
+usernames_db = carregar_usuarios()
 
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 
-# --- TELA DE ACESSO ---
+# --- COMPONENTE DE LOGIN MILITAR ---
 if not st.session_state.autenticado:
-    st.markdown("<br><br>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 1.5, 1])
-    with c2:
-        with st.container():
-            st.markdown("<div class='glass-card' style='text-align:center;'>", unsafe_allow_html=True)
-            if os.path.exists(LOGO_PATH): st.image(LOGO_PATH, width=100)
-            st.markdown("<h2 class='glitch-title'>Acessar Jarvis OS</h2>", unsafe_allow_html=True)
-            user = st.text_input("Credencial de Operador").lower()
-            pw = st.text_input("Código de Segurança", type="password")
-            if st.button("Iniciar Protocolo"):
-                if user in usernames_db and hashlib.sha256(pw.encode()).hexdigest() == usernames_db[user]["password"]:
-                    st.session_state.autenticado = True
-                    st.session_state.username = user
-                    st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    _, login_col, _ = st.columns([1, 1.2, 1])
+    with login_col:
+        st.markdown("<div class='hud-box'>", unsafe_allow_html=True)
+        if os.path.exists(LOGO_PATH): 
+            st.image(LOGO_PATH, width=80)
+        st.markdown("<div class='hud-header'>SISTEMA AUTENTICADOR</div>", unsafe_allow_html=True)
+        operador = st.text_input("ID OPERADOR").lower()
+        chave = st.text_input("CHAVE CRIPTOGRÁFICA", type="password")
+        if st.button("DESBLOQUEAR TERMINAL"):
+            if operador in usernames_db and hashlib.sha256(chave.encode()).hexdigest() == usernames_db[operador]["password"]:
+                st.session_state.autenticado = True
+                st.session_state.username = operador
+                st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
-# ==================== DASHBOARD ADAPTATIVO ====================
+# ==================== OPERAÇÃO INTEGRADA COCKPIT ====================
 username = st.session_state.username
 name = usernames_db[username]["name"]
 ARQUIVO_DADOS = f"dados_user_{username}.json"
 
-def load_data():
+def carregar_dados():
     if os.path.exists(ARQUIVO_DADOS):
         with open(ARQUIVO_DADOS, "r") as f: return json.load(f)
-    return {"metas": [], "agua": 0, "peso": 70.0, "pomo": 0, "eventos": []}
+    return {"metas": [{"nome": "Mapeamento Quântico", "tempo_dedicado": 15}], "agua": 500, "eventos": []}
 
-db = load_data()
+db = carregar_dados()
 
-# --- HEADER TÁTICO ---
-col_logo, col_stat1, col_stat2, col_stat3, col_out = st.columns([0.8, 1, 1, 1, 0.8])
-with col_logo:
-    if os.path.exists(LOGO_PATH): st.image(LOGO_PATH, width=50)
-with col_stat1:
-    st.markdown(f"<span class='system-label'>IA SYNC</span><span style='color:#00ff88;'>● ONLINE</span>", unsafe_allow_html=True)
-with col_stat2:
-    st.markdown(f"<span class='system-label'>USER</span><span style='color:white;'>{name}</span>", unsafe_allow_html=True)
-with col_stat3:
-    st.markdown(f"<span class='system-label'>OS VERSION</span><span style='color:#d4af37;'>MK-IV NEXT</span>", unsafe_allow_html=True)
-with col_out:
-    if st.button("LOGOUT"):
-        st.session_state.autenticado = False
-        st.rerun()
+# --- BARRA DE STATUS SUPERIOR (HUD HEADER) ---
+st.markdown(f"""
+    <div style='display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: center; border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding-bottom: 8px; margin-bottom: 20px;'>
+        <div style='font-family: "Orbitron"; font-size: 18px; font-weight: 800; letter-spacing: 2px;'>
+            JARVIS <span style='color: #d4af37;'>OS</span>
+        </div>
+        <div style='text-align: center; font-size: 13px; letter-spacing: 4px; color: rgba(0, 240, 255, 0.7);'>
+            SISTEMA CORE: <span style='color: #fff;'>SYS_ACTIVE</span> | OPERADOR: <span style='color: #d4af37;'>{name}</span>
+        </div>
+        <div style='text-align: right; font-family: "Orbitron"; font-size: 12px; color: #ff3b3b;'>
+            SEC_LEVEL_04
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
-st.markdown("<hr style='border: 0.5px solid rgba(212,175,55,0.2); margin-top:0;'>", unsafe_allow_html=True)
+# --- GRID TÁTICO TRIDIMENSIONAL (BENTO BOX APEX) ---
+col_esquerda, col_direita = st.columns([1.9, 1.1])
 
-# --- GRID CENTRAL (Bento Box Productive Style) ---
-main_l, main_r = st.columns([1.8, 1.2])
-
-with main_l:
-    # Módulo de Comando (Chat)
-    st.markdown(f"<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown(f"<span class='system-label'>{ICONES['terminal']} Terminal de Comando</span>", unsafe_allow_html=True)
+with col_esquerda:
+    # Bloco Central: Terminal Neural (Chat Inteligente)
+    st.markdown("<div class='hud-box'>", unsafe_allow_html=True)
+    st.markdown("<div class='hud-header'>[⚡] NÚCLEO COGNITIVO COMANDO DE VOZ / TEXTO</div>", unsafe_allow_html=True)
     
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"Protocolos ativos, {name}. Aguardando diretrizes."}]
-    
-    chat_box = st.container(height=350)
-    for m in st.session_state.messages:
-        chat_box.chat_message(m["role"]).write(m["content"])
+        st.session_state.messages = [{"role": "assistant", "content": f"Aguardando coordenadas estratégicas, {name}."}]
         
-    if prompt := st.chat_input("Insira comando tático..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # Lógica simplificada de resposta (Jarvis Persona)
+    chat_container = st.container(height=360)
+    for m in st.session_state.messages:
+        chat_container.chat_message(m["role"]).write(m["content"])
+        
+    if comando := st.chat_input("Injetar dados de telemetria..."):
+        st.session_state.messages.append({"role": "user", "content": comando})
         if client:
-            res = client.chat.completions.create(
-                model=MODELO_PRINCIPAL,
-                messages=[{"role":"system","content":"Você é o Jarvis MK-IV. Responda de forma curta, técnica e elegante."},{"role":"user","content":prompt}]
-            ).choices[0].message.content
-        else: res = "Erro de conexão com o núcleo neural."
-        st.session_state.messages.append({"role": "assistant", "content": res})
+            try:
+                resposta_ia = client.chat.completions.create(
+                    model=MODELO_PRINCIPAL,
+                    messages=[{"role": "system", "content": "Você é o Jarvis OS, um computador de bordo tático avançado. Dê respostas curtas, precisas e militares."}, {"role": "user", "content": comando}]
+                ).choices[0].message.content
+            except:
+                resposta_ia = "Falha no feedback do link neural."
+        else:
+            resposta_ia = "Link Groq offline. Execute em ambiente simulado."
+        st.session_state.messages.append({"role": "assistant", "content": resposta_ia})
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Módulo de Objetivos Ativos (Lista Rápida)
-    st.markdown(f"<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown(f"<span class='system-label'>Diretrizes Prioritárias</span>", unsafe_allow_html=True)
-    if not db["metas"]: st.info("Nenhuma diretriz ativa.")
-    else:
-        for i, meta in enumerate(db["metas"][:3]): # Mostra as 3 primeiras
-            st.markdown(f"➢ **{meta['nome']}** <span style='float:right; color:#d4af37;'>{meta['tempo_dedicado']}min</span>", unsafe_allow_html=True)
+    # Bloco Inferior Esquerdo: Diretrizes Ativas (Tabela Tática)
+    st.markdown("<div class='hud-box'>", unsafe_allow_html=True)
+    st.markdown("<div class='hud-header'>[⚙] ANÁLISE DE DIRETRIZES EM EXECUÇÃO</div>", unsafe_allow_html=True)
+    for m in db["metas"]:
+        st.markdown(f"""
+            <div style='display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0, 240, 255, 0.1); padding: 6px 0;'>
+                <span>➢ {m['nome']}</span>
+                <span class='gold-glow'>{m['tempo_dedicado']} MIN REPETIDOS</span>
+            </div>
+        """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-with main_r:
-    # Módulo de Foco (Pomodoro)
-    st.markdown(f"<div class='glass-card' style='text-align:center;'>", unsafe_allow_html=True)
-    st.markdown(f"<span class='system-label'>{ICONES['foco']} Ciclo de Concentração</span>", unsafe_allow_html=True)
-    st.markdown(f"<h1 style='font-size:50px; margin:10px 0;'>25:00</h1>", unsafe_allow_html=True)
-    st.button("Iniciar Ciclo")
+with col_direita:
+    # Bloco Superior Direito: Ciclo de Foco (Contador Holográfico)
+    st.markdown("<div class='hud-box' style='text-align: center;'>", unsafe_allow_html=True)
+    st.markdown("<div class='hud-header' style='justify-content: center;'>[⏱] CONTAGEM REGRESSIVA CRÍTICA</div>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-family: \"Orbitron\", sans-serif; font-size: 55px; color: #fff; text-shadow: 0 0 20px #00f0ff; margin: 5px 0;'>25:00</h2>", unsafe_allow_html=True)
+    st.button("ENGAJAR CRONÔMETRO")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Módulo de Hidratação (Vitals)
-    st.markdown(f"<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown(f"<span class='system-label'>{ICONES['vitals']} Nível de Hidratação</span>", unsafe_allow_html=True)
-    progresso = min(db["agua"] / 2500, 1.0)
-    st.progress(progresso)
-    st.markdown(f"<small>{db['agua']}ml de 2500ml</small>", unsafe_allow_html=True)
-    if st.button("Catalogar 250ml"):
+    # Bloco Intermediário Direito: Consumo de Fluidos (Vitals)
+    st.markdown("<div class='hud-box'>", unsafe_allow_html=True)
+    st.markdown("<div class='hud-header'>[💧] NÍVEIS OTIMIZADOS BIOMÉTRICOS</div>", unsafe_allow_html=True)
+    st.markdown(f"Consumo de H2O: **{db['agua']} ml** / <span style='color:#777;'>2500 ml</span>", unsafe_allow_html=True)
+    st.markdown("<div style='background: rgba(0, 240, 255, 0.1); border: 1px solid #00f0ff; height: 8px; border-radius: 4px; margin: 10px 0;'><div class='progress-bar-fill' style='width: 20%;'></div></div>", unsafe_allow_html=True)
+    if st.button("INJETAR 250ML"):
         db["agua"] += 250
         with open(ARQUIVO_DADOS, "w") as f: json.dump(db, f)
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Módulo de Agenda Rápida
-    st.markdown(f"<div class='glass-card'>", unsafe_allow_html=True)
-    st.markdown(f"<span class='system-label'>Cronograma Hoje</span>", unsafe_allow_html=True)
-    st.markdown("<small>• 14:00 - Reunião Stark</small><br><small>• 17:00 - Análise de Dados</small>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    # Bloco Inferior Direito: Logo do Dono integrada perfeitamente sem fundo
+    if os.path.exists(LOGO_PATH):
+        st.markdown("<div class='hud-box' style='text-align: center; display: flex; justify-content: center; align-items: center; background: rgba(212,175,55,0.03) !important; border-color: rgba(212,175,55,0.3);'>", unsafe_allow_html=True)
+        st.image(LOGO_PATH, width=90)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# --- ABAS PARA DETALHES ---
-st.markdown("<br>", unsafe_allow_html=True)
-aba1, aba2 = st.tabs(["HISTÓRICO COMPLETO", "CONFIGURAÇÕES DE SISTEMA"])
-
-with aba1:
-    st.write("Aqui você pode colocar as tabelas e gráficos que já tínhamos, mas em uma aba separada para não poluir o cockpit principal.")
-
-with aba2:
-    st.write("Ajuste de peso, troca de senha e calibração de IA.")
+# Rodapé Técnico de Operações
+st.markdown("<div style='text-align: center; font-size: 11px; color: rgba(0, 240, 255, 0.4); margin-top: 20px;'>JARVIS CORE ENGINE - PROTÓTIPO DE EXECUÇÃO DE ALTA PERMANÊNCIA</div>", unsafe_allow_html=True)
