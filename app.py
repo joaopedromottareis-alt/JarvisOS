@@ -9,8 +9,6 @@ import calendar as pycalendar
 from groq import Groq
 
 # ==================== CONFIGURAÇÃO DA IA (BLINDADA) ====================
-# O Jarvis agora busca a chave de forma oculta e segura dos servidores.
-# Você NÃO DEVE escrever sua chave gsk_ aqui! O sistema puxa do GitHub/Streamlit.
 API_KEY = os.environ.get("GROQ_API_KEY")
 
 if not API_KEY and "GROQ_API_KEY" in st.secrets:
@@ -31,7 +29,7 @@ st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", init
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     .stApp { 
         background-color: #050505 !important; 
@@ -226,11 +224,10 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS (SISTEMA INTEGRADO) ---
+    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
-        # Alerta amigável caso você se esqueça de preencher os Secrets
         if not API_KEY or client is None:
             return "⚠️ **Sistemas offline:** Nenhuma chave configurada. Por favor, adicione a variável `GROQ_API_KEY` nas configurações ocultas (Secrets) do seu servidor."
 
@@ -240,7 +237,6 @@ if st.session_state.autenticado and username:
             "Se o usuário pediu para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme elegantemente na resposta."
         )
         
-        # 1. Obter a resposta de conversação fluida da IA principal
         try:
             conversa_principal = client.chat.completions.create(
                 model=MODELO_PRINCIPAL,
@@ -253,20 +249,19 @@ if st.session_state.autenticado and username:
                 return "⚠️ **Falha Crítica:** A chave configurada nos Secrets foi considerada INVÁLIDA ou BLOQUEADA pelo Groq. Por favor, gere uma nova chave no painel do Groq e atualize seus Secrets."
             return f"⚠️ **Instabilidade nos Servidores:** {str(e)}"
 
-        # 2. Executar o analisador secundário em background para alimentar a agenda/metas
         try:
             prompt_sistema_extrator = (
                 f"Você é uma API de extração de dados. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise o comando inserido pelo usuário e retorne ESTRITAMENTE um objeto JSON.\n"
-                "Regras:\n"
-                "1. Se o usuário quiser criar uma meta geral de longo prazo, mude 'criar_meta' para true e preencha 'novas_metas'.\n"
-                "2. Se o usuário pediu para colocar um compromisso, aula, prova ou tarefa com horário e data na agenda (como hoje, amanhã ou data específica), mude 'criar_evento' para true e preencha 'novos_eventos' extraindo o título, a data no formato YYYY-MM-DD e o horário em HH:MM.\n\n"
+                "Importante: se o usuário disser 'as 17 hrs de hj' ou qualquer variação de horário de hoje, mude 'criar_evento' para true, coloque a data de hoje no formato YYYY-MM-DD e o horário correspondente.\n"
                 "Modelo estrutural padrão de saída esperado:\n"
                 "{\n"
                 "  \"criar_meta\": false,\n"
                 "  \"novas_metas\": [],\n"
                 "  \"criar_evento\": false,\n"
-                "  \"novos_eventos\": []\n"
+                "  \"novos_eventos\": [\n"
+                "     {{\"title\": \"Nome da Atividade\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"}}\n"
+                "  ]\n"
                 "}"
             )
             
@@ -280,7 +275,6 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Gravação de Metas
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -293,7 +287,6 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Gravação de Eventos na Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -400,10 +393,10 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. AGENDA (CALENDÁRIO REESTRUTURADO)
+    # 4. AGENDA (CALENDÁRIO OTIMIZADO COM INDICAÇÃO VISUAL)
     with aba_calendario:
         st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
-        col_esq_info, col_dir_cal = st.columns([1, 2.5])
+        col_esq_info, col_dir_cal = st.columns([1.2, 2.3])
         
         hoje = datetime.date.today()
         dia_num_hoje = hoje.strftime("%d")
@@ -444,6 +437,7 @@ if st.session_state.autenticado and username:
             cal_objeto = pycalendar.Calendar(firstweekday=6)
             mes_dias = cal_objeto.monthdayscalendar(ano_atual, mes_atual)
             
+            # Agrupar eventos por dia
             dict_eventos = {}
             for ev in db.get("eventos_locais", []):
                 ev_date_str = ev.get("date")
@@ -458,19 +452,18 @@ if st.session_state.autenticado and username:
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
-                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; background-color: #0a0a0a; padding: 20px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
+                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background-color: #0a0a0a; padding: 15px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 5px; }
-                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 10px; display: flex; flex-direction: column; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 55px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
                 .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.08); border: 1px solid #d4af37; }
                 .calendar-cell.cell-empty { background-color: transparent; border: none; }
-                .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; }
-                .cell-today .cell-number { color: #d4af37; }
-                .cell-events-container { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
-                .calendar-event-tag { background-color: rgba(212, 175, 55, 0.12); color: #d4af37; border-left: 2px solid #d4af37; font-size: 9px; font-weight: 600; padding: 2px 4px; border-radius: 3px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+                .cell-number { font-weight: 700; font-size: 16px; color: #888888; }
+                .cell-today .cell-number { color: #d4af37; font-size: 18px; }
+                .event-indicator { width: 6px; height: 6px; background-color: #d4af37; border-radius: 50%; position: absolute; bottom: 8px; box-shadow: 0 0 6px #d4af37; }
             </style>
             """
             
-            html_corpo = f"<div style='text-align: center; margin-bottom: 15px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
+            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
             
             for hd in dias_semana_headers:
@@ -485,18 +478,45 @@ if st.session_state.autenticado and username:
                         data_corrente_str = data_corrente.isoformat()
                         classe_hoje = "cell-today" if data_corrente == hoje else ""
                         
-                        html_tags_eventos = ""
+                        indicador_evento = ""
                         if data_corrente_str in dict_eventos:
-                            for ev in dict_eventos[data_corrente_str]:
-                                html_tags_eventos += f"<div class='calendar-event-tag'>{ev['time']} - {ev['title']}</div>"
+                            indicador_evento = "<div class='event-indicator'></div>"
                                 
                         html_corpo += f"<div class='calendar-cell {classe_hoje}'>"
                         html_corpo += f"<div class='cell-number'>{dia_num}</div>"
-                        html_corpo += f"<div class='cell-events-container'>{html_tags_eventos}</div>"
+                        html_corpo += indicador_evento
                         html_corpo += "</div>"
                         
             html_corpo += "</div>"
-            st.components.v1.html(html_estilos_calendario + html_corpo, height=620, scrolling=False)
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=440, scrolling=False)
+
+        # --- NOVA SEÇÃO: DETALHES DA AGENDA LOGO ABAIXO ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="titulo-card">📋 LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>', unsafe_allow_html=True)
+        
+        eventos_cadastrados = db.get("eventos_locais", [])
+        if not eventos_cadastrados:
+            st.info("Nenhum compromisso agendado até o momento.")
+        else:
+            # Ordenar eventos por data e hora
+            eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
+            
+            for idx, ev in enumerate(eventos_ordenados):
+                try:
+                    data_convertida = datetime.date.fromisoformat(ev["date"]).strftime("%d/%m/%Y")
+                except:
+                    data_convertida = ev["date"]
+                
+                col_info_ev, col_acao_ev = st.columns([5, 1])
+                with col_info_ev:
+                    st.markdown(
+                        f"🔹 **{ev['title']}** — 📅 `{data_convertida}` às ⏰ `{ev['time']}`"
+                    )
+                with col_acao_ev:
+                    if st.button("Remover", key=f"del_{ev.get('id', idx)}"):
+                        db["eventos_locais"] = [item for item in db["eventos_locais"] if item.get("id") != ev.get("id")]
+                        salvar_dados(db)
+                        st.rerun()
 
     # 5. ESTATÍSTICAS
     with aba_graficos:
