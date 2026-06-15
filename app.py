@@ -1,179 +1,592 @@
 import streamlit as st
-from groq import Groq
+import datetime
+import time
 import json
+import os
+import hashlib
+import re
+import calendar as pycalendar
+from groq import Groq
 
-# 1. CONFIGURAÇÃO DA PÁGINA
-st.set_page_config(page_title="Jarvis OS", page_icon="🤖", layout="wide")
+# ==================== CONFIGURAÇÃO DA IA ====================
+API_KEY = os.environ.get("GROQ_API_KEY")
 
+if not API_KEY and "GROQ_API_KEY" in st.secrets:
+    API_KEY = st.secrets["GROQ_API_KEY"]
+
+client = None
+if API_KEY:
+    try:
+        client = Groq(api_key=API_KEY)
+    except Exception:
+        client = None
+
+MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
+MODELO_EXTRATOR = "llama-3.3-70b-versatile"
+
+# ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
+st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
+
+# Dicionário de Ícones SVG Atualizado
 ICONES = {
-    "conversa": "💬",
-    "calendario": "📅",
-    "metas": "🎯",
-    "timer": "⏱️",
-    "saude": "❤️"
+    "jarvis": """<svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd700"/>
+                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#8a6d1c"/>
+            </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="42" stroke="url(#gold-grad)" stroke-width="5" stroke-dasharray="4 2" fill="none" />
+        <circle cx="50" cy="50" r="28" stroke="url(#gold-grad)" stroke-width="3" fill="none" opacity="0.8"/>
+        <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
+        <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
+    </svg>""",
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/>/svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/>/svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/>/svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/>/svg>""",
+    "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="gold-grad-caderno" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd700"/>
+                <stop offset="50%" stop-color="#d4af37"/>
+                <stop offset="100%" stop-color="#aa7c11"/>
+            </linearGradient>
+        </defs>
+        <path d="M3 5c0-.55.45-1 1-1h1v16H4c-.55 0-1-.45-1-1V5zm4-1h10c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H7V4zm14 2h-1v12h1c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1zm-11 3h6v1.5h-6V9zm0 3.5h6V14h-6v-1.5zm0 3.5h4v1.5h-4V16z" fill="url(#gold-grad-caderno)"/>
+        <path d="M18.5 3.5l2 2-11 11H7.5v-2l11-11z" fill="url(#gold-grad-caderno)"/>
+    </svg>"""
 }
 
-# Inicializa o cliente da Groq (Troque pela sua chave ou use Streamlit Secrets)
-client = Groq(api_key=st.secrets.get("GROQ_API_KEY", "SUA_CHAVE_AQUI"))
-
-# 2. INICIALIZAÇÃO DO SESSION STATE (MEMÓRIA DO SISTEMA)
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-if "metas" not in st.session_state:
-    st.session_state.metas = []
-
-if "eventos_calendario" not in st.session_state:
-    st.session_state.eventos_calendario = []
-
-if "logado" not in st.session_state:
-    st.session_state.logado = False
-
-if "username" not in st.session_state:
-    st.session_state.username = ""
-
-
-# 3. MOTOR DE IA (PROCESSADOR COM IDENTIFICAÇÃO DE GÊNERO)
-def processar_comando_e_criar_metas(texto_usuario):
-    username_atual = st.session_state.get("username", "Operador")
+# CSS MODIFICADO: Correção agressiva para forçar o fundo das caixas e inputs a ficarem escuros mesmo em Light Mode de Macs
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
-    # Prompt inteligente que descobre o gênero pelo nome inserido no login
-    contexto_prompt = f"""
-    Você é o Jarvis, o assistente virtual ultra-eficiente e genial do sistema operacional Jarvis OS.
-    O operador atual autenticado no sistema chama-se: {username_atual}.
+    .stApp { 
+        background-color: #050505 !important; 
+        color: #e5e5e5 !important; 
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background-image: 
+            radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.07) 0%, transparent 60%),
+            radial-gradient(circle at 90% 80%, rgba(184, 134, 11, 0.03) 0%, transparent 40%) !important;
+        background-attachment: fixed !important;
+    }
     
-    DIRETRIZES DE PERSONALIDADE E GÊNERO:
-    1. Analise o nome "{username_atual}" e identifique o gênero para responder adequadamente. 
-       - Se for feminino (ex: Maria, Mãe, Ana), use SEMPRE o tratamento "Senhora", "atendê-la", "comprometida", etc.
-       - Se for masculino (ex: João, Pedro), use "Senhor", "atendê-lo", "comprometido", etc.
-       - Se não tiver certeza, adote uma postura formal e respeitosa usando o nome diretamente de forma neutra.
-    2. Responda de forma extremamente educada, prestativa e tecnológica, mantendo o tom clássico do Jarvis.
+    [data-testid="stSidebarCollapsedControl"], [data-testid="stSidebar"], #MainMenu, footer, header {
+        display: none !important;
+    }
+    
+    .block-container { 
+        padding: 2rem 3rem !important; 
+        max-width: 100% !important; 
+    }
+    
+    div[data-testid="stHorizontalBlock"] {
+        gap: 2rem !important;
+        width: 100% !important;
+    }
 
-    Ação solicitada pelo operador: "{texto_usuario}"
+    div[data-testid="column"] {
+        flex: 1 1 0% !important;
+        min-width: 0px !important;
+    }
     
-    Sua resposta deve ser estritamente um objeto JSON válido, sem formatação markdown (sem ```json), com a seguinte estrutura:
-    {{
-        "resposta_jarvis": "Texto da sua resposta falada/escrita para o operador",
-        "novas_metas": [
-            {{"titulo": "Nome da Meta", "status": "Em andamento"}}
-        ],
-        "novas_tarefas_calendario": [
-            {{"evento": "Nome do Compromisso", "data": "AAAA-MM-DD", "hora": "HH:MM"}}
-        ]
-    }}
-    """
+    .custom-title {
+        font-family: 'Kanit', sans-serif !important;
+        background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700 !important; 
+        letter-spacing: -0.5px !important;
+        margin-bottom: 25px !important;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
     
-    try:
-        response = client.chat.completions.create(
-            messages=[{"role": "user", "content": contexto_prompt}],
-            model="llama3-8b-8192",
-            temperature=0.3
+    .jarvis-brand {
+        background: linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700 !important;
+    }
+    
+    /* SELETORES DE ALTA PRIORIDADE PARA ADIAR TEMAS CLAROS EXTERNOS */
+    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], [data-testid="stChatInputTextArea"] {
+        background-color: #0b0b0b !important; 
+        border: 1px solid rgba(212, 175, 55, 0.3) !important; 
+        border-radius: 12px !important; 
+        color: #ffffff !important;
+        padding: 10px 16px !important;
+        width: 100% !important;
+    }
+    
+    /* Garante visibilidade e fundo escuro na barra de texto do Chat input */
+    [data-testid="stChatInput"] {
+        background-color: #050505 !important;
+        border-radius: 14px !important;
+        padding: 4px !important;
+    }
+
+    .titulo-card { 
+        color: #d4af37 !important; 
+        font-family: 'Kanit', sans-serif !important;
+        font-size: 14px !important; 
+        font-weight: 500 !important; 
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
+        padding-bottom: 8px;
+    }
+
+    .stButton>button { 
+        background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
+        color: #000000 !important; 
+        border: none !important;
+        border-radius: 12px !important; 
+        padding: 12px 24px !important; 
+        font-weight: 700 !important; 
+        width: 100% !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] { 
+        background-color: transparent !important; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        margin-bottom: 30px !important;
+        width: 100% !important;
+    }
+    
+    .stTabs [data-baseweb="tab"] { 
+        color: #777777 !important; 
+        font-family: 'Kanit', sans-serif !important;
+        flex-grow: 1 !important;
+        text-align: center !important;
+    }
+    
+    .stTabs [aria-selected="true"] { 
+        color: #d4af37 !important; 
+    }
+    
+    [data-testid="stChatMessage"] {
+        background-color: rgba(20, 20, 20, 0.5) !important;
+        border-left: 3px solid #d4af37 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# ==================== GERENCIADOR DE USUÁRIOS ====================
+ARQUIVO_CONFIG_USERS = "usuarios_config.json"
+
+def gerar_hash_sha256(senha_texto):
+    return hashlib.sha256(senha_texto.encode('utf-8')).hexdigest()
+
+def carregar_credenciais_salvas():
+    if os.path.exists(ARQUIVO_CONFIG_USERS):
+        with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+            if "usernames" in dados: return dados["usernames"]
+            return dados
+    return {"admin": {"name": "SENHOR ADMIN", "password": gerar_hash_sha256("admin123")}}
+
+def salvar_novas_credenciais(dicionario_usernames):
+    with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
+        json.dump({"usernames": dicionario_usernames}, f, indent=4, ensure_ascii=False)
+
+usernames_db = carregar_credenciais_salvas()
+
+if "autenticado" not in st.session_state: st.session_state.autenticado = False
+if "username" not in st.session_state: st.session_state.username = None
+
+# --- TELA DE LOGIN ---
+if not st.session_state.autenticado:
+    header_html = f"<h2 class='custom-title'>{ICONES['jarvis']} ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>"
+    st.markdown(header_html, unsafe_allow_html=True)
+    modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
+    
+    if modo_tela == "LOGIN":
+        st.markdown("### LOGIN DO OPERADOR")
+        input_user = st.text_input("USERNAME:", key="login_username").strip().lower()
+        input_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", key="login_password")
+        
+        if st.button("ACESSAR PAINEL PRINCIPAL"):
+            if input_user in usernames_db:
+                hash_informado = gerar_hash_sha256(input_senha)
+                hash_salvo = usernames_db[input_user]["password"]
+                if hash_informado == hash_salvo or input_senha == hash_salvo:
+                    st.session_state.autenticado = True
+                    st.session_state.username = input_user
+                    st.rerun()
+                else: st.error("CHAVE INCORRETA.")
+            else: st.error("OPERADOR NÃO ENCONTRADO.")
+        st.stop()
+            
+    elif modo_tela == "REGISTRAR NOVA CONTA":
+        st.markdown("### CRIAR NOVA CONTA")
+        novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
+        novo_user = st.text_input("USERNAME (SEM ESPAÇOS):").strip().lower()
+        nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password")
+        confirmar_senha = st.text_input("CONFIRME A SENHA:", type="password")
+        
+        if st.button("FINALIZAR CADASTRO"):
+            if not novo_nome or not novo_user or not nova_senha: st.error("Preencha tudo.")
+            elif novo_user in usernames_db: st.error("Username já existe.")
+            elif nova_senha != confirmar_senha: st.error("Senhas divergentes.")
+            else:
+                usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
+                salvar_novas_credenciais(usernames_db)
+                st.success("Conta criada!")
+        st.stop()
+
+# ==================== SESSÃO OPERACIONAL DE USUÁRIO ====================
+username = st.session_state.username
+
+if st.session_state.autenticado and username:
+    name = usernames_db[username]["name"]
+    ARQUIVO_DADOS = f"dados_user_{username}.json"
+
+    def carregar_dados():
+        if os.path.exists(ARQUIVO_DADOS):
+            with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: return json.load(f)
+        return {"metas": [], "agua": 0, "peso_usuario": 70.0, "historico_pomodoro": 0, "refeicoes": [], "eventos_locais": []}
+
+    def salvar_dados(dados):
+        with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f: json.dump(dados, f, indent=4, ensure_ascii=False)
+
+    if "db" not in st.session_state or st.session_state.get("atual_user") != username:
+        st.session_state.db = carregar_dados()
+        st.session_state.atual_user = username
+        
+    db = st.session_state.db
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": f"Sistemas prontos, {name}! Como posso te ajudar hoje?"}]
+
+    if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
+    if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
+    if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
+    if "eventos_locais" not in db: db["eventos_locais"] = []
+
+    # --- HEADER ---
+    col_titulo_sistema, col_botao_logout = st.columns([5, 1])
+    with col_titulo_sistema:
+        header_dashboard = f"<h1 class='custom-title' style='margin-bottom: 0px !important;'>{ICONES['jarvis']} <span class='jarvis-brand'>JARVIS OS</span></h1>"
+        st.markdown(header_dashboard, unsafe_allow_html=True)
+    with col_botao_logout:
+        if st.button("SAIR DA SESSÃO"):
+            st.session_state.autenticado = False
+            st.session_state.username = None
+            st.rerun()
+
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
+
+    # --- MOTOR DE EXECUÇÃO DUPLO ---
+    def processar_comando_e_criar_metas(comando):
+        data_hoje_str = datetime.date.today().isoformat()
+        
+        if not API_KEY or client is None:
+            return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
+
+        # MODIFICAÇÃO DO PROMPT DO SISTEMA: Lógica inteligente de tratamento de gênero baseada no nome cadastrado
+        prompt_sistema_chat = (
+            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário cadastrado sob o nome de: '{name}'). Hoje é {data_hoje_str}.\n"
+            f"DIRETRIZES OBRIGATÓRIAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
+            f"1. Analise cuidadosamente o nome '{name}' para identificar o gênero do operador.\n"
+            f"   - Se o nome indicar gênero feminino (ex: Maria, Ana, Mãe, Paula, etc), use SEMPRE os pronomes e tratamentos femininos: 'Senhora', 'atendê-la', 'pronta', 'comissionada', 'minha senhora'. Nunca a chame de senhor.\n"
+            f"   - Se indicar gênero masculino (ex: João, Pedro, admin), use 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"   - Se o nome for ambíguo, use um tom polido e executivo referindo-se diretamente pelo nome ou tratamentos neutros com extrema sofisticação britânica.\n"
+            f"2. Responda ao usuário com extrema imponência, elegância e eficiência britânica.\n"
+            f"3. Se o usuário pediu para marcar uma atividade, confirme elegantemente na resposta."
         )
         
-        conteudo = response.choices[0].message.content.strip()
-        resultado = json.loads(conteudo)
-        
-        # Salva as novas metas no estado da sessão
-        for meta in resultado.get("novas_metas", []):
-            st.session_state.metas.append(meta)
+        try:
+            conversa_principal = client.chat.completions.create(
+                model=MODELO_PRINCIPAL,
+                messages=[{"role": "system", "content": prompt_sistema_chat}, {"role": "user", "content": comando}],
+                temperature=0.7
+            )
+            resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
+        except Exception as e:
+            if "401" in str(e) or "invalid_api_key" in str(e).lower():
+                return " Falha Crítica: A chave configurada nos Secrets foi considerada INVÁLIDA pelo Groq."
+            return f" Instabilidade nos Servidores: {str(e)}"
+
+        try:
+            prompt_sistema_extrator = (
+                f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
+                "Regras Obrigatórias:\n"
+                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "Esquema JSON estrito:\n"
+                "{\n"
+                "  \"criar_meta\": true/false,\n"
+                "  \"novas_metas\": [ {\"nome\": \"Estudar Geografia\", \"categoria\": \"Estudos\"} ],\n"
+                "  \"criar_evento\": true/false,\n"
+                "  \"novos_eventos\": [ {\"title\": \"Estudar Geografia\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"} ]\n"
+                "}"
+            )
             
-        # Salva os novos eventos na agenda
-        for ev in resultado.get("novas_tarefas_calendario", []):
-            st.session_state.eventos_calendario.append(ev)
+            extracao_dados = client.chat.completions.create(
+                model=MODELO_EXTRATOR,
+                messages=[{"role": "system", "content": prompt_sistema_extrator}, {"role": "user", "content": comando}],
+                temperature=0.0,
+                response_format={"type": "json_object"}
+            )
             
-        return resultado.get("resposta_jarvis", "Comando processado com sucesso.")
-        
-    except Exception as e:
-        return f"Sistemas instáveis, não consegui processar a solicitação interna: {str(e)}"
-
-
-# 4. TELA DE LOGIN / CADASTRO
-if not st.session_state.logado:
-    st.markdown(f'<h1>{ICONES["conversa"]} ENTRAR NO JARVIS OS</h1>', unsafe_allow_html=True)
-    
-    operacao = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
-    
-    st.subheader("LOGIN DO OPERADOR")
-    username_input = st.text_input("USERNAME:")
-    senha_input = st.text_input("SENHA DE SEGURANÇA:", type="password")
-    
-    if st.button("ACESSAR PAINEL PRINCIPAL"):
-        if username_input.strip() != "":
-            st.session_state.logado = True
-            st.session_state.username = username_input.strip()
-            # Mensagem inicial personalizada de boas-vindas baseada no gênero
-            st.session_state.messages = [{"role": "assistant", "content": processar_comando_e_criar_metas("Diga oi e pergunte como pode ajudar")}]
-            st.rerun()
-        else:
-            st.error("Por favor, digite um username válido para identificação de diretrizes.")
-
-# 5. PAINEL PRINCIPAL (PÓS-LOGIN)
-else:
-    # Barra Superior com botão de Sair
-    col_titulo, col_sair = st.columns([9, 1])
-    with col_titulo:
-        st.markdown(f"<h1>🤖 JARVIS OS — <small style='color:#d4af37;'>Operador: {st.session_state.username}</small></h1>", unsafe_allow_html=True)
-    with col_sair:
-        if st.button("SAIR DA SESSÃO"):
-            st.session_state.logado = False
-            st.session_state.username = ""
-            st.session_state.messages = []
-            st.rerun()
+            dados_brutos = extracao_dados.choices[0].message.content.strip()
+            resultado = json.loads(dados_brutos)
             
-    st.markdown("---")
+            if resultado.get("criar_meta") and resultado.get("novas_metas"):
+                for nova_m in resultado.get("novas_metas", []):
+                    if isinstance(nova_m, dict) and "nome" in nova_m:
+                        db["metas"].append({
+                            "id": str(time.time() + len(db["metas"])), 
+                            "nome": nova_m["nome"],
+                            "categoria": nova_m.get("categoria", "Geral"), 
+                            "concluida": False, 
+                            "tempo_dedicado": 0
+                        })
+                salvar_dados(db)
+                
+            if resultado.get("criar_evento") and resultado.get("novos_eventos"):
+                for ev in resultado.get("novos_eventos", []):
+                    if isinstance(ev, dict) and "title" in ev:
+                        db["eventos_locais"].append({
+                            "id": f"ia_{int(time.time())}_{len(db['eventos_locais'])}",
+                            "title": ev["title"],
+                            "date": ev.get("date", data_hoje_str),
+                            "time": ev.get("time", "12:00")
+                        })
+                salvar_dados(db)
+                
+        except Exception as e:
+            print(f"[Erro de Extração]: {str(e)}")
+            
+        return resposta_texto_jarvis
 
-    # Criação das Abas do Sistema
-    aba_metas, aba_timer, aba_saude, aba_agenda = st.tabs([
-        "🎯 CONVERSA & METAS", 
-        "⏱️ TIMER DE FOCO", 
-        "❤️ SAÚDE & FITNESS", 
-        "📅 AGENDA"
+# ==================== NAVEGAÇÃO POR ABAS ====================
+    aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
+        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # --- ABA 1: CONVERSA & METAS ---
+    # 1. CONVERSA & METAS
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
-        
         with col_ia:
-            st.markdown(f'<h3>{ICONES["conversa"]} INTERFACE DE COMANDO</h3>', unsafe_allow_html=True)
-            
-            # Caixa do Chat histórico
-            chat_container = st.container(height=380)
+            card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
+            chat_container = st.container(height=340)
             with chat_container:
-                for msg in st.session_state.messages:
-                    st.chat_message(msg["role"]).write(msg["content"])
-            
-            # Campo de texto para enviar instruções
-            if prompt := st.chat_input("Envie uma instrução de texto para o Jarvis..."):
+                for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
+            if prompt := st.chat_input("Envie uma instrução..."):
                 st.session_state.messages.append({"role": "user", "content": prompt})
                 resposta = processar_comando_e_criar_metas(prompt)
                 st.session_state.messages.append({"role": "assistant", "content": resposta})
                 st.rerun()
-
         with col_lista:
-            st.markdown(f'<h3>{ICONES["metas"]} OBJETIVOS ATIVOS</h3>', unsafe_allow_html=True)
-            if not st.session_state.metas:
-                st.info("Nenhuma meta ativa nos registros no momento.")
+            card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
+            metas_ativas = [m for m in db["metas"] if not m["concluida"]]
+            if not metas_ativas: st.info("Sem diretrizes ativas.")
             else:
-                for idx, m in enumerate(st.session_state.metas):
-                    st.checkbox(f"**{m.get('titulo')}** — Status: {m.get('status', 'Em andamento')}", key=f"meta_{idx}")
+                for m in db["metas"]:
+                    if not m["concluida"]:
+                        c1, c2, c3 = st.columns([3, 1, 1])
+                        c1.markdown(f"**{m['nome']}**<br><span style='color:#777777;'>{m['categoria']}</span>", unsafe_allow_html=True)
+                        c2.markdown(f"<div style='padding-top:10px; color:#d4af37;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
+                        if c3.button("✓", key=m["id"]):
+                            m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # --- ABA 2: TIMER DE FOCO ---
-    with aba_timer:
-        st.markdown(f'<h3>{ICONES["timer"]} TIMER DE FOCO POMODORO</h3>', unsafe_allow_html=True)
-        st.write("Módulo de produtividade ativo. Use para focar nas suas metas.")
-
-    # --- ABA 3: SAÚDE & FITNESS ---
-    with aba_saude:
-        st.markdown(f'<h3>{ICONES["saude"]} MONITORAMENTO DE SAÚDE</h3>', unsafe_allow_html=True)
-        peso = st.number_input("Seu peso atual (kg):", value=70)
-        st.write(f"Alvo de hidratação calculado pelo Jarvis: {int(peso * 35)} ml por dia.")
-
-    # --- ABA 4: AGENDA ---
-    with aba_agenda:
-        st.markdown(f'<h3>{ICONES["calendario"]} COMPROMISSOS AGENDADOS</h3>', unsafe_allow_html=True)
-        if not st.session_state.eventos_calendario:
-            st.info("Nenhum evento na agenda para os próximos dias.")
+    # 2. POMODORO
+    with aba_pomodoro:
+        card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
+        metas_validas = [m for m in db["metas"] if not m["concluida"]]
+        if not metas_validas: st.warning("Nenhum objetivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
-            for ev in st.session_state.eventos_calendario:
-                st.markdown(f"📆 **{ev.get('data')}** às **{ev.get('hora')}** — *{ev.get('evento')}*")
+            cp1, cp2 = st.columns([1, 1])
+            with cp1:
+                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
+                minutos_slider = st.slider("Duração:", 1, 120, int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
+                if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_slider:
+                    st.session_state.pomo_tempo_inicial_escolhido = minutos_slider
+                    st.session_state.pomo_segundos_restantes = minutos_slider * 60
+            b1, b2 = st.columns([1, 1])
+            if not st.session_state.pomo_rodando:
+                if b1.button("▶ INICIAR"): st.session_state.pomo_rodando = True; st.rerun()
+            else:
+                if b1.button("⏸ PAUSAR"): st.session_state.pomo_rodando = False; st.rerun()
+            if b2.button("Automático" if st.session_state.pomo_rodando else "🔄 RESETAR"):
+                st.session_state.pomo_rodando = False
+                st.session_state.pomo_segundos_restantes = st.session_state.pomo_tempo_inicial_escolhido * 60
+                st.rerun()
+            with cp2:
+                m_vis, s_vis = divmod(st.session_state.pomo_segundos_restantes, 60)
+                st.markdown(f"<div style='text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; padding-top: 20px;'><h1 style='font-size: 75px; color:#ffffff; margin: 0;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37; font-weight: 600; font-size: 16px; margin-top: 10px;'> {meta_alvo}</span></div>", unsafe_allow_html=True)
+            
+            if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
+                time.sleep(1)
+                st.session_state.pomo_segundos_restantes -= 1
+                if st.session_state.pomo_segundos_restantes == 0:
+                    st.session_state.pomo_rodando = False
+                    for m in db["metas"]:
+                        if m["nome"] == meta_alvo and not m["concluida"]: m["tempo_dedicado"] += st.session_state.pomo_tempo_inicial_escolhido
+                    db["historico_pomodoro"] += st.session_state.pomo_tempo_inicial_escolhido
+                    salvar_dados(db); st.balloons()
+                st.rerun()
+
+    # 3. SAÚDE & FITNESS
+    with aba_saude:
+        cs1, cs2 = st.columns([1, 1])
+        with cs1:
+            card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
+            peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)))
+            try: peso_limpo = float(peso_texto.replace(',', '.'))
+            except: peso_limpo = 70.0
+            db["peso_usuario"] = peso_limpo
+            alvo_calc = int(peso_limpo * 35)
+            st.metric("Consumido", f"{db['agua']} ml", f"Alvo do Jarvis: {alvo_calc} ml")
+            cb1, cb2 = st.columns([1, 1])
+            if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
+            if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
+        with cs2:
+            card_html = f'<div class="titulo-card">{ICONES["saude"]} REFEIÇÕES DO DIA</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
+            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche")
+            if st.button("Registrar MacroAlimento"):
+                if refeicao:
+                    db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
+                    salvar_dados(db); st.toast("Nutrientes Catalogados!")
+
+    # 4. AGENDA
+    with aba_calendario:
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
+        col_esq_info, col_dir_cal = st.columns([1, 1])
+        
+        hoje = datetime.date.today()
+        dia_num_hoje = hoje.strftime("%d")
+        dias_traduzidos = {
+            "Monday": "SEGUNDA-FEIRA", "Tuesday": "TERÇA-FEIRA", "Wednesday": "QUARTA-FEIRA",
+            "Thursday": "QUINTA-FEIRA", "Friday": "SEXTA-FEIRA", "Saturday": "SÁBADO", "Sunday": "DOMINGO"
+        }
+        dia_name_hoje = dias_traduzidos.get(hoje.strftime("%A"), "HOJE")
+        
+        with col_esq_info:
+            st.markdown(
+                f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 25px; border: 1px solid rgba(212,175,55,0.1);'>"
+                f"<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
+                f"<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{dia_num_hoje}</h1>"
+                f"<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>{dia_name_hoje}</div>"
+                f"</div>", 
+                unsafe_allow_html=True
+            )
+            
+            with st.expander("➕ GERENCIAR EVENTOS MANUALMENTE", expanded=True):
+                nome_ev = st.text_input("Título do compromisso:")
+                data_ev = st.date_input("Data do evento:", hoje)
+                h_ini = st.time_input("Início da atividade:", datetime.time(9, 0))
+                
+                if st.button("Agendar Evento"):
+                    if nome_ev:
+                        id_unico = f"manual_{int(time.time())}"
+                        db["eventos_locais"].append({
+                            "id": id_unico, "title": nome_ev, "date": data_ev.isoformat(), "time": h_ini.strftime('%H:%M')
+                        })
+                        salvar_dados(db); st.rerun()
+
+        with col_dir_cal:
+            mes_atual = hoje.month
+            ano_atual = hoje.year
+            dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
+            
+            cal_objeto = pycalendar.Calendar(firstweekday=6)
+            mes_dias = cal_objeto.monthdayscalendar(ano_atual, mes_atual)
+            
+            dict_eventos = {}
+            for ev in db.get("eventos_locais", []):
+                ev_date_str = ev.get("date")
+                if ev_date_str:
+                    if ev_date_str not in dict_eventos: dict_eventos[ev_date_str] = []
+                    dict_eventos[ev_date_str].append(ev)
+
+            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
+            nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
+            
+            html_estilos_calendario = """
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+                body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
+                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); width: 100%; box-sizing: border-box; }
+                .calendar-header-day { text-align: center; font-weight: 600; font-size: 12px; color: #777777; text-transform: uppercase; padding-bottom: 3px; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
+                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
+                .calendar-cell.cell-empty { background-color: transparent; border: none; }
+                .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; align-self: flex-end; }
+                .cell-today .cell-number { color: #d4af37; font-size: 15px; }
+                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; max-height: 42px; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; box-sizing: border-box; }
+            </style>
+            """
+            
+            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
+            html_corpo += "<div class='jarvis-calendar-grid'>"
+            
+            for hd in dias_semana_headers:
+                html_corpo += f"<div class='calendar-header-day'>{hd}</div>"
+                
+            for semana in mes_dias:
+                for dia_num in semana:
+                    if dia_num == 0:
+                        html_corpo += "<div class='calendar-cell cell-empty'></div>"
+                    else:
+                        data_corrente = datetime.date(ano_atual, mes_atual, dia_num)
+                        data_corrente_str = data_corrente.isoformat()
+                        classe_hoje = "cell-today" if data_corrente == hoje else ""
+                        
+                        conteudo_eventos = ""
+                        if data_corrente_str in dict_eventos:
+                            conteudo_eventos += "<div class='events-wrapper'>"
+                            for ev in dict_eventos[data_corrente_str]:
+                                titulo_limpo = ev.get("title", "Compromisso")
+                                conteudo_eventos += f"<div class='event-tag' title='{titulo_limpo}'>{titulo_limpo}</div>"
+                            conteudo_eventos += "</div>"
+                                
+                        html_corpo += f"<div class='calendar-cell {classe_hoje}'>"
+                        html_corpo += f"<div class='cell-number'>{dia_num}</div>"
+                        html_corpo += conteudo_eventos
+                        html_corpo += "</div>"
+                        
+            html_corpo += "</div>"
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
+        
+        eventos_cadastrados = db.get("eventos_locais", [])
+        if not eventos_cadastrados:
+            st.info("Nenhum compromisso agendado até o momento.")
+        else:
+            eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
+            
+            for idx, ev in enumerate(eventos_ordenados):
+                try:
+                    data_convertida = datetime.date.fromisoformat(ev["date"]).strftime("%d/%m/%Y")
+                except:
+                    data_convertida = ev["date"]
+                
+                col_info_ev, col_acao_ev = st.columns([5, 1])
+                with col_info_ev:
+                    st.markdown(f"**{ev['title']}** —  `{data_convertida}` às  `{ev['time']}`")
+                with col_acao_ev:
+                    if st.button("Remover", key=f"del_{ev.get('id', idx)}"):
+                        db["eventos_locais"].remove(ev)
+                        salvar_dados(db)
+                        st.rerun()
