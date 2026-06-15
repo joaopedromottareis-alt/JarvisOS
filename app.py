@@ -8,7 +8,7 @@ import re
 import calendar as pycalendar
 from groq import Groq
 
-# ==================== CONFIGURAÇÃO DA IA (BLINDADA) ====================
+# ==================== CONFIGURAÇÃO DA IA ====================
 API_KEY = os.environ.get("GROQ_API_KEY")
 
 if not API_KEY and "GROQ_API_KEY" in st.secrets:
@@ -21,16 +21,25 @@ if API_KEY:
     except Exception:
         client = None
 
-# Centralizando no modelo mais potente para garantir estabilidade na geração de JSON
 MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
+# Dicionário de Ícones SVG com gradiente dourado
+ICONES = {
+    "jarvis": """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 2L2 22h4l3-6h6l3 6h4L12 2zm-2.12 12L12 9.75 14.12 14H9.88z" fill="url(#gold-grad)"/></svg>""",
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
+    "estatisticas": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="url(#gold-grad)"/></svg>"""
+}
+
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     .stApp { 
         background-color: #050505 !important; 
@@ -59,6 +68,9 @@ st.markdown("""
         font-weight: 700 !important; 
         letter-spacing: -0.5px !important;
         margin-bottom: 25px !important;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
     
     .jarvis-brand {
@@ -86,7 +98,7 @@ st.markdown("""
         margin-bottom: 12px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
         padding-bottom: 8px;
     }
@@ -148,11 +160,12 @@ if "username" not in st.session_state: st.session_state.username = None
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    st.markdown("<h2 class='custom-title'>✨ ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>", unsafe_allow_html=True)
+    header_html = f"<h2 class='custom-title'>{ICONES['jarvis']} ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>"
+    st.markdown(header_html, unsafe_allow_html=True)
     modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
     
     if modo_tela == "LOGIN":
-        st.markdown("### 🔑 LOGIN DO OPERADOR")
+        st.markdown("### LOGIN DO OPERADOR")
         input_user = st.text_input("USERNAME:", key="login_username").strip().lower()
         input_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", key="login_password")
         
@@ -169,7 +182,7 @@ if not st.session_state.autenticado:
         st.stop()
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
-        st.markdown("### 👋 CRIAR NOVA CONTA")
+        st.markdown("### CRIAR NOVA CONTA")
         novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
         novo_user = st.text_input("USERNAME (SEM ESPAÇOS):").strip().lower()
         nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password")
@@ -216,7 +229,8 @@ if st.session_state.autenticado and username:
     # --- HEADER ---
     col_titulo_sistema, col_botao_logout = st.columns([4, 1])
     with col_titulo_sistema:
-        st.markdown("""<h1 class='custom-title' style='margin-bottom: 0px !important;'>🔱 <span class='jarvis-brand'>JARVIS OS</span></h1>""", unsafe_allow_html=True)
+        header_dashboard = f"<h1 class='custom-title' style='margin-bottom: 0px !important;'>{ICONES['jarvis']} <span class='jarvis-brand'>JARVIS OS</span></h1>"
+        st.markdown(header_dashboard, unsafe_allow_html=True)
     with col_botao_logout:
         if st.button("SAIR DA SESSÃO"):
             st.session_state.autenticado = False
@@ -225,17 +239,17 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- MOTOR DE EXECUÇÃO DUPLO DO JARVIS ---
+    # --- MOTOR DE EXECUÇÃO DUPLO ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
         if not API_KEY or client is None:
-            return "⚠️ **Sistemas offline:** Nenhuma chave configurada. Por favor, adicione a variável `GROQ_API_KEY` nas configurações ocultas (Secrets) do seu servidor."
+            return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
             "Responda ao usuário com extrema imponência, elegância e eficiência britânica. "
-            "Se o usuário pediu para marcar uma atividade, compromisso, tarefa de escola ou geografia, confirme elegantemente na resposta."
+            "Se o usuário pediu para marcar uma atividade, confirme elegantemente na resposta."
         )
         
         try:
@@ -247,18 +261,17 @@ if st.session_state.autenticado and username:
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
         except Exception as e:
             if "401" in str(e) or "invalid_api_key" in str(e).lower():
-                return "⚠️ **Falha Crítica:** A chave configurada nos Secrets foi considerada INVÁLIDA ou BLOQUEADA pelo Groq. Por favor, gere uma nova chave no painel do Groq e atualize seus Secrets."
-            return f"⚠️ **Instabilidade nos Servidores:** {str(e)}"
+                return " Falha Crítica: A chave configurada nos Secrets foi considerada INVÁLIDA pelo Groq."
+            return f" Instabilidade nos Servidores: {str(e)}"
 
-        # Módulo de extração aprimorado para garantir que novos itens entrem na lista
         try:
             prompt_sistema_extrator = (
                 f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
-                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'. Isso fará com que o item apareça nos Objetivos Ativos e no Timer Pomodoro.\n"
-                "2. Se o comando contiver referências de tempo ou data (como hoje, amanhã, determinado horário, às X horas), você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD correta e o horário HH:MM correspondente.\n\n"
-                "Esquema JSON estrito que você deve retornar:\n"
+                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "Esquema JSON estrito:\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
                 "  \"novas_metas\": [ {\"nome\": \"Estudar Geografia\", \"categoria\": \"Estudos\"} ],\n"
@@ -277,7 +290,6 @@ if st.session_state.autenticado and username:
             dados_brutos = extracao_dados.choices[0].message.content.strip()
             resultado = json.loads(dados_brutos)
             
-            # Gravação de Metas / Objetivos do Pomodoro
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
                     if isinstance(nova_m, dict) and "nome" in nova_m:
@@ -290,7 +302,6 @@ if st.session_state.autenticado and username:
                         })
                 salvar_dados(db)
                 
-            # Gravação de Eventos na Agenda
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for novo_ev in resultado.get("novos_eventos", []):
                     if isinstance(novo_ev, dict) and "title" in novo_ev:
@@ -303,20 +314,21 @@ if st.session_state.autenticado and username:
                 salvar_dados(db)
                 
         except Exception as e:
-            print(f"[Erro de Extração Oculto]: {str(e)}")
+            print(f"[Erro de Extração]: {str(e)}")
             
         return resposta_texto_jarvis
 
     # ==================== NAVEGAÇÃO POR ABAS ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario, aba_graficos = st.tabs([
-        "💬 CONVERSA & METAS", "⏱️ TIMER DE FOCO", "🥗 SAÚDE & FITNESS", "📅 AGENDA", "📊 ESTATÍSTICAS"
+        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA", "ESTATÍSTICAS"
     ])
 
     # 1. CONVERSA & METAS
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
-            st.markdown('<div class="titulo-card">🔱 CONVERSAR COM O JARVIS</div>', unsafe_allow_html=True)
+            card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
@@ -326,21 +338,23 @@ if st.session_state.autenticado and username:
                 st.session_state.messages.append({"role": "assistant", "content": resposta})
                 st.rerun()
         with col_lista:
-            st.markdown('<div class="titulo-card">🎯 OBJETIVOS ATIVOS</div>', unsafe_allow_html=True)
+            card_html = f'<div class="titulo-card">{ICONES["jarvis"]} OBJETIVOS ATIVOS</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
             metas_ativas = [m for m in db["metas"] if not m["concluida"]]
             if not metas_ativas: st.info("Sem diretrizes ativas.")
             else:
                 for m in db["metas"]:
                     if not m["concluida"]:
                         c1, c2, c3 = st.columns([3, 1, 1])
-                        c1.markdown(f"✨ **{m['nome']}**<br><span style='color:#777777;'>{m['categoria']}</span>", unsafe_allow_html=True)
+                        c1.markdown(f"**{m['nome']}**<br><span style='color:#777777;'>{m['categoria']}</span>", unsafe_allow_html=True)
                         c2.markdown(f"<div style='padding-top:10px; color:#d4af37;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
                         if c3.button("✓", key=m["id"]):
                             m["concluida"] = True; salvar_dados(db); st.rerun()
 
     # 2. POMODORO
     with aba_pomodoro:
-        st.markdown('<div class="titulo-card">⏱️ TIMER DE FOCO</div>', unsafe_allow_html=True)
+        card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
         if not metas_validas: st.warning("Nenhum objetivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
@@ -362,7 +376,7 @@ if st.session_state.autenticado and username:
                     st.rerun()
             with cp2:
                 m_vis, s_vis = divmod(st.session_state.pomo_segundos_restantes, 60)
-                st.markdown(f"<div style='text-align: center;'><h1 style='font-size: 75px; color:#ffffff;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37;'>🎯 {meta_alvo}</span></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: center;'><h1 style='font-size: 75px; color:#ffffff;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37;'> {meta_alvo}</span></div>", unsafe_allow_html=True)
             
             if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
                 time.sleep(1)
@@ -379,7 +393,8 @@ if st.session_state.autenticado and username:
     with aba_saude:
         cs1, cs2 = st.columns(2)
         with cs1:
-            st.markdown('<div class="titulo-card">💧 DIRETRIZES DE HIDRATAÇÃO</div>', unsafe_allow_html=True)
+            card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
             peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)))
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
@@ -390,7 +405,8 @@ if st.session_state.autenticado and username:
             if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
             if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
-            st.markdown('<div class="titulo-card">🍳 REFEIÇÕES DO DIA</div>', unsafe_allow_html=True)
+            card_html = f'<div class="titulo-card">{ICONES["saude"]} REFEIÇÕES DO DIA</div>'
+            st.markdown(card_html, unsafe_allow_html=True)
             refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche")
             if st.button("Registrar MacroAlimento"):
                 if refeicao:
@@ -399,7 +415,8 @@ if st.session_state.autenticado and username:
 
     # 4. AGENDA
     with aba_calendario:
-        st.markdown('<div class="titulo-card">📅 SEU CRONOGRAMA DE ATIVIDADES</div>', unsafe_allow_html=True)
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
         col_esq_info, col_dir_cal = st.columns([1.2, 2.3])
         
         hoje = datetime.date.today()
@@ -499,7 +516,8 @@ if st.session_state.autenticado and username:
             st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="titulo-card">📋 LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>', unsafe_allow_html=True)
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
         
         eventos_cadastrados = db.get("eventos_locais", [])
         if not eventos_cadastrados:
@@ -515,7 +533,7 @@ if st.session_state.autenticado and username:
                 
                 col_info_ev, col_acao_ev = st.columns([5, 1])
                 with col_info_ev:
-                    st.markdown(f"🔹 **{ev['title']}** — 📅 `{data_convertida}` às ⏰ `{ev['time']}`")
+                    st.markdown(f"**{ev['title']}** —  `{data_convertida}` às  `{ev['time']}`")
                 with col_acao_ev:
                     if st.button("Remover", key=f"del_{ev.get('id', idx)}"):
                         db["eventos_locais"] = [item for item in db["eventos_locais"] if item.get("id") != ev.get("id")]
@@ -524,7 +542,8 @@ if st.session_state.autenticado and username:
 
     # 5. ESTATÍSTICAS
     with aba_graficos:
-        st.markdown('<div class="titulo-card">📊 DESEMPENHO OPERACIONAL</div>', unsafe_allow_html=True)
+        card_html = f'<div class="titulo-card">{ICONES["estatisticas"]} DESEMPENHO OPERACIONAL</div>'
+        st.markdown(card_html, unsafe_allow_html=True)
         if db.get("metas"):
             concluidas = sum(1 for m in db["metas"] if m["concluida"])
             total = len(db["metas"])
