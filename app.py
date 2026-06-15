@@ -10,7 +10,7 @@ from groq import Groq
 
 # ==================== CONFIGURAÇÃO DA IA (GROQ) ====================
 # 🔴 ATENÇÃO: Substitua a string abaixo pela sua NOVA chave gerada em: https://console.groq.com/keys
-API_KEY = "SUA_NOVA_CHAVE_DO_GROQ_AQUI"
+API_KEY = "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"
 
 try:
     client = Groq(api_key=API_KEY)
