@@ -27,9 +27,11 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a nova Logo)
+# Caminho da imagem da logo oficial do usuário
+LOGO_PATH = "logo.png"
+
+# Dicionário de Ícones SVG secundários para os cards do sistema
 ICONES = {
-    "jarvis": """<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25c-.27-.17-.4-.49-.31-.8.09-.31.35-.53.67-.53h14.48c.32 0 .58.22.67.53.09.31-.04.63-.31.8z" fill="url(#gold-grad)"/><path d="M12 14.25c-.34 0-.67-.09-.96-.26L3.1 9.05V18c0 .55.45 1 1 1h15.8c.55 0 1-.45 1-1V9.05l-7.94 4.94c-.29.17-.62.26-.96.26z" fill="url(#gold-grad)"/><circle cx="12" cy="11.5" r="1.5" fill="url(#gold-grad)"/></svg>""",
     "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
     "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
     "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
@@ -63,6 +65,7 @@ st.markdown("""
     div[data-testid="stHorizontalBlock"] {
         gap: 2rem !important;
         width: 100% !important;
+        align-items: center !important;
     }
 
     div[data-testid="column"] {
@@ -70,6 +73,13 @@ st.markdown("""
         min-width: 0px !important;
     }
     
+    .custom-title-container {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
     .custom-title {
         font-family: 'Kanit', sans-serif !important;
         background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
@@ -77,10 +87,8 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         font-weight: 700 !important; 
         letter-spacing: -0.5px !important;
-        margin-bottom: 25px !important;
-        display: flex;
-        align-items: center;
-        gap: 14px;
+        margin: 0 !important;
+        padding: 0 !important;
     }
     
     .jarvis-brand {
@@ -174,8 +182,14 @@ if "username" not in st.session_state: st.session_state.username = None
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    header_html = f"<h2 class='custom-title'>{ICONES['jarvis']} ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>"
-    st.markdown(header_html, unsafe_allow_html=True)
+    # Header de Login Dinâmico com st.image local
+    col_logo_login, col_txt_login = st.columns([0.12, 2])
+    with col_logo_login:
+        if os.path.exists(LOGO_PATH):
+            st.image(LOGO_PATH, width=54)
+    with col_txt_login:
+        st.markdown("<div class='custom-title-container'><h2 class='custom-title'>ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2></div>", unsafe_allow_html=True)
+        
     modo_tela = st.radio("SELECIONE A OPERAÇÃO:", ["LOGIN", "REGISTRAR NOVA CONTA"], horizontal=True)
     
     if modo_tela == "LOGIN":
@@ -240,11 +254,13 @@ if st.session_state.autenticado and username:
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # --- HEADER ---
-    col_titulo_sistema, col_botao_logout = st.columns([5, 1])
+    # --- HEADER PRINCIPAL ADAPTADO ---
+    col_logo_main, col_titulo_sistema, col_botao_logout = st.columns([0.12, 5, 1.2])
+    with col_logo_main:
+        if os.path.exists(LOGO_PATH):
+            st.image(LOGO_PATH, width=54)
     with col_titulo_sistema:
-        header_dashboard = f"<h1 class='custom-title' style='margin-bottom: 0px !important;'>{ICONES['jarvis']} <span class='jarvis-brand'>JARVIS OS</span></h1>"
-        st.markdown(header_dashboard, unsafe_allow_html=True)
+        st.markdown("<div class='custom-title-container' style='margin-bottom: 0px !important;'><h1 class='custom-title'> <span class='jarvis-brand'>JARVIS OS</span></h1></div>", unsafe_allow_html=True)
     with col_botao_logout:
         if st.button("SAIR DA SESSÃO"):
             st.session_state.autenticado = False
@@ -352,8 +368,8 @@ if st.session_state.autenticado and username:
                 st.session_state.messages.append({"role": "assistant", "content": resposta})
                 st.rerun()
         with col_lista:
-            card_html = f'<div class="titulo-card">{ICONES["jarvis"]} OBJETIVOS ATIVOS</div>'
-            st.markdown(card_html, unsafe_allow_html=True)
+            # Integrando a logo de forma limpa na listagem de diretrizes
+            st.markdown("<div style='display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(212,175,55,0.15); padding-bottom:8px; margin-bottom:12px;'><span style='color:#d4af37; font-family:\"Kanit\", sans-serif; font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:1.5px;'>OBJETIVOS ATIVOS</span></div>", unsafe_allow_html=True)
             metas_ativas = [m for m in db["metas"] if not m["concluida"]]
             if not metas_ativas: st.info("Sem diretrizes ativas.")
             else:
