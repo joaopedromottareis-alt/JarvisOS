@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import os
 
 # 1. CONFIGURAÇÃO PREMIUM DA PÁGINA STREAMLIT
@@ -18,7 +17,6 @@ if 'current_tab' not in st.session_state:
     st.session_state.current_tab = "gerenciamento"
 
 # --- BACKEND INTEGRAÇÃO DE INTELIGÊNCIA ARTIFICIAL (GROQ) ---
-# Tenta importar a biblioteca oficial da Groq Cloud
 try:
     from groq import Groq
     groq_disponivel = True
@@ -27,7 +25,6 @@ except ImportError:
 
 def chamar_jarvis_ia(prompt_usuario):
     """Função para gerenciar chamadas de IA dinâmicas usando a API da Groq"""
-    # Procura a chave de API nas variáveis de ambiente ou segredos do Streamlit
     api_key = os.environ.get("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY", None)
     
     if not groq_disponivel:
@@ -40,7 +37,7 @@ def chamar_jarvis_ia(prompt_usuario):
         completion = client.chat.completions.create(
             model="llama3-8b-8192",
             messages=[
-                {"role": "system", "content": f"Você é o Jarvis OS, um assistente operacional avançado e refinado. Responda ao usuário {st.session_state.username} de forma polida, prestativa e focada em produtividade."},
+                {"role": "system", "content": f"Você é o Jarvis OS, um assistente operacional avançado e refinado. Responda ao usuário {st.session_state.username} de forma polida, prestativa e focada em produtividade e saúde de alta performance. Seja direto."},
                 {"role": "user", "content": prompt_usuario}
             ],
             temperature=0.7,
@@ -50,9 +47,10 @@ def chamar_jarvis_ia(prompt_usuario):
     except Exception as e:
         return f"Falha na conexão neural com a rede Groq: {str(e)}"
 
-# --- ESTILIZAÇÃO CSS AVANÇADA (Layout Expansivo de Tela Cheia) ---
-estilos_css = """
+# --- ESTILIZAÇÃO GLOBAL (CSS injetado para unificar o layout) ---
+st.markdown("""
 <style>
+    /* Reset e Variáveis de Design */
     :root {
         --bg-main: #080705;
         --bg-card: #110e0a;
@@ -63,69 +61,55 @@ estilos_css = """
         --border-color: #231c12;
     }
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: 'Montserrat', sans-serif;
+    /* Modificando containers nativos do Streamlit para evitar divisões feias */
+    .stApp {
+        background-color: #080705 !important;
+    }
+    
+    .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 1400px !important;
     }
 
-    body {
-        background-color: var(--bg-main);
-        color: var(--text-main);
-        padding: 30px;
-    }
-
-    /* Layout do Painel Principal (Ocupa a Guia Toda) */
-    .dashboard-container {
+    /* Estilos das Janelas e Paineis Uniformes */
+    .jarvis-container {
         width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
-        background: radial-gradient(circle at center, #14100a 0%, #070604 100%);
-        border: 2px solid var(--border-color);
-        border-radius: 24px;
-        padding: 40px;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        background: linear-gradient(145deg, #120e09 0%, #070604 100%);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 35px;
+        margin-bottom: 25px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
     }
 
-    /* Cabeçalho Superior */
     .jarvis-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid #231c12;
-        padding-bottom: 25px;
-        margin-bottom: 35px;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
     }
 
     .brand-title {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 700;
-        letter-spacing: 3px;
-        background: var(--gold-gradient);
+        letter-spacing: 2px;
+        background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
     .status-pill {
         font-size: 11px;
-        color: #ff4a4a;
+        color: #ffd700;
         font-weight: 600;
-        background: rgba(255, 74, 74, 0.1);
+        background: rgba(212, 175, 55, 0.1);
         padding: 6px 14px;
         border-radius: 20px;
-        border: 1px solid rgba(255, 74, 74, 0.2);
+        border: 1px solid rgba(212, 175, 55, 0.2);
         letter-spacing: 1px;
-    }
-
-    /* Cartões e Containers de Conteúdo */
-    .panel-card {
-        background: linear-gradient(145deg, #16120d 0%, #0e0b08 100%);
-        border: 1px solid #2d2314;
-        border-radius: 16px;
-        padding: 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
     .panel-title {
@@ -133,49 +117,50 @@ estilos_css = """
         color: var(--gold-primary);
         font-weight: 600;
         margin-bottom: 15px;
+        letter-spacing: 1px;
     }
 
-    /* Orbe de IA Inteligente */
+    /* Orbe de IA */
     .orbe-glow {
-        width: 140px;
-        height: 140px;
-        background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%);
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 20px auto;
+        margin: 10px auto 20px auto;
     }
 
     .orbe-core {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         background: #080705;
         border-radius: 50%;
         border: 2px solid var(--gold-primary);
-        box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
     }
 
-    /* Cronograma de Calendário Expandido Desktop */
+    /* Grid do Calendário Desktop Completo */
     .grid-calendario {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 15px;
-        margin-top: 20px;
+        gap: 12px;
+        margin-top: 15px;
     }
 
     .dia-semana {
         text-align: center;
         font-weight: 600;
         color: var(--text-muted);
-        font-size: 13px;
+        font-size: 12px;
         text-transform: uppercase;
     }
 
     .celula-dia {
         background: #0b0906;
         border: 1px solid #1f1910;
-        border-radius: 12px;
-        height: 100px;
+        border-radius: 10px;
+        height: 95px;
         padding: 10px;
         display: flex;
         flex-direction: column;
@@ -183,13 +168,13 @@ estilos_css = """
     }
 
     .celula-dia.hoje {
-        border: 2px solid var(--gold-primary);
-        background: #19140e;
+        border: 1px solid var(--gold-primary);
+        background: #16120d;
     }
 
     .num-dia {
         font-weight: 700;
-        color: #635747;
+        color: #524738;
     }
 
     .celula-dia.hoje .num-dia {
@@ -197,146 +182,128 @@ estilos_css = """
     }
 
     .evento-tag {
-        background: rgba(212, 175, 55, 0.15);
-        color: #fcefd2;
-        border-left: 3px solid var(--gold-primary);
-        padding: 4px 8px;
-        font-size: 11px;
-        border-radius: 4px;
-        font-weight: 500;
+        background: rgba(212, 175, 55, 0.1);
+        color: #f2e3c6;
+        border-left: 2px solid var(--gold-primary);
+        padding: 3px 6px;
+        font-size: 10px;
+        border-radius: 3px;
+    }
+
+    /* Customizações extras para inputs nativos parecerem premium */
+    .stTextInput>div>div>input {
+        background-color: #0d0a07 !important;
+        color: #ffffff !important;
+        border: 1px solid #231c12 !important;
     }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-"""
+""", unsafe_allow_html=True)
 
-# --- ETAPA DE AUTENTICAÇÃO / LOGIN ---
+# --- ETAPA DE LOGIN ---
 if not st.session_state.logged_in:
-    # Exibição do Painel de Entrada Centralizado
-    interface_login = f"""
-    {estilos_css}
-    <div class="dashboard-container" style="max-width: 600px; margin: 80px auto; text-align: center;">
-        <header class="jarvis-header" style="justify-content: center; border-bottom: none;">
-            <h1 class="brand-title">INICIALIZAR CORTEX</h1>
-        </header>
-        <p style="color: #8e8271; font-size: 14px; margin-bottom: 30px;">Identifique-se para descriptografar os módulos de produtividade.</p>
+    st.markdown("""
+    <div class="jarvis-container" style="max-width: 550px; margin: 60px auto; text-align: center;">
+        <div class="brand-title" style="margin-bottom: 10px;">INICIALIZAR CORTEX</div>
+        <p style="color: #8e8271; font-size: 13px;">Identifique-se para descriptografar os módulos operacionais.</p>
     </div>
-    """
-    components.html(interface_login, height=220)
+    """, unsafe_allow_html=True)
     
-    # Inputs nativos do Streamlit para controle preciso de dados e ações
-    with st.container():
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            input_user = st.text_input("Username / Operador", placeholder="Digite seu nome corporativo...")
-            btn_entrar = st.button("Autenticar Conexão", use_container_width=True)
-            
-            if btn_entrar and input_user:
+    col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
+    with col_l2:
+        input_user = st.text_input("Operador / Username", placeholder="Digite seu login...", key="login_username")
+        if st.button("Autenticar Conexão", use_container_width=True):
+            if input_user:
                 st.session_state.username = input_user
                 st.session_state.logged_in = True
                 st.rerun()
+            else:
+                st.error("Por favor, digite um username válido.")
+
 else:
-    # --- HUB OPERACIONAL PRINCIPAL (USUÁRIO LOGADO) ---
+    # --- HUB OPERACIONAL PRINCIPAL (TELA UNIFICADA) ---
     
-    # Cabeçalho Fixo do Sistema Operacional
-    header_html = f"""
-    {estilos_css}
-    <div class="dashboard-container" style="padding-bottom: 10px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
-        <header class="jarvis-header" style="margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div style="width: 12px; height: 12px; background: var(--gold-gradient); border-radius: 50%;"></div>
-                <h1 class="brand-title">JARVIS OS CORE</h1>
+    # Cabeçalho Superior Dinâmico com Nome do Usuário Logado
+    st.markdown(f"""
+    <div class="jarvis-container" style="padding-bottom: 15px; margin-bottom: 15px;">
+        <div class="jarvis-header" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 8px; height: 8px; background: var(--gold-gradient); border-radius: 50%;"></div>
+                <div class="brand-title">JARVIS OS CORE</div>
             </div>
             <div style="display: flex; align-items: center; gap: 20px;">
                 <span style="font-size: 13px; color: #8e8271;">Operador: <strong style="color: #fff;">{st.session_state.username}</strong></span>
                 <div class="status-pill">SISTEMA CONECTADO</div>
             </div>
-        </header>
+        </div>
     </div>
-    """
-    components.html(header_html, height=120)
+    """, unsafe_allow_html=True)
 
-    # Menu de Navegação Superior Integrado via Streamlit (Janelas completas separadas)
-    col_nav1, col_nav2, col_nav3, col_nav4 = st.columns(4)
+    # Menu de Janelas Únicas (Substituído emojis por Labels com Design Uniforme)
+    col_nav1, col_nav2, col_nav3, col_nav4, col_nav5 = st.columns(5)
     with col_nav1:
-        if st.button("🎛️ Painel de Gerenciamento", use_container_width=True):
+        if st.button("Painel de Controle", use_container_width=True):
             st.session_state.current_tab = "gerenciamento"
     with col_nav2:
-        if st.button("🎯 Planejar Nova Meta", use_container_width=True):
+        if st.button("Planejar Metas", use_container_width=True):
             st.session_state.current_tab = "nova_meta"
     with col_nav3:
-        if st.button("📅 Cronograma Mensal", use_container_width=True):
+        if st.button("Cronograma", use_container_width=True):
             st.session_state.current_tab = "calendario"
     with col_nav4:
-        if st.button("⏳ Sessão de Foco", use_container_width=True):
+        if st.button("Sessão Foco", use_container_width=True):
             st.session_state.current_tab = "foco"
+    with col_nav5:
+        if st.button("Sinais Vitais / Saúde", use_container_width=True):
+            st.session_state.current_tab = "saude"
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-color: #1f1910; margin: 10px 0 25px 0;'>", unsafe_allow_html=True)
 
-    # --- JANELA 1: GERENCIAMENTO (TELA CHEIA) ---
+    # --- JANELA 1: GERENCIAMENTO ---
     if st.session_state.current_tab == "gerenciamento":
-        html_gerenciamento = f"""
-        {estilos_css}
-        <div class="dashboard-container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
-            <div class="panel-card">
-                <div class="panel-title">Relatório Semanal de Atividades</div>
-                <p style="font-size: 14px; color: #c9beaf; line-height: 1.6; margin-bottom: 20px;">
-                    Olá, <strong>{st.session_state.username}</strong>. Analisamos seus padrões de trabalho mais recentes. Atualmente, existem tarefas administrativas e relatórios estruturais aguardando sua validação final.
-                </p>
-                <div style="font-size: 12px; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; border: 1px solid #231c12; display: inline-block;">
-                    Arquivos em Cache: Relatorio_Jan.zip, Documentos_Core.tar +3
-                </div>
+        st.markdown(f"""
+        <div class="jarvis-container">
+            <div class="panel-title">Relatório Semanal de Atividades</div>
+            <p style="font-size: 14px; color: #c9beaf; line-height: 1.6; margin-bottom: 15px;">
+                Olá, <strong>{st.session_state.username}</strong>. Mapeamos os seus parâmetros operacionais mais recentes. Existem pendências estruturais prontas para sua triagem e aprovação de relatórios.
+            </p>
+            <div style="font-size: 11px; color: #8e8271; background: #0b0906; padding: 10px; border-radius: 6px; border: 1px solid #231c12; display: inline-block;">
+                Módulos Locais carregados com sucesso.
             </div>
         </div>
-        """
-        components.html(html_gerenciamento, height=280)
+        """, unsafe_allow_html=True)
         
-        # Área de interação com a IA da Groq Cloud
         st.markdown("### 🧠 Consultar Núcleo Cognitivo (Jarvis IA)")
-        pergunta = st.text_input(f"Envie uma instrução operacional, {st.session_state.username}:", placeholder="Ex: Crie um sumário para o relatório de Janeiro...")
+        pergunta = st.text_input(f"Instrua o Cortex, {st.session_state.username}:", placeholder="Ex: Prepare os tópicos essenciais para o planejamento estratégico...")
         if st.button("Transmitir Comando"):
             if pergunta:
-                with st.spinner("Processando através dos clusters da Groq..."):
+                with st.spinner("Conectando aos clusters de processamento Groq..."):
                     resposta_ia = chamar_jarvis_ia(pergunta)
                     st.info(resposta_ia)
-            else:
-                st.warning("Por favor, insira um comando válido antes de transmitir.")
 
-    # --- JANELA 2: NOVA META (TELA CHEIA COM ORBE CENTRAL) ---
+    # --- JANELA 2: NOVA META ---
     elif st.session_state.current_tab == "nova_meta":
-        html_meta = f"""
-        {estilos_css}
-        <div class="dashboard-container" style="border-top-left-radius: 0; border-top-right-radius: 0; text-align: center;">
-            <div class="orbe-glow">
-                <div class="orbe-core"></div>
-            </div>
-            <h2 style="font-weight: 500; margin-bottom: 30px; letter-spacing: 1px;">O que pretende planejar hoje, {st.session_state.username}?</h2>
+        st.markdown(f"""
+        <div class="jarvis-container" style="text-align: center;">
+            <div class="orbe-glow"><div class="orbe-core"></div></div>
+            <div class="panel-title" style="margin-bottom: 5px;">Direcionamento Estratégico</div>
+            <p style="color: #8e8271; font-size: 14px;">O que pretende arquitetar e organizar hoje, {st.session_state.username}?</p>
         </div>
-        """
-        components.html(html_meta, height=280)
+        """, unsafe_allow_html=True)
         
         with st.container():
-            st.markdown("#### Configuração de Vetor de Meta")
-            meta_txt = st.text_input("Definição do Objetivo Comercial / Acadêmico:")
-            horario_meta = st.text_input("Janela Recomendada de Execução:", placeholder="Ex: 20:30 - Hoje")
-            if st.button("Fixar Meta no Painel"):
-                st.success(f"Meta mapeada com sucesso para o operador {st.session_state.username}!")
+            meta_txt = st.text_input("Definição clara do Objetivo Principal:")
+            horario_meta = st.text_input("Prazo ou Janela sugerida:", placeholder="Ex: Até as 18:00 - Hoje")
+            if st.button("Fixar Meta Operacional"):
+                st.success(f"Objetivo devidamente registrado sob a custódia do operador {st.session_state.username}.")
 
-    # --- JANELA 3: CALENDÁRIO MENSAL MIGRADO DE DESKTOP ---
+    # --- JANELA 3: CRONOGRAMA ---
     elif st.session_state.current_tab == "calendario":
-        # Montagem dinâmica do HTML do calendário em tamanho de tela cheia
         dias_semana_html = "".join(f'<div class="dia-semana">{d}</div>' for d in ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"])
-        
-        celulas_dias_html = ""
-        # Offset inicial para alinhamento correto do calendário
-        celulas_dias_html += "<div></div>" 
+        celulas_dias_html = "<div></div>"  # Alinhamento
         
         for dia in range(1, 29):
             classe_hoje = "hoje" if dia == 15 else ""
-            conteudo_evento = ""
-            
-            if dia == 19:
-                conteudo_evento = '<div class="evento-tag">📅 Prova de Geografia</div>'
-                
+            conteudo_evento = '<div class="evento-tag">Prova de Geografia</div>' if dia == 19 else ""
             celulas_dias_html += f"""
             <div class="celula-dia {classe_hoje}">
                 <div class="num-dia">{dia}</div>
@@ -344,28 +311,47 @@ else:
             </div>
             """
 
-        html_calendario = f"""
-        {estilos_css}
-        <div class="dashboard-container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
-            <h3 style="font-weight: 500; letter-spacing: 1px; margin-bottom: 25px; text-align: center;">VETOR DE CRONOGRAMA INTEGRADO</h3>
+        st.markdown(f"""
+        <div class="jarvis-container">
+            <div class="panel-title" style="text-align: center; margin-bottom: 20px;">Linha do Tempo e Agendamentos</div>
             <div class="grid-calendario">
                 {dias_semana_html}
                 {celulas_dias_html}
             </div>
         </div>
-        """
-        components.html(html_calendario, height=620)
+        """, unsafe_allow_html=True)
 
-    # --- JANELA 4: SESSÃO DE FOCO (POMODORO) ---
+    # --- JANELA 4: SESSÃO FOCO ---
     elif st.session_state.current_tab == "foco":
-        html_foco = f"""
-        {estilos_css}
-        <div class="dashboard-container" style="border-top-left-radius: 0; border-top-right-radius: 0; text-align: center; padding: 60px 40px;">
-            <h3 style="font-weight: 600; letter-spacing: 1px; color: var(--text-muted);">MÓDULO DE PRODUTIVIDADE ISOLADA</h3>
-            <div style="font-size: 84px; font-weight: 300; margin: 30px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px;">
+        st.markdown("""
+        <div class="jarvis-container" style="text-align: center; padding: 50px 20px;">
+            <div class="panel-title" style="color: #8e8271; font-size: 12px; letter-spacing: 2px;">MÓDULO DE ISOLAMENTO COGNITIVO</div>
+            <div style="font-size: 72px; font-weight: 300; margin: 20px 0; background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px;">
                 25:00
             </div>
         </div>
-        """
-        components.html(html_foco, height=320)
-        st.button("Disparar Fluxo de Concentração Alpha", use_container_width=True)
+        """, unsafe_allow_html=True)
+        st.button("Iniciar Ciclo de Concentração", use_container_width=True)
+
+    # --- JANELA 5: MÓDULO SAÚDE (RESTAURADO E UNIFICADO) ---
+    elif st.session_state.current_tab == "saude":
+        st.markdown(f"""
+        <div class="jarvis-container">
+            <div class="panel-title">Módulo de Bio-Performance & Saúde</div>
+            <p style="font-size: 14px; color: #c9beaf; margin-bottom: 25px;">
+                Gerenciamento de energia física e foco do operador <strong>{st.session_state.username}</strong>.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Grid interno limpo e nativo para métricas de saúde
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            st.metric(label="Consumo Hidrológico", value="1.8 L", delta="Meta: 3.0 L")
+        with col_s2:
+            st.metric(label="Descanso Concluído", value="7h 45m", delta="Qualidade Ótima")
+        with col_s3:
+            st.metric(label="Rendimento Físico Diário", value="84%", delta="Estável")
+            
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.button("Sincronizar Dispositivos Biométricos", use_container_width=True)
