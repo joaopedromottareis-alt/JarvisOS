@@ -29,7 +29,7 @@ st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", init
 
 # Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a Nova Logo do Reator)
 ICONES = {
-    "jarvis": """<svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "jarvis": """<svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
