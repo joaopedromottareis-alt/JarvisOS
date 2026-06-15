@@ -59,7 +59,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS MODIFICADO: Estilos globais e customização de alto contraste das boxes de alimentos
+# CSS MODIFICADO: Estilos globais e customização de alto contraste (Versão Blindada para Mac)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -68,9 +68,10 @@ st.markdown("""
         background-color: #050505 !important; 
         color: #e5e5e5 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        background-image: 
-            radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.07) 0%, transparent 60%),
-            radial-gradient(circle at 90% 80%, rgba(184, 134, 11, 0.03) 0%, transparent 40%) !important;
+        
+        /* Compatibilidade total com Safari/Macbook (Gradiente linear visível em telas Retina) */
+        background-image: -webkit-linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
+        background-image: linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
         background-attachment: fixed !important;
     }
     
@@ -95,6 +96,7 @@ st.markdown("""
     
     .custom-title {
         font-family: 'Kanit', sans-serif !important;
+        background: -webkit-linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
         background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -107,6 +109,7 @@ st.markdown("""
     }
     
     .jarvis-brand {
+        background: -webkit-linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
         background: linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -144,6 +147,7 @@ st.markdown("""
     }
 
     .stButton>button { 
+        background: -webkit-linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
         border: none !important;
@@ -176,7 +180,6 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* ESTILOS EXCLUSIVOS PARA AS BOXES DE ALIMENTOS */
     .jarvis-food-container {
         display: flex;
         flex-direction: column;
