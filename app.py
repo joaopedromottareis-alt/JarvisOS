@@ -27,9 +27,9 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG com gradiente dourado executivo (Incluindo o novo "A")
+# Dicionário de Ícones SVG com gradiente dourado executivo (Atualizado com a nova Logo)
 ICONES = {
-    "jarvis": """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 2L1 21h4.5l2.25-4.5h8.5l2.25 4.5H23L12 2zm-2 11.5L12 9l2 4.5H10z" fill="url(#gold-grad)"/></svg>""",
+    "jarvis": """<svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25c-.27-.17-.4-.49-.31-.8.09-.31.35-.53.67-.53h14.48c.32 0 .58.22.67.53.09.31-.04.63-.31.8z" fill="url(#gold-grad)"/><path d="M12 14.25c-.34 0-.67-.09-.96-.26L3.1 9.05V18c0 .55.45 1 1 1h15.8c.55 0 1-.45 1-1V9.05l-7.94 4.94c-.29.17-.62.26-.96.26z" fill="url(#gold-grad)"/><circle cx="12" cy="11.5" r="1.5" fill="url(#gold-grad)"/></svg>""",
     "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
     "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
     "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
@@ -80,7 +80,7 @@ st.markdown("""
         margin-bottom: 25px !important;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
     }
     
     .jarvis-brand {
