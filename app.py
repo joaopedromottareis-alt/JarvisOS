@@ -27,7 +27,7 @@ MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
 st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
 
-# Dicionário de Ícones SVG com gradiente dourado
+# Dicionário de Ícones SVG com gradiente dourado executivo
 ICONES = {
     "jarvis": """<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="50%" stop-color="#f3e5ab"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 2L2 22h4l3-6h6l3 6h4L12 2zm-2.12 12L12 9.75 14.12 14H9.88z" fill="url(#gold-grad)"/></svg>""",
     "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
@@ -56,8 +56,19 @@ st.markdown("""
     }
     
     .block-container { 
-        padding: 3rem 5rem !important; 
+        padding: 2rem 3rem !important; 
         max-width: 100% !important; 
+    }
+    
+    /* Alinhamento simétrico para todas as estruturas de colunas */
+    div[data-testid="stHorizontalBlock"] {
+        gap: 2rem !important;
+        width: 100% !important;
+    }
+
+    div[data-testid="column"] {
+        flex: 1 1 0% !important;
+        min-width: 0px !important;
     }
     
     .custom-title {
@@ -86,6 +97,7 @@ st.markdown("""
         border-radius: 12px !important; 
         color: #ffffff !important;
         padding: 10px 16px !important;
+        width: 100% !important;
     }
 
     .titulo-card { 
@@ -117,11 +129,14 @@ st.markdown("""
         background-color: transparent !important; 
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         margin-bottom: 30px !important;
+        width: 100% !important;
     }
     
     .stTabs [data-baseweb="tab"] { 
         color: #777777 !important; 
         font-family: 'Kanit', sans-serif !important;
+        flex-grow: 1 !important;
+        text-align: center !important;
     }
     
     .stTabs [aria-selected="true"] { 
@@ -227,7 +242,7 @@ if st.session_state.autenticado and username:
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
     # --- HEADER ---
-    col_titulo_sistema, col_botao_logout = st.columns([4, 1])
+    col_titulo_sistema, col_botao_logout = st.columns([5, 1])
     with col_titulo_sistema:
         header_dashboard = f"<h1 class='custom-title' style='margin-bottom: 0px !important;'>{ICONES['jarvis']} <span class='jarvis-brand'>JARVIS OS</span></h1>"
         st.markdown(header_dashboard, unsafe_allow_html=True)
@@ -323,7 +338,7 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA", "ESTATÍSTICAS"
     ])
 
-    # 1. CONVERSA & METAS
+    # 1. CONVERSA & METAS (Dividido simetricamente 1 para 1)
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1])
         with col_ia:
@@ -351,21 +366,21 @@ if st.session_state.autenticado and username:
                         if c3.button("✓", key=m["id"]):
                             m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. POMODORO
+    # 2. POMODORO (Dividido simetricamente 1 para 1)
     with aba_pomodoro:
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
         if not metas_validas: st.warning("Nenhum objetivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
-            cp1, cp2 = st.columns(2)
+            cp1, cp2 = st.columns([1, 1])
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 minutos_slider = st.slider("Duração:", 1, 120, int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
                 if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_slider:
                     st.session_state.pomo_tempo_inicial_escolhido = minutos_slider
                     st.session_state.pomo_segundos_restantes = minutos_slider * 60
-                b1, b2 = st.columns(2)
+                b1, b2 = st.columns([1, 1])
                 if not st.session_state.pomo_rodando:
                     if b1.button("▶ INICIAR"): st.session_state.pomo_rodando = True; st.rerun()
                 else:
@@ -376,7 +391,7 @@ if st.session_state.autenticado and username:
                     st.rerun()
             with cp2:
                 m_vis, s_vis = divmod(st.session_state.pomo_segundos_restantes, 60)
-                st.markdown(f"<div style='text-align: center;'><h1 style='font-size: 75px; color:#ffffff;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37;'> {meta_alvo}</span></div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; padding-top: 20px;'><h1 style='font-size: 75px; color:#ffffff; margin: 0;'>{m_vis:02d}:{s_vis:02d}</h1><span style='color:#d4af37; font-weight: 600; font-size: 16px; margin-top: 10px;'> {meta_alvo}</span></div>", unsafe_allow_html=True)
             
             if st.session_state.pomo_rodando and st.session_state.pomo_segundos_restantes > 0:
                 time.sleep(1)
@@ -389,9 +404,9 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE & FITNESS
+    # 3. SAÚDE & FITNESS (Dividido simetricamente 1 para 1)
     with aba_saude:
-        cs1, cs2 = st.columns(2)
+        cs1, cs2 = st.columns([1, 1])
         with cs1:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
             st.markdown(card_html, unsafe_allow_html=True)
@@ -401,7 +416,7 @@ if st.session_state.autenticado and username:
             db["peso_usuario"] = peso_limpo
             alvo_calc = int(peso_limpo * 35)
             st.metric("Consumido", f"{db['agua']} ml", f"Alvo do Jarvis: {alvo_calc} ml")
-            cb1, cb2 = st.columns(2)
+            cb1, cb2 = st.columns([1, 1])
             if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
             if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
         with cs2:
@@ -413,11 +428,11 @@ if st.session_state.autenticado and username:
                     db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
                     salvar_dados(db); st.toast("Nutrientes Catalogados!")
 
-    # 4. AGENDA
+    # 4. AGENDA (Ajustado de [1.2, 2.3] para ocupar igualmente [1, 1] ou [1, 2] se preferir manter o calendário maior)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
-        col_esq_info, col_dir_cal = st.columns([1.2, 2.3])
+        col_esq_info, col_dir_cal = st.columns([1, 1])
         
         hoje = datetime.date.today()
         dia_num_hoje = hoje.strftime("%d")
@@ -429,7 +444,7 @@ if st.session_state.autenticado and username:
         
         with col_esq_info:
             st.markdown(
-                f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 15px; border: 1px solid rgba(212,175,55,0.1);'>"
+                f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 25px; border: 1px solid rgba(212,175,55,0.1);'>"
                 f"<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
                 f"<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{dia_num_hoje}</h1>"
                 f"<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>{dia_name_hoje}</div>"
@@ -437,7 +452,7 @@ if st.session_state.autenticado and username:
                 unsafe_allow_html=True
             )
             
-            with st.expander("➕ GERENCIAR EVENTOS MANUALMENTE", expanded=False):
+            with st.expander("➕ GERENCIAR EVENTOS MANUALMENTE", expanded=True):
                 nome_ev = st.text_input("Título do compromisso:")
                 data_ev = st.date_input("Data do evento:", hoje)
                 h_ini = st.time_input("Início da atividade:", datetime.time(9, 0))
@@ -472,7 +487,7 @@ if st.session_state.autenticado and username:
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
-                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
+                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); width: 100%; box-sizing: border-box; }
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 12px; color: #777777; text-transform: uppercase; padding-bottom: 3px; }
                 .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
                 .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
