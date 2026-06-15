@@ -9,20 +9,19 @@ import calendar as pycalendar
 from groq import Groq
 
 # ==================== CONFIGURAÇÃO DA IA (BLINDADA) ====================
-# O Jarvis agora busca a chave de forma oculta e segura.
-# Você NÃO precisa escrever sua chave gsk_ aqui! O sistema puxa do GitHub/Streamlit.
+# O Jarvis agora busca a chave de forma oculta e segura dos servidores.
+# Você NÃO DEVE escrever sua chave gsk_ aqui! O sistema puxa do GitHub/Streamlit.
 API_KEY = os.environ.get("GROQ_API_KEY")
 
 if not API_KEY and "GROQ_API_KEY" in st.secrets:
     API_KEY = st.secrets["GROQ_API_KEY"]
 
-try:
-    if API_KEY:
+client = None
+if API_KEY:
+    try:
         client = Groq(api_key=API_KEY)
-    else:
+    except Exception:
         client = None
-except Exception:
-    client = None
 
 MODELO_PRINCIPAL = "llama-3.3-70b-versatile" 
 MODELO_EXTRATOR = "llama3-8b-8192"
@@ -231,11 +230,9 @@ if st.session_state.autenticado and username:
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
-        if not API_KEY:
-            return "⚠️ Erro de Autenticação: Nenhuma chave de API válida encontrada. Certifique-se de configurar a variável 'GROQ_API_KEY' no seu painel de Secrets."
-            
-        if client is None:
-            return "⚠️ O cliente de IA não pôde ser instanciado. Verifique a configuração dos seus servidores."
+        # Alerta amigável caso você se esqueça de preencher os Secrets
+        if not API_KEY or client is None:
+            return "⚠️ **Sistemas offline:** Nenhuma chave configurada. Por favor, adicione a variável `GROQ_API_KEY` nas configurações ocultas (Secrets) do seu servidor."
 
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário {name}). Hoje é {data_hoje_str}.\n"
@@ -252,9 +249,9 @@ if st.session_state.autenticado and username:
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
         except Exception as e:
-            if "401" in str(e):
-                return "⚠️ Falha crítica: A chave configurada nos Secrets é considerada inválida pelo Groq. Por favor, gere uma nova chave."
-            return f"⚠️ Falha de comunicação com os sistemas centrais: {str(e)}"
+            if "401" in str(e) or "invalid_api_key" in str(e).lower():
+                return "⚠️ **Falha Crítica:** A chave configurada nos Secrets foi considerada INVÁLIDA ou BLOQUEADA pelo Groq. Por favor, gere uma nova chave no painel do Groq e atualize seus Secrets."
+            return f"⚠️ **Instabilidade nos Servidores:** {str(e)}"
 
         # 2. Executar o analisador secundário em background para alimentar a agenda/metas
         try:
