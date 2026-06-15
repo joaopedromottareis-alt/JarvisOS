@@ -29,7 +29,7 @@ st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", init
 
 # Dicionário de Ícones SVG (Atualizado: Ícone Jarvis principal aumentado para 34 para se destacar do texto)
 ICONES = {
-    "jarvis": """<svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
+    "jarvis": """<svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle;">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
