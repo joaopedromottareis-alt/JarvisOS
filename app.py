@@ -29,7 +29,7 @@ st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", init
 
 # Dicionário de Ícones SVG Atualizado
 ICONES = {
-    "jarvis": """<svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -59,7 +59,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS MODIFICADO: Correção agressiva para forçar o fundo das caixas e inputs a ficarem escuros mesmo em Light Mode de Macs
+# CSS MODIFICADO: Estilos globais e customização de alto contraste das boxes de alimentos
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -113,7 +113,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    /* SELETORES DE ALTA PRIORIDADE PARA ADIAR TEMAS CLAROS EXTERNOS */
     .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], [data-testid="stChatInputTextArea"] {
         background-color: #0b0b0b !important; 
         border: 1px solid rgba(212, 175, 55, 0.3) !important; 
@@ -123,7 +122,6 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Garante visibilidade e fundo escuro na barra de texto do Chat input */
     [data-testid="stChatInput"] {
         background-color: #050505 !important;
         border-radius: 14px !important;
@@ -176,6 +174,67 @@ st.markdown("""
     [data-testid="stChatMessage"] {
         background-color: rgba(20, 20, 20, 0.5) !important;
         border-left: 3px solid #d4af37 !important;
+    }
+
+    /* ESTILOS EXCLUSIVOS PARA AS BOXES DE ALIMENTOS (GLASSMORPHISM INTEGRADOR) */
+    .jarvis-food-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .jarvis-food-box {
+        background: rgba(255, 255, 255, 0.02) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(212, 175, 55, 0.2) !important;
+        border-radius: 14px;
+        padding: 14px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .jarvis-food-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .jarvis-food-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff !important; /* Contraste máximo em branco puro */
+        margin: 0;
+        text-transform: capitalize;
+    }
+
+    .jarvis-food-details {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #ffd700 !important; /* Dourado claro para destacar as informações adicionais */
+        margin: 0;
+    }
+
+    .jarvis-food-calories {
+        text-align: right;
+    }
+
+    .jarvis-cal-number {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ffffff !important; /* Número com contraste máximo */
+        margin: 0;
+    }
+
+    .jarvis-cal-unit {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #a0aec0 !important;
+        margin: 0;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -291,14 +350,13 @@ if st.session_state.autenticado and username:
         if not API_KEY or client is None:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
-        # MODIFICAÇÃO DO PROMPT DO SISTEMA: Lógica inteligente de tratamento de gênero baseada no nome cadastrado
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao usuário cadastrado sob o nome de: '{name}'). Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"1. Analise cuidadosamente o nome '{name}' para identificar o gênero do operador.\n"
             f"   - Se o nome indicar gênero feminino (ex: Maria, Ana, Mãe, Paula, etc), use SEMPRE os pronomes e tratamentos femininos: 'Senhora', 'atendê-la', 'pronta', 'comissionada', 'minha senhora'. Nunca a chame de senhor.\n"
             f"   - Se indicar gênero masculino (ex: João, Pedro, admin), use 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
-            f"   - Se o nome for ambíguo, use um tom polido e executivo referindo-se diretamente pelo nome ou tratamentos neutros com extrema sofisticação britânica.\n"
+            f"   - Se o nome foi ambíguo, use um tom polido e executivo referindo-se diretamente pelo nome ou tratamentos neutros com extrema sofisticação britânica.\n"
             f"2. Responda ao usuário com extrema imponência, elegância e eficiência britânica.\n"
             f"3. Se o usuário pediu para marcar uma atividade, confirme elegantemente na resposta."
         )
@@ -318,10 +376,10 @@ if st.session_state.autenticado and username:
         try:
             prompt_sistema_extrator = (
                 f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
-                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
-                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
                 "Esquema JSON estrito:\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
@@ -407,7 +465,7 @@ if st.session_state.autenticado and username:
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
-        if not metas_validas: st.warning("Nenhum objetivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
+        if not metas_validas: st.warning("Nenhum objective ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
             cp1, cp2 = st.columns([1, 1])
             with cp1:
@@ -440,7 +498,7 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE & FITNESS
+    # 3. SAÚDE & FITNESS (REESTRUTURADA COM AS BOXES INTEGRADAS)
     with aba_saude:
         cs1, cs2 = st.columns([1, 1])
         with cs1:
@@ -455,14 +513,60 @@ if st.session_state.autenticado and username:
             cb1, cb2 = st.columns([1, 1])
             if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
             if cb2.button("🔄 Limpar Registro"): db["agua"] = 0; salvar_dados(db); st.rerun()
+            
         with cs2:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} REFEIÇÕES DO DIA</div>'
             st.markdown(card_html, unsafe_allow_html=True)
-            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Lanche")
+            
+            # Form de entrada rápido
+            refeicao = st.text_input("O que consumiu agora?", placeholder="Ex: Sopa de abóbora")
+            porcao = st.text_input("Quantidade / Porção:", placeholder="Ex: 1 porção (300ml)")
+            calorias_input = st.text_input("Calorias estimadas (kcal):", placeholder="Ex: 150")
+            
             if st.button("Registrar MacroAlimento"):
                 if refeicao:
-                    db["refeicoes"].append({"data": str(datetime.date.today()), "item": refeicao})
-                    salvar_dados(db); st.toast("Nutrientes Catalogados!")
+                    p_limpa = porcao if porcao else "1 porção"
+                    c_limpa = calorias_input if calorias_input.isdigit() else "0"
+                    
+                    db["refeicoes"].append({
+                        "data": str(datetime.date.today()), 
+                        "item": refeicao,
+                        "porcao": p_limpa,
+                        "calorias": c_limpa
+                    })
+                    salvar_dados(db)
+                    st.toast("Nutrientes Catalogados com Sucesso!")
+                    st.rerun()
+            
+            # HISTÓRICO VISUAL INJETADO NO GRADIENTE (GLASSMORPHISM)
+            st.markdown("<div style='margin-top: 20px; font-size: 13px; color: #777777; font-weight: 600; text-transform: uppercase;'>Histórico Recente</div>", unsafe_allow_html=True)
+            
+            refeicoes_hoje = [r for r in db.get("refeicoes", []) if r.get("data") == str(datetime.date.today())]
+            
+            if not refeicoes_hoje:
+                st.markdown("<p style='color: #777777; font-style: italic; margin-top: 10px;'>Nenhum alimento catalogado para hoje.</p>", unsafe_allow_html=True)
+            else:
+                # Montando o bloco HTML dinâmico integrado perfeitamente ao gradiente de fundo
+                html_boxes = "<div class='jarvis-food-container'>"
+                for ref in refeicoes_hoje:
+                    nome_ref = ref.get("item", "Alimento")
+                    detalhe_ref = ref.get("porcao", "1 porção")
+                    cal_ref = ref.get("calorias", "0")
+                    
+                    html_boxes += f"""
+                        <div class='jarvis-food-box'>
+                            <div class='jarvis-food-info'>
+                                <p class='jarvis-food-name'>{nome_ref}</p>
+                                <p class='jarvis-food-details'>{detalhe_ref}</p>
+                            </div>
+                            <div class='jarvis-food-calories'>
+                                <p class='jarvis-cal-number'>{cal_ref}</p>
+                                <p class='jarvis-cal-unit'>kcal</p>
+                            </div>
+                        </div>
+                    """
+                html_boxes += "</div>"
+                st.markdown(html_boxes, unsafe_allow_html=True)
 
     # 4. AGENDA
     with aba_calendario:
@@ -565,7 +669,7 @@ if st.session_state.autenticado and username:
                         
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
-
+            
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>'
         st.markdown(card_html, unsafe_allow_html=True)
