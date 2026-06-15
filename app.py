@@ -453,16 +453,17 @@ if st.session_state.autenticado and username:
             
             html_estilos_calendario = """
             <style>
-                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
-                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background-color: #0a0a0a; padding: 15px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
-                .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 5px; }
-                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 55px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.08); border: 1px solid #d4af37; }
+                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); }
+                .calendar-header-day { text-align: center; font-weight: 600; font-size: 12px; color: #777777; text-transform: uppercase; padding-bottom: 3px; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
+                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
                 .calendar-cell.cell-empty { background-color: transparent; border: none; }
-                .cell-number { font-weight: 700; font-size: 16px; color: #888888; }
-                .cell-today .cell-number { color: #d4af37; font-size: 18px; }
-                .event-indicator { width: 6px; height: 6px; background-color: #d4af37; border-radius: 50%; position: absolute; bottom: 8px; box-shadow: 0 0 6px #d4af37; }
+                .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; align-self: flex-end; }
+                .cell-today .cell-number { color: #d4af37; font-size: 15px; }
+                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; max-height: 42px; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 2px 4px; border-radius: 4px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; block-size: fit-content; }
             </style>
             """
             
@@ -481,17 +482,21 @@ if st.session_state.autenticado and username:
                         data_corrente_str = data_corrente.isoformat()
                         classe_hoje = "cell-today" if data_corrente == hoje else ""
                         
-                        indicador_evento = ""
+                        conteudo_eventos = ""
                         if data_corrente_str in dict_eventos:
-                            indicador_evento = "<div class='event-indicator'></div>"
+                            conteudo_eventos += "<div class='events-wrapper'>"
+                            for ev in dict_eventos[data_corrente_str]:
+                                titulo_limpo = ev.get("title", "Compromisso")
+                                conteudo_eventos += f"<div class='event-tag' title='{titulo_limpo}'>{titulo_limpo}</div>"
+                            conteudo_eventos += "</div>"
                                 
                         html_corpo += f"<div class='calendar-cell {classe_hoje}'>"
                         html_corpo += f"<div class='cell-number'>{dia_num}</div>"
-                        html_corpo += indicador_evento
+                        html_corpo += conteudo_eventos
                         html_corpo += "</div>"
                         
             html_corpo += "</div>"
-            st.components.v1.html(html_estilos_calendario + html_corpo, height=440, scrolling=False)
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown('<div class="titulo-card">📋 LISTA COMPLETA DE COMPROMISSOS ATIVOS</div>', unsafe_allow_html=True)
