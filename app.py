@@ -127,7 +127,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], [data-testid="stChatInputTextArea"] {
+    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], [data-testid="stChatInputTextArea"], .stNumberInput input {
         background-color: #0b0b0b !important; 
         border: 1px solid rgba(212, 175, 55, 0.3) !important; 
         border-radius: 12px !important; 
@@ -223,7 +223,6 @@ if "code" in parametros_url and "state" in parametros_url:
     
     if os.path.exists('credentials.json'):
         try:
-            # AJUSTADO: Sem a barra final para combinar com as requisições nativas do Google
             redirecionamento_uri = "http://localhost:8501" 
             
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
@@ -284,7 +283,6 @@ if not st.session_state.autenticado:
                 usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
                 salvar_novas_credenciais(usernames_db)
                 
-                # AJUSTADO: Sem a barra final para corresponder ao Google Console
                 redirecionamento_uri = "http://localhost:8501" 
                 
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
@@ -546,7 +544,7 @@ if st.session_state.autenticado and username:
                         if c3.button("✓", key=m["id"]):
                             m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. POMODORO
+    # 2. POMODORO (ATUALIZADO COM INPUT DE NÚMERO DIRETO)
     with aba_pomodoro:
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -556,10 +554,21 @@ if st.session_state.autenticado and username:
             cp1, cp2 = st.columns([1, 1])
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
-                minutos_slider = st.slider("Duração:", 1, 120, int(st.session_state.pomo_tempo_inicial_escolhido), disabled=st.session_state.pomo_rodando)
-                if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_slider:
-                    st.session_state.pomo_tempo_inicial_escolhido = minutos_slider
-                    st.session_state.pomo_segundos_restantes = minutos_slider * 60
+                
+                # IMPLEMENTADO: Substituição do Slider pelo campo de digitação de minutos
+                minutos_digitados = st.number_input(
+                    "Duração (em minutos):", 
+                    min_value=1, 
+                    max_value=120, 
+                    value=int(st.session_state.pomo_tempo_inicial_escolhido), 
+                    step=1,
+                    disabled=st.session_state.pomo_rodando
+                )
+                
+                if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_digitados:
+                    st.session_state.pomo_tempo_inicial_escolhido = minutos_digitados
+                    st.session_state.pomo_segundos_restantes = minutos_digitados * 60
+                    
             b1, b2 = st.columns([1, 1])
             if not st.session_state.pomo_rodando:
                 if b1.button("▶ INICIAR"): st.session_state.pomo_rodando = True; st.rerun()
