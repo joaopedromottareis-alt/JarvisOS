@@ -25,7 +25,8 @@ MODELO_PRINCIPAL = "llama-3.3-70b-versatile"
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
-LOGO_JARVIS_URL = "https://i.ibb.co/VpbyW9gQ/jarvis-logo-gold.png"
+# RESTAURADA A LOGO ESTILO CÉREBRO / CHIP DE IA FUTURISTA
+LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/ffffff/artificial-intelligence.png"
 
 st.set_page_config(
     page_title="Jarvis OS", 
@@ -181,7 +182,6 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* CONTAINER INTERNO DO HISTÓRICO DE MACROS */
     .jarvis-food-row {
         background: rgba(255, 255, 255, 0.02) !important;
         border: 1px solid rgba(212, 175, 55, 0.2) !important;
@@ -483,7 +483,6 @@ if st.session_state.autenticado and username:
                     p_limpa = porcao if porcao else "1 porção"
                     c_limpa = calorias_input if calorias_input.isdigit() else "0"
                     
-                    # Criação de um ID único por refeição para permitir deletar separadamente
                     id_refeicao_unico = f"food_{int(time.time())}_{len(db.get('refeicoes', []))}"
                     
                     db["refeicoes"].append({
@@ -504,14 +503,12 @@ if st.session_state.autenticado and username:
             if not refeicoes_hoje:
                 st.markdown("<p style='color: #777777; font-style: italic; margin-top: 10px;'>Nenhum alimento catalogado para hoje.</p>", unsafe_allow_html=True)
             else:
-                # Loop atualizado renderizando com componentes nativos do Streamlit + CSS para possibilitar o funcionamento dos botões
                 for idx, ref in enumerate(refeicoes_hoje):
                     nome_ref = ref.get("item", "Alimento")
                     detalhe_ref = ref.get("porcao", "1 porção")
                     cal_ref = ref.get("calorias", "0")
-                    id_ref = ref.get("id", f"antigo_{idx}") # Trata legados sem ID anterior
+                    id_ref = ref.get("id", f"antigo_{idx}")
                     
-                    # Layout modular em colunas limpas
                     container_box = st.container()
                     with container_box:
                         c_info, c_cal, c_del = st.columns([3, 1, 1])
@@ -521,7 +518,6 @@ if st.session_state.autenticado and username:
                             st.markdown(f"<p style='font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0; text-align:right;'>{cal_ref} <span style='font-size:0.75rem; color:#a0aec0;'>kcal</span></p>", unsafe_allow_html=True)
                         with c_del:
                             if st.button("Remover", key=f"del_food_{id_ref}"):
-                                # Remove o item específico procurando pelo ID único
                                 item_para_remover = next((x for x in db["refeicoes"] if x.get("id") == id_ref or (x.get("item") == nome_ref and x.get("calorias") == cal_ref)), None)
                                 if item_para_remover:
                                     db["refeicoes"].remove(item_para_remover)
