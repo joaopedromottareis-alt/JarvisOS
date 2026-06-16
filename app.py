@@ -199,7 +199,6 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* ESSA CLASSE EXPULSA O ESPAÇO VAZIO DO BOTÃO ATUALIZAR E ERGUE O CONTEÚDO DA DIREITA */
     .subir-bloco-agenda {
         margin-top: -66px !important;
     }
@@ -320,8 +319,8 @@ if st.session_state.autenticado and username:
         if os.path.exists(ARQUIVO_DADOS):
             with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: 
                 dados = json.load(f)
-                if "messages" not in dados:
-                    dados["messages"] = [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+                if "conversas" not in dados:
+                    dados["conversas"] = {}
                 return dados
         return {
             "metas": [], 
@@ -330,7 +329,7 @@ if st.session_state.autenticado and username:
             "historico_pomodoro": 0, 
             "refeicoes": [], 
             "eventos_locais": [],
-            "messages": [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+            "conversas": {}
         }
 
     def salvar_dados(dados):
@@ -342,9 +341,8 @@ if st.session_state.autenticado and username:
         
     db = st.session_state.db
     
-    # Sincroniza as mensagens do arquivo JSON com o session_state para persistência perfeita
-    if "messages" not in st.session_state:
-        st.session_state.messages = db.get("messages", [])
+    if "conversas" not in db:
+        db["conversas"] = {}
 
     if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
@@ -430,7 +428,7 @@ if st.session_state.autenticado and username:
         if st.button("SAIR DA SESSÃO"):
             st.session_state.autenticado = False
             st.session_state.username = None
-            if "messages" in st.session_state: del st.session_state.messages
+            if "conversas" in st.session_state: del st.session_state.conversas
             st.rerun()
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
@@ -462,9 +460,26 @@ if st.session_state.autenticado and username:
         except Exception:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
 
-    def processar_comando_e_criar_metas(comando):
+    def gerar_titulo_conversa(primeira_mensagem):
+        if not API_KEY or client is None:
+            return "Nova Conversa"
+        prompt_titulo = (
+            "Você é o Jarvis. Resuma a mensagem do usuário em um título curto de 3 a 5 palavras no máximo.\n"
+            "Não use aspas, não adicione pontos finais e seja muito corporativo e conciso.\n"
+            f"Mensagem: {primeira_mensagem}"
+        )
+        try:
+            resposta = client.chat.completions.create(
+                model=MODELO_EXTRATOR,
+                messages=[{"role": "user", "content": prompt_titulo}],
+                temperature=0.3
+            )
+            return resposta.choices[0].message.content.strip()
+        except Exception:
+            return "Nova Conversa"
+
+    def processar_comando_e_criar_metas(comando, historico_chat):
         data_hoje_str = datetime.date.today().isoformat()
-        
         if not API_KEY or client is None:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
@@ -473,16 +488,21 @@ if st.session_state.autenticado and username:
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"Antes de responder, analise o text digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
-            f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
-            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhorn', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhorn' ou pronomes masculinos.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegance corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
         )
         
+        # Constrói o histórico para a IA se lembrar do contexto da conversa selecionada
+        mensagens_ia = [{"role": "system", "content": prompt_sistema_chat}]
+        for msg in historico_chat:
+            mensagens_ia.append({"role": msg["role"], "content": msg["content"]})
+        
         try:
             conversa_principal = client.chat.completions.create(
                 model=MODELO_PRINCIPAL,
-                messages=[{"role": "system", "content": prompt_sistema_chat}, {"role": "user", "content": comando}],
+                messages=mensagens_ia,
                 temperature=0.7
             )
             resposta_texto_jarvis = conversa_principal.choices[0].message.content.strip()
@@ -512,8 +532,7 @@ if st.session_state.autenticado and username:
                 response_format={"type": "json_object"}
             )
             
-            dados_brutos = extracao_dados.choices[0].message.content.strip()
-            resultado = json.loads(dados_brutos)
+            resultado = json.loads(extracao_dados.choices[0].message.content.strip())
             
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
                 for nova_m in resultado.get("novas_metas", []):
@@ -550,16 +569,38 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # 1. CONVERSA & METAS (SALVAMENTO DE CONVERSA CORRIGIDO)
+    # 1. CONVERSA & METAS (COM GESTÃO COMPLETA DE MULTI-CONVERSAS)
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
-            card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
+            card_html = f'<div class="titulo-card">{ICONES["conversa"]} GERENCIADOR DE CONVERSAS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            chat_container = st.container(height=315)
+            # Mapeamento e montagem do seletor de chats
+            opcoes_conversas = ["➕ Iniciar Nova Conversa"] + list(db["conversas"].keys())
+            
+            # Preserva a seleção atual do usuário para evitar resets visuais
+            if "id_conversa_atual" not in st.session_state:
+                st.session_state.id_conversa_atual = opcoes_conversas[0]
+                
+            conversa_selecionada = st.selectbox(
+                "Selecione o chat ativo:",
+                opcoes_conversas,
+                index=opcoes_conversas.index(st.session_state.id_conversa_atual) if st.session_state.id_conversa_atual in opcoes_conversas else 0,
+                label_visibility="collapsed"
+            )
+            st.session_state.id_conversa_atual = conversa_selecionada
+            
+            # Carrega o histórico correspondente da conversa selecionada
+            if conversa_selecionada == "➕ Iniciar Nova Conversa":
+                mensagens_exibidas = [{"role": "assistant", "content": f"Sistemas online, {name}! Como posso auxiliá-lo com suas diretrizes hoje?"}]
+            else:
+                mensagens_exibidas = db["conversas"][conversa_selecionada]
+            
+            chat_container = st.container(height=260)
             with chat_container:
-                for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
+                for msg in mensagens_exibidas: 
+                    st.chat_message(msg["role"]).write(msg["content"])
             
             with st.container():
                 c_txt, c_btn = st.columns([5.2, 0.8])
@@ -572,12 +613,28 @@ if st.session_state.autenticado and username:
                 
                 if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
                     st.session_state.ultimo_prompt_enviado = prompt
-                    st.session_state.messages.append({"role": "user", "content": prompt})
-                    resposta = processar_comando_e_criar_metas(prompt)
-                    st.session_state.messages.append({"role": "assistant", "content": resposta})
                     
-                    # Salva permanentemente no JSON do usuário
-                    db["messages"] = st.session_state.messages
+                    # Se for um chat novo, gera o título inteligente pela primeira mensagem
+                    if conversa_selecionada == "➕ Iniciar Nova Conversa":
+                        with st.spinner("Estruturando nova linha de chat..."):
+                            titulo_novo = gerar_titulo_conversa(prompt)
+                            # Previne colisões de nomes iguais adicionando carimbo de tempo se necessário
+                            if titulo_novo in db["conversas"]:
+                                titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
+                            
+                            db["conversas"][titulo_novo] = []
+                            conversa_alvo = titulo_novo
+                            st.session_state.id_conversa_atual = titulo_novo
+                    else:
+                        conversa_alvo = conversa_selecionada
+                    
+                    # Registra a mensagem do usuário
+                    db["conversas"][conversa_alvo].append({"role": "user", "content": prompt})
+                    
+                    # Solicita resposta do Jarvis trazendo o histórico deste chat específico
+                    resposta = processar_comando_e_criar_metas(prompt, db["conversas"][conversa_alvo])
+                    db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
+                    
                     salvar_dados(db)
                     st.rerun()
                     
@@ -739,7 +796,7 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA (ALINHAMENTO PROPORCIONAL CORRIGIDO)
+    # 4. AGENDA 
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -779,7 +836,6 @@ if st.session_state.autenticado and username:
                             else:
                                 st.error("Falha ao salvar. Verifique suas credenciais.")
 
-        # --- CONTAINER REESTRUTURADO PARA LEVANTAR O MÊS E BOTÕES JUNTOS ---
         with col_dir_cal:
             st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
             
@@ -863,8 +919,7 @@ if st.session_state.autenticado and username:
                         
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
-            
-            st.markdown('</div>', unsafe_allow_html=True) # Fecha o container de subida
+            st.markdown('</div>', unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
