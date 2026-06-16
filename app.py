@@ -8,7 +8,7 @@ import re
 import calendar as pycalendar
 from groq import Groq
 
-# Bibliotecas Oficiais do Google
+# Novas bibliotecas para a integração real com o Google Agenda
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -215,33 +215,7 @@ usernames_db = carregar_credenciais_salvas()
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if "username" not in st.session_state: st.session_state.username = None
 
-# --- CAPTURA DE RETORNO DO OAUTH DO GOOGLE (Verifica a URL do Streamlit) ---
-parametros_url = st.query_params
-if "code" in parametros_url and "state" in parametros_url:
-    codigo_google = parametros_url["code"]
-    usuario_registro = parametros_url["state"] 
-    
-    if os.path.exists('credentials.json'):
-        try:
-            # AJUSTADO: Sem a barra final para combinar com as requisições nativas do Google
-            redirecionamento_uri = "http://localhost:8501" 
-            
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
-            flow.fetch_token(code=codigo_google)
-            creds = flow.credentials
-            
-            token_path = f"token_user_{usuario_registro}.json"
-            with open(token_path, 'w') as token_file:
-                token_file.write(creds.to_json())
-                
-            st.success("✓ Integração com o Google Agenda realizada com sucesso durante o registro!")
-            st.info("Faça o login agora para acessar sua conta integrada.")
-            st.query_params.clear() 
-            time.sleep(2)
-        except Exception as e:
-            st.error(f"Erro ao salvar token do Google: {e}")
-
-# --- TELA DE LOGIN / REGISTRO ---
+# --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
     header_html = f"<h2 class='custom-title'>{ICONES['jarvis']} ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>"
     st.markdown(header_html, unsafe_allow_html=True)
@@ -265,35 +239,20 @@ if not st.session_state.autenticado:
         st.stop()
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
-        st.markdown("### CRIAR NOVA CONTA INTEGRADA COM GOOGLE")
+        st.markdown("### CRIAR NOVA CONTA")
         novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
-        novo_user = st.text_input("USERNAME (SEM ESPAÇOS, CURTO):").strip().lower()
+        novo_user = st.text_input("USERNAME (SEM ESPAÇOS):").strip().lower()
         nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password")
         confirmar_senha = st.text_input("CONFIRME A SENHA:", type="password")
         
-        if st.button("VINCULAR GOOGLE CALENDAR E FINALIZAR CADASTRO"):
-            if not novo_nome or not novo_user or not nova_senha: 
-                st.error("Preencha todos os campos obrigatórios.")
-            elif novo_user in usernames_db: 
-                st.error("Username já existe no banco de dados.")
-            elif nova_senha != confirmar_senha: 
-                st.error("As senhas informadas divergem.")
-            elif not os.path.exists('credentials.json'):
-                st.error("Arquivo 'credentials.json' ausente na raiz do servidor!")
+        if st.button("FINALIZAR CADASTRO"):
+            if not novo_nome or not novo_user or not nova_senha: st.error("Preencha tudo.")
+            elif novo_user in usernames_db: st.error("Username já existe.")
+            elif nova_senha != confirmar_senha: st.error("Senhas divergentes.")
             else:
                 usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
                 salvar_novas_credenciais(usernames_db)
-                
-                # AJUSTADO: Sem a barra final para corresponder ao Google Console
-                redirecionamento_uri = "http://localhost:8501" 
-                
-                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
-                
-                auth_url, _ = flow.authorization_url(prompt='consent', state=novo_user)
-                
-                st.success("Conta Local criada! Redirecionando para a Google para ativação do Calendário...")
-                st.markdown(f'<meta http-equiv="refresh" content="1;url={auth_url}">', unsafe_allow_html=True)
-                st.markdown(f"[Se não for redirecionado automaticamente, clique aqui para Autenticar]({auth_url})")
+                st.success("Conta criada!")
         st.stop()
 
 # ==================== SESSÃO OPERACIONAL DE USUÁRIO ====================
@@ -318,33 +277,31 @@ if st.session_state.autenticado and username:
         
     db = st.session_state.db
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+        st.session_state.messages = [{"role": "assistant", "content": f"Sistemas prontos, {name}! Módulo do Google Agenda pronto para integração."}]
 
     if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
+    # --- FUNÇÕES DE CONEXÃO REAL COM O GOOGLE AGENDA ---
     def obter_servico_google_calendar():
         creds = None
         if os.path.exists(TOKEN_GOOGLE_USER):
-            try:
-                creds = Credentials.from_authorized_user_file(TOKEN_GOOGLE_USER, SCOPES)
-            except Exception:
-                creds = None
+            creds = Credentials.from_authorized_user_file(TOKEN_GOOGLE_USER, SCOPES)
         
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                try:
-                    creds.refresh(Request())
-                    with open(TOKEN_GOOGLE_USER, 'w') as token:
-                        token.write(creds.to_json())
-                except Exception:
-                    creds = None
+                creds.refresh(Request())
+            else:
+                if not os.path.exists('credentials.json'):
+                    st.error("Erro Crítico: Ficheiro 'credentials.json' não encontrado na pasta raiz! Siga o tutorial da Parte 1.")
+                    return None
+                flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+                creds = flow.run_local_server(port=0)
             
-            if not creds:
-                st.warning("⚠️ Seu Google Agenda não está vinculado a este operador. Vá até a aba da Agenda para configurar.")
-                return None
+            with open(TOKEN_GOOGLE_USER, 'w') as token:
+                token.write(creds.to_json())
         
         return build('calendar', 'v3', credentials=creds)
 
@@ -353,6 +310,7 @@ if st.session_state.autenticado and username:
         if not service: return False
         try:
             start_datetime = f"{data_str}T{horario_str}:00"
+            # Define o término 1 hora depois por padrão
             horas, minutos = map(int, horario_str.split(':'))
             fim_horas = (horas + 1) % 24
             end_datetime = f"{data_str}T{fim_horas:02d}:{minutos:02d}:00"
@@ -379,9 +337,10 @@ if st.session_state.autenticado and username:
                                                 orderBy='startTime').execute()
             events = events_result.get('items', [])
             
-            db["eventos_locais"] = []
+            db["eventos_locais"] = [] # Limpa locais para espelhar a nuvem
             for ev in events:
                 start = ev['start'].get('dateTime', ev['start'].get('date'))
+                # Formata datas vindas do Google (YYYY-MM-DD)
                 data_limpa = start[:10]
                 hora_limpa = start[11:16] if 'T' in start else "00:00"
                 
@@ -408,6 +367,7 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
+    # --- INTEGRAÇÃO DA IA: ANALISADOR DE PRATOS E NUTRIENTES ---
     def analisar_nutrientes_refeicao(descricao_refeicao):
         if not API_KEY or client is None:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
@@ -435,6 +395,7 @@ if st.session_state.autenticado and username:
         except Exception:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
 
+    # --- MOTOR DE EXECUÇÃO DUPLO COM CORREÇÃO DE GÊNERO DINÂMICA ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
@@ -444,11 +405,11 @@ if st.session_state.autenticado and username:
         prompt_sistema_chat = (
             f"Você é o Jarvis, um assistente executivo altamente avançado e refinado. O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
-            f"Antes de responder, analise o text digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
+            f"Antes de responder, analise o texto digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
             f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
-            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
-            f"3. Responda com extrema imponência, elegance corporativa e formalidade britânica.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhorn', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"3. Responda com extrema imponência, elegância corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
         )
         
@@ -465,10 +426,10 @@ if st.session_state.autenticado and username:
         try:
             prompt_sistema_extrator = (
                 f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
-                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
-                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
+                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
                 "Esquema JSON estrito:\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
@@ -503,10 +464,11 @@ if st.session_state.autenticado and username:
             if resultado.get("criar_evento") and resultado.get("novos_eventos"):
                 for ev in resultado.get("novos_eventos", []):
                     if isinstance(ev, dict) and "title" in ev:
+                        # GRAVA DIRETAMENTE NO GOOGLE AGENDA EM TEMPO REAL!
                         data_ev = ev.get("date", data_hoje_str)
                         hora_ev = ev.get("time", "12:00")
                         enviar_evento_para_google(ev["title"], data_ev, hora_ev)
-                puxar_eventos_do_google()
+                puxar_eventos_do_google() # Atualiza espelho local
                 
         except Exception:
             pass
@@ -677,15 +639,16 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA 
+    # 4. AGENDA (INTEGRADA COM O GOOGLE CALENDAR DE VERDADE)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         
-        if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
-            with st.spinner("Sincronizando tarefas atuais..."):
+        # Botão central para sincronizar a nuvem do Google com o Jarvis OS
+        if st.button("🔄 SINCRONIZAR AGENDA REAL COM O GOOGLE"):
+            with st.spinner("Ligando aos servidores do Google Agenda..."):
                 puxar_eventos_do_google()
-                st.success("Sincronização efetuada com sucesso!")
+                st.success("Sincronização efetuada!")
                 st.rerun()
 
         col_esq_info, col_dir_cal = st.columns([1, 1])
@@ -795,12 +758,14 @@ if st.session_state.autenticado and username:
         
         eventos_cadastrados = db.get("eventos_locais", [])
         if not eventos_cadastrados:
-            st.info("Pressione 'Atualizar Dados' acima para carregar as informações do servidor.")
+            st.info("Pressione 'Sincronizar' acima para carregar a sua agenda em tempo real.")
         else:
             eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
+            
             for idx, ev in enumerate(eventos_ordenados):
                 try:
                     data_convertida = datetime.date.fromisoformat(ev["date"]).strftime("%d/%m/%Y")
                 except:
                     data_convertida = ev["date"]
+                
                 st.markdown(f"🗓️ **{ev['title']}** —  `{data_convertida}` às  `{ev['time']}`")
