@@ -715,16 +715,16 @@ if st.session_state.autenticado and username:
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
     # 4. AGENDA (COMPLETAMENTE NIVELADO)
+# 4. AGENDA (COMPLETAMENTE NIVELADO)
     with aba_calendario:
+        # --- DEFINIR A VARIÁVEL HOJE AQUI NO TOPO DA ABA ---
+        hoje = datetime.date.today()
+        mes_atual = hoje.month
+        ano_atual = hoje.year
+        
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         
-        if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
-            with st.spinner("Sincronizando tarefas atuais..."):
-                puxar_eventos_do_google()
-                st.success("Sincronização efetuada com sucesso!")
-                st.rerun()
-
         # Proporção [1, 1.3] alinhando perfeitamente com os grids superiores
         col_esq_info, col_dir_cal = st.columns([1, 1.3])
         
