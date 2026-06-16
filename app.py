@@ -520,6 +520,11 @@ if st.session_state.autenticado and username:
             
         return resposta_texto_jarvis
 
+# ==================== DEFINIÇÃO GLOBAL DE DATAS (CRÍTICO) ====================
+    hoje = datetime.date.today()
+    mes_atual = hoje.month
+    ano_atual = hoje.year
+
 # ==================== NAVEGAÇÃO POR ABAS ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
@@ -527,18 +532,15 @@ if st.session_state.autenticado and username:
 
     # 1. CONVERSA & METAS (NIVELADO E SIMÉTRICO)
     with aba_metas:
-        # Mudança na proporção global para [1, 1.3] para evitar esmagamento na esquerda
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Altura do chat ajustada para 315px para compensar o input e alinhar com a direita
             chat_container = st.container(height=315)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
             
-            # Caixa do Input + Botão
             with st.container():
                 c_txt, c_btn = st.columns([5.2, 0.8])
                 with c_txt:
@@ -559,7 +561,6 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Altura de 380px idêntica à soma total dos componentes da coluna esquerda
             metas_container = st.container(height=380)
             with metas_container:
                 metas_ativas = [m for m in db["metas"] if not m["concluida"]]
@@ -715,20 +716,19 @@ if st.session_state.autenticado and username:
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
     # 4. AGENDA (COMPLETAMENTE NIVELADO)
-# 4. AGENDA (COMPLETAMENTE NIVELADO)
     with aba_calendario:
-        # --- DEFINIR A VARIÁVEL HOJE AQUI NO TOPO DA ABA ---
-        hoje = datetime.date.today()
-        mes_atual = hoje.month
-        ano_atual = hoje.year
-        
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         
+        if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
+            with st.spinner("Sincronizando tarefas atuais..."):
+                puxar_eventos_do_google()
+                st.success("Sincronização efetuada com sucesso!")
+                st.rerun()
+
         # Proporção [1, 1.3] alinhando perfeitamente com os grids superiores
         col_esq_info, col_dir_cal = st.columns([1, 1.3])
         
-        hoje = datetime.date.today()
         dia_num_hoje = hoje.strftime("%d")
         dias_traduzidos = {
             "Monday": "SEGUNDA-FEIRA", "Tuesday": "TERÇA-FEIRA", "Wednesday": "QUARTA-FEIRA",
@@ -763,8 +763,6 @@ if st.session_state.autenticado and username:
                                 st.error("Falha ao salvar. Verifique se o arquivo credentials.json está correto.")
 
         with col_dir_cal:
-            mes_atual = hoje.month
-            ano_atual = hoje.year
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
             cal_objeto = pycalendar.Calendar(firstweekday=6)
@@ -779,37 +777,35 @@ if st.session_state.autenticado and username:
 
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
-            # --- LOCALIZA ISSO NO SEU CÓDIGO (DENTRO DA ABA CALENDÁRIO) ---
-
-html_estilos_calendario = """
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
-    body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
-    
-    /* ESTA É A LINHA QUE VAI PUXAR O CALENDÁRIO PARA CIMA */
-    .jarvis-calendar-grid { 
-        display: grid; 
-        grid-template-columns: repeat(7, 1fr); 
-        gap: 6px; 
-        background-color: #0a0a0a; 
-        padding: 12px; 
-        border-radius: 20px; 
-        border: 1px solid rgba(212, 175, 55, 0.15); 
-        width: 100%; 
-        box-sizing: border-box; 
-        margin-top: -42px; /* <-- ADICIONE OU AJUSTE ESTE VALOR AQUI */
-    }
-    
-    .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
-    .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
-    .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
-    .calendar-cell.cell-empty { background-color: transparent; border: none; }
-    .cell-number { font-weight: 700; font-size: 15px; color: #666666; margin-bottom: 6px; align-self: flex-end; }
-    .cell-today .cell-number { color: #d4af37; font-size: 16px; }
-    .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 55px; }
-    .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 92%; box-sizing: border-box; }
-</style>
-"""
+            
+            html_estilos_calendario = """
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+                body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
+                
+                .jarvis-calendar-grid { 
+                    display: grid; 
+                    grid-template-columns: repeat(7, 1fr); 
+                    gap: 6px; 
+                    background-color: #0a0a0a; 
+                    padding: 12px; 
+                    border-radius: 20px; 
+                    border: 1px solid rgba(212, 175, 55, 0.15); 
+                    width: 100%; 
+                    box-sizing: border-box; 
+                    margin-top: -35px; /* <-- ENCAIXADO E ALINHADO PARA CIMA */
+                }
+                
+                .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
+                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
+                .calendar-cell.cell-empty { background-color: transparent; border: none; }
+                .cell-number { font-weight: 700; font-size: 15px; color: #666666; margin-bottom: 6px; align-self: flex-end; }
+                .cell-today .cell-number { color: #d4af37; font-size: 16px; }
+                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 55px; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 92%; box-sizing: border-box; }
+            </style>
+            """
             
             html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 18px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
