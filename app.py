@@ -75,7 +75,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS Customizado
+# CSS Customizado Estabilizado
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -127,7 +127,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
     
-    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], [data-testid="stChatInputTextArea"], .stNumberInput input {
+    .stTextInput input, .stDateInput input, .stTextArea textarea, div[data-baseweb="select"], div[role="button"], .stNumberInput input {
         background-color: #0b0b0b !important; 
         border: 1px solid rgba(212, 175, 55, 0.3) !important; 
         border-radius: 12px !important; 
@@ -136,22 +136,9 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* REMOÇÃO CIRÚRGICA DA BARRA DE ROLAGEM INDESEJADA NA CAIXA DE TEXTO */
-    [data-testid="stChatInput"] {
-        background-color: transparent !important;
-        border-radius: 14px !important;
-        padding: 0px !important;
-        overflow: hidden !important;
-    }
-    [data-testid="stChatInput"] fieldset {
-        border: none !important;
-    }
-    div[data-testid="stChatInputTextArea"] {
-        overflow-y: hidden !important;
-        resize: none !important;
-    }
-    .stChatInputContainer {
-        padding: 0px !important;
+    /* Remove labels fantasmas criados pela nossa nova caixa lado a lado */
+    div[data-testid="stTextInput"] label {
+        display: none !important;
     }
 
     .titulo-card { 
@@ -227,7 +214,7 @@ usernames_db = carregar_credenciais_salvas()
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if "username" not in st.session_state: st.session_state.username = None
 
-# --- CAPTURA DE RETORNO DO OAUTH DO GOOGLE (Verifica a URL do Streamlit) ---
+# --- CAPTURA DE RETORNO DO OAUTH DO GOOGLE ---
 parametros_url = st.query_params
 if "code" in parametros_url and "state" in parametros_url:
     codigo_google = parametros_url["code"]
@@ -474,7 +461,7 @@ if st.session_state.autenticado and username:
 
         try:
             prompt_sistema_extrator = (
-                f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
+                f"Você é uma inteligência de extração de dados and automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true and inclua o objeto dentro de 'novas_metas'.\n"
@@ -537,11 +524,22 @@ if st.session_state.autenticado and username:
             chat_container = st.container(height=340)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
-            if prompt := st.chat_input("Envie uma instrução..."):
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                resposta = processar_comando_e_criar_metas(prompt)
-                st.session_state.messages.append({"role": "assistant", "content": resposta})
-                st.rerun()
+            
+            # --- CAIXA DE MENSAGEM LADO A LADO CORRIGIDA ---
+            with st.container():
+                c_txt, c_btn = st.columns([5, 1])
+                with c_txt:
+                    prompt = st.text_input("Envie uma instrução...", key="chat_prompt_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
+                with c_btn:
+                    enviou_botao = st.button("ENVIAR", key="btn_enviar_chat")
+                
+                if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
+                    st.session_state.ultimo_prompt_enviado = prompt
+                    st.session_state.messages.append({"role": "user", "content": prompt})
+                    resposta = processar_comando_e_criar_metas(prompt)
+                    st.session_state.messages.append({"role": "assistant", "content": resposta})
+                    st.rerun()
+                    
         with col_lista:
             card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
@@ -556,7 +554,7 @@ if st.session_state.autenticado and username:
                         if c3.button("✓", key=m["id"]):
                             m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. POMODORO (ATUALIZADO COM INPUT DE NÚMERO DIRETO)
+    # 2. POMODORO
     with aba_pomodoro:
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -567,7 +565,6 @@ if st.session_state.autenticado and username:
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 
-                # Duração (em minutos)
                 minutos_digitados = st.number_input(
                     "Duração (em minutos):", 
                     min_value=1, 
