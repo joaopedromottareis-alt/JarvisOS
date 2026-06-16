@@ -199,7 +199,7 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* ESTE TRUQUE EXPULSA O ESPAÇO VAZIO SUPERIOR DO BOTÃO DE ATUALIZAR DA AGENDA */
+    /* ESSA CLASSE EXPULSA O ESPAÇO VAZIO DO BOTÃO ATUALIZAR E ERGUE O CONTEÚDO DA DIREITA */
     .subir-bloco-agenda {
         margin-top: -66px !important;
     }
@@ -318,8 +318,20 @@ if st.session_state.autenticado and username:
 
     def carregar_dados():
         if os.path.exists(ARQUIVO_DADOS):
-            with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: return json.load(f)
-        return {"metas": [], "agua": 0, "peso_usuario": 70.0, "historico_pomodoro": 0, "refeicoes": [], "eventos_locais": []}
+            with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: 
+                dados = json.load(f)
+                if "messages" not in dados:
+                    dados["messages"] = [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+                return dados
+        return {
+            "metas": [], 
+            "agua": 0, 
+            "peso_usuario": 70.0, 
+            "historico_pomodoro": 0, 
+            "refeicoes": [], 
+            "eventos_locais": [],
+            "messages": [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+        }
 
     def salvar_dados(dados):
         with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f: json.dump(dados, f, indent=4, ensure_ascii=False)
@@ -329,8 +341,10 @@ if st.session_state.autenticado and username:
         st.session_state.atual_user = username
         
     db = st.session_state.db
+    
+    # Sincroniza as mensagens do arquivo JSON com o session_state para persistência perfeita
     if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+        st.session_state.messages = db.get("messages", [])
 
     if "pomo_segundos_restantes" not in st.session_state: st.session_state.pomo_segundos_restantes = 1500
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
@@ -416,6 +430,7 @@ if st.session_state.autenticado and username:
         if st.button("SAIR DA SESSÃO"):
             st.session_state.autenticado = False
             st.session_state.username = None
+            if "messages" in st.session_state: del st.session_state.messages
             st.rerun()
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
@@ -535,7 +550,7 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # 1. CONVERSA & METAS (NIVELADO E SIMÉTRICO)
+    # 1. CONVERSA & METAS (SALVAMENTO DE CONVERSA CORRIGIDO)
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
@@ -560,6 +575,10 @@ if st.session_state.autenticado and username:
                     st.session_state.messages.append({"role": "user", "content": prompt})
                     resposta = processar_comando_e_criar_metas(prompt)
                     st.session_state.messages.append({"role": "assistant", "content": resposta})
+                    
+                    # Salva permanentemente no JSON do usuário
+                    db["messages"] = st.session_state.messages
+                    salvar_dados(db)
                     st.rerun()
                     
         with col_lista:
@@ -579,7 +598,7 @@ if st.session_state.autenticado and username:
                             if c3.button("✓", key=m["id"]):
                                 m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. POMODORO
+    # 2. TIMER DE FOCO (POMODORO)
     with aba_pomodoro:
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -720,9 +739,9 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA (ALINHAMENTO PROPORCIONAL E CORRETO)
+    # 4. AGENDA (ALINHAMENTO PROPORCIONAL CORRIGIDO)
     with aba_calendario:
-        card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
 
         col_esq_info, col_dir_cal = st.columns([1, 1.3])
@@ -744,7 +763,7 @@ if st.session_state.autenticado and username:
                 unsafe_allow_html=True
             )
             
-            with st.expander("➕ ENVIAR NOVO COMPROMISSO MANUAL PARA O GOOGLE", expanded=True):
+            with st.expander("➕ ENVIAR NOVO COMPROMISSO MANUAL", expanded=True):
                 nome_ev = st.text_input("Título do compromisso:")
                 data_ev = st.date_input("Data do evento:", hoje)
                 h_ini = st.time_input("Início da atividade:", datetime.time(9, 0))
@@ -758,11 +777,17 @@ if st.session_state.autenticado and username:
                                 st.toast("Evento salvo no Google Agenda!")
                                 st.rerun()
                             else:
-                                st.error("Falha ao salvar. Verifique se o arquivo credentials.json está correto.")
+                                st.error("Falha ao salvar. Verifique suas credenciais.")
 
-        # --- AQUI ESTÁ O SEGREDO: ENVOLVEMOS A COLUNA DIREITA NUM CONTAINER HTML PARA SUBIR TUDO JUNTO ---
+        # --- CONTAINER REESTRUTURADO PARA LEVANTAR O MÊS E BOTÕES JUNTOS ---
         with col_dir_cal:
             st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
+            
+            if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
+                with st.spinner("Sincronizando tarefas atuais..."):
+                    puxar_eventos_do_google()
+                    st.success("Sincronização efetuada com sucesso!")
+                    st.rerun()
                     
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
@@ -794,7 +819,7 @@ if st.session_state.autenticado and username:
                     border: 1px solid rgba(212, 175, 55, 0.15); 
                     width: 100%; 
                     box-sizing: border-box;
-                    margin-top: 5px; /* Margem limpa e zerada aqui */
+                    margin-top: 5px;
                 }
                 
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
@@ -839,7 +864,7 @@ if st.session_state.autenticado and username:
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
             
-            st.markdown('</div>', unsafe_allow_html=True) # Fecha a div que empurra tudo pra cima
+            st.markdown('</div>', unsafe_allow_html=True) # Fecha o container de subida
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
