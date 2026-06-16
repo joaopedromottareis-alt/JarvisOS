@@ -75,7 +75,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS Customizado Estabilizado
+# CSS Customizado Estabilizado e Nivelado
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -136,7 +136,6 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Remove labels fantasmas */
     div[data-testid="stTextInput"] label {
         display: none !important;
     }
@@ -156,7 +155,6 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    /* Botão de Seta Estilizado para o Enviar do Chat */
     .btn-seta-enviar button {
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -168,7 +166,6 @@ st.markdown("""
         font-size: 18px !important;
     }
 
-    /* Botões Padrões do Sistema */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -452,7 +449,7 @@ if st.session_state.autenticado and username:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
         prompt_sistema_chat = (
-            f"Você é o Jarvis, um assistente executivo altamente avançado e refinado. O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
+            f"Você é o Jarvis, um assistente executivo altamente avançado e refinado. O operador da account principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"Antes de responder, analise o text digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
@@ -528,24 +525,25 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # 1. CONVERSA & METAS
+    # 1. CONVERSA & METAS (NIVELADO E SIMÉTRICO)
     with aba_metas:
-        # DIMINUIÇÃO DA ESQUERDA: Proporção alterada de [1, 1] para [0.8, 1.2] para liberar espaço ao calendário
-        col_ia, col_lista = st.columns([0.8, 1.2])
+        # Mudança na proporção global para [1, 1.3] para evitar esmagamento na esquerda
+        col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
-            chat_container = st.container(height=340)
+            
+            # Altura do chat ajustada para 315px para compensar o input e alinhar com a direita
+            chat_container = st.container(height=315)
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
             
-            # --- CAIXA DE MENSAGEM COM SETA PARA CIMA (▲) ---
+            # Caixa do Input + Botão
             with st.container():
                 c_txt, c_btn = st.columns([5.2, 0.8])
                 with c_txt:
                     prompt = st.text_input("Envie uma instrução...", key="chat_prompt_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
                 with c_btn:
-                    # O botão agora exibe a clássica seta para cima (▲)
                     st.markdown('<div class="btn-seta-enviar">', unsafe_allow_html=True)
                     enviou_botao = st.button("▲", key="btn_enviar_chat")
                     st.markdown('</div>', unsafe_allow_html=True)
@@ -560,16 +558,20 @@ if st.session_state.autenticado and username:
         with col_lista:
             card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
-            metas_ativas = [m for m in db["metas"] if not m["concluida"]]
-            if not metas_ativas: st.info("Sem diretrizes ativas.")
-            else:
-                for m in db["metas"]:
-                    if not m["concluida"]:
-                        c1, c2, c3 = st.columns([3, 1, 1])
-                        c1.markdown(f"**{m['nome']}**<br><span style='color:#777777;'>{m['categoria']}</span>", unsafe_allow_html=True)
-                        c2.markdown(f"<div style='padding-top:10px; color:#d4af37;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
-                        if c3.button("✓", key=m["id"]):
-                            m["concluida"] = True; salvar_dados(db); st.rerun()
+            
+            # Altura de 380px idêntica à soma total dos componentes da coluna esquerda
+            metas_container = st.container(height=380)
+            with metas_container:
+                metas_ativas = [m for m in db["metas"] if not m["concluida"]]
+                if not metas_ativas: st.info("Sem diretrizes ativas.")
+                else:
+                    for m in db["metas"]:
+                        if not m["concluida"]:
+                            c1, c2, c3 = st.columns([3, 1, 1])
+                            c1.markdown(f"**{m['nome']}**<br><span style='color:#777777;'>{m['categoria']}</span>", unsafe_allow_html=True)
+                            c2.markdown(f"<div style='padding-top:10px; color:#d4af37;'>{m['tempo_dedicado']} min</div>", unsafe_allow_html=True)
+                            if c3.button("✓", key=m["id"]):
+                                m["concluida"] = True; salvar_dados(db); st.rerun()
 
     # 2. POMODORO
     with aba_pomodoro:
@@ -578,7 +580,7 @@ if st.session_state.autenticado and username:
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
         if not metas_validas: st.warning("Nenhum objectivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
-            cp1, cp2 = st.columns([0.8, 1.2]) # Mantendo proporção ajustada
+            cp1, cp2 = st.columns([1, 1.3])
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 
@@ -621,7 +623,7 @@ if st.session_state.autenticado and username:
 
     # 3. SAÚDE & FITNESS 
     with aba_saude:
-        cs1, cs2 = st.columns([0.8, 1.2]) # Mantendo proporção ajustada
+        cs1, cs2 = st.columns([1, 1.3])
         with cs1:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
             st.markdown(card_html, unsafe_allow_html=True)
@@ -712,7 +714,7 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA (AUMENTADA EM PROPORÇÃO E TAMANHO)
+    # 4. AGENDA (COMPLETAMENTE NIVELADO)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -723,8 +725,8 @@ if st.session_state.autenticado and username:
                 st.success("Sincronização efetuada com sucesso!")
                 st.rerun()
 
-        # Proporção 0.8 / 1.2 reduzindo a largura da esquerda e expandindo brutalmente a direita
-        col_esq_info, col_dir_cal = st.columns([0.8, 1.2])
+        # Proporção [1, 1.3] alinhando perfeitamente com os grids superiores
+        col_esq_info, col_dir_cal = st.columns([1, 1.3])
         
         hoje = datetime.date.today()
         dia_num_hoje = hoje.strftime("%d")
@@ -778,7 +780,6 @@ if st.session_state.autenticado and username:
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
-            # CALENDÁRIO REESTILIZADO: min-height das células aumentado para 85px para ficar muito maior
             html_estilos_calendario = """
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
@@ -824,7 +825,6 @@ if st.session_state.autenticado and username:
                         html_corpo += "</div>"
                         
             html_corpo += "</div>"
-            # ALTURA DO COMPONENTE DO CALENDÁRIO: Aumentado para 560 de forma a acompanhar o novo tamanho do grid
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
             
         st.markdown("<br>", unsafe_allow_html=True)
