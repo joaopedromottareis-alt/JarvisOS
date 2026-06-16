@@ -25,9 +25,17 @@ MODELO_PRINCIPAL = "llama-3.3-70b-versatile"
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
-st.set_page_config(page_title="Jarvis OS", page_icon="🔱", layout="wide", initial_sidebar_state="collapsed")
+# Link direto para a imagem do Reator Arc / Jarvis oficial
+LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/000000/iron-man-arc-reactor.png"
 
-# Dicionário de Ícones SVG Corrigido (Fechamentos </svg>)
+st.set_page_config(
+    page_title="Jarvis OS", 
+    page_icon=LOGO_JARVIS_URL,  # <--- Aplicado o Logo Real do Jarvis na Guia do Chrome
+    layout="wide", 
+    initial_sidebar_state="collapsed"
+)
+
+# Dicionário de Ícones SVG Internos
 ICONES = {
     "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -59,7 +67,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS MODIFICADO: Estilos globais e customização de alto contraste (Versão Blindada para Mac)
+# CSS Customizado: Suporte a telas Retina de Macbooks e Navegador Safari
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -69,7 +77,7 @@ st.markdown("""
         color: #e5e5e5 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         
-        /* Compatibilidade total com Safari/Macbook (Gradiente linear visível em telas Retina) */
+        /* Força o gradiente linear visível no Mac */
         background-image: -webkit-linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
         background-image: linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
         background-attachment: fixed !important;
@@ -353,7 +361,6 @@ if st.session_state.autenticado and username:
         if not API_KEY or client is None:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
-        # Prompt do sistema atualizado para analisar dinamicamente quem está interagindo com o MacBook no momento
         prompt_sistema_chat = (
             f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao operador atual no sistema). O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
