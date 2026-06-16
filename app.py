@@ -25,16 +25,17 @@ MODELO_PRINCIPAL = "llama-3.3-70b-versatile"
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
-LOGO_JARVIS_URL = "https://i.ibb.co/VpbyW9gQ/jarvis-logo-gold.png"
+# ÍCONE ATUALIZADO: Chip de Inteligência Artificial / Rede Neural Futurista em Branco e Transparente
+LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/ffffff/artificial-intelligence.png"
 
 st.set_page_config(
     page_title="Jarvis OS", 
-    page_icon=LOGO_JARVIS_URL,
+    page_icon=LOGO_JARVIS_URL,  # <--- Nova identidade de IA pura na guia do Chrome
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
 
-# Dicionário de Ícones SVG Atualizado
+# Dicionário de Ícones SVG Internos
 ICONES = {
     "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -66,7 +67,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS Customizado
+# CSS Customizado: Suporte a telas Retina de Macbooks e Navegador Safari
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -75,6 +76,9 @@ st.markdown("""
         background-color: #050505 !important; 
         color: #e5e5e5 !important; 
         font-family: 'Plus Jakarta Sans', sans-serif !important;
+        
+        /* Força o gradiente linear visível no Mac */
+        background-image: -webkit-linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
         background-image: linear-gradient(135deg, #050505 0%, #0c0a05 50%, #141002 100%) !important;
         background-attachment: fixed !important;
     }
@@ -100,6 +104,7 @@ st.markdown("""
     
     .custom-title {
         font-family: 'Kanit', sans-serif !important;
+        background: -webkit-linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
         background: linear-gradient(135deg, #ffffff 40%, #d4af37 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -112,6 +117,7 @@ st.markdown("""
     }
     
     .jarvis-brand {
+        background: -webkit-linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
         background: linear-gradient(45deg, #d4af37, #f3e5ab, #aa7c11);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -149,6 +155,7 @@ st.markdown("""
     }
 
     .stButton>button { 
+        background: -webkit-linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
         border: none !important;
@@ -181,16 +188,64 @@ st.markdown("""
         border-left: 3px solid #d4af37 !important;
     }
 
-    /* CONTAINER INTERNO DO HISTÓRICO DE MACROS */
-    .jarvis-food-row {
+    .jarvis-food-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .jarvis-food-box {
         background: rgba(255, 255, 255, 0.02) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(212, 175, 55, 0.2) !important;
         border-radius: 14px;
-        padding: 12px 18px;
-        margin-bottom: 10px;
+        padding: 14px 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .jarvis-food-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .jarvis-food-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff !important;
+        margin: 0;
+        text-transform: capitalize;
+    }
+
+    .jarvis-food-details {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #ffd700 !important;
+        margin: 0;
+    }
+
+    .jarvis-food-calories {
+        text-align: right;
+    }
+
+    .jarvis-cal-number {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ffffff !important;
+        margin: 0;
+    }
+
+    .jarvis-cal-unit {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #a0aec0 !important;
+        margin: 0;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -307,12 +362,12 @@ if st.session_state.autenticado and username:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
         prompt_sistema_chat = (
-            f"Você é o Jarvis, um assistente executivo altamente avançado e refinado. O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
+            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao operador atual no sistema). O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"Antes de responder, analise o texto digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
             f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
-            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhorn', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegância corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento ou a marcação de tarefas, confirme de forma polida que a diretriz foi integrada aos sistemas de mapeamento."
         )
@@ -483,11 +538,7 @@ if st.session_state.autenticado and username:
                     p_limpa = porcao if porcao else "1 porção"
                     c_limpa = calorias_input if calorias_input.isdigit() else "0"
                     
-                    # Criação de um ID único por refeição para permitir deletar separadamente
-                    id_refeicao_unico = f"food_{int(time.time())}_{len(db.get('refeicoes', []))}"
-                    
                     db["refeicoes"].append({
-                        "id": id_refeicao_unico,
                         "data": str(datetime.date.today()), 
                         "item": refeicao,
                         "porcao": p_limpa,
@@ -504,30 +555,26 @@ if st.session_state.autenticado and username:
             if not refeicoes_hoje:
                 st.markdown("<p style='color: #777777; font-style: italic; margin-top: 10px;'>Nenhum alimento catalogado para hoje.</p>", unsafe_allow_html=True)
             else:
-                # Loop atualizado renderizando com componentes nativos do Streamlit + CSS para possibilitar o funcionamento dos botões
-                for idx, ref in enumerate(refeicoes_hoje):
+                html_boxes = "<div class='jarvis-food-container'>"
+                for ref in refeicoes_hoje:
                     nome_ref = ref.get("item", "Alimento")
                     detalhe_ref = ref.get("porcao", "1 porção")
                     cal_ref = ref.get("calorias", "0")
-                    id_ref = ref.get("id", f"antigo_{idx}") # Trata legados sem ID anterior
                     
-                    # Layout modular em colunas limpas
-                    container_box = st.container()
-                    with container_box:
-                        c_info, c_cal, c_del = st.columns([3, 1, 1])
-                        with c_info:
-                            st.markdown(f"<p style='font-size: 1.05rem; font-weight: 700; color: #ffffff; margin: 0;'>{nome_ref.capitalize()}</p><p style='font-size: 0.85rem; color: #ffd700; margin: 0;'>{detalhe_ref}</p>", unsafe_allow_html=True)
-                        with c_cal:
-                            st.markdown(f"<p style='font-size: 1.2rem; font-weight: 800; color: #ffffff; margin: 0; text-align:right;'>{cal_ref} <span style='font-size:0.75rem; color:#a0aec0;'>kcal</span></p>", unsafe_allow_html=True)
-                        with c_del:
-                            if st.button("Remover", key=f"del_food_{id_ref}"):
-                                # Remove o item específico procurando pelo ID único
-                                item_para_remover = next((x for x in db["refeicoes"] if x.get("id") == id_ref or (x.get("item") == nome_ref and x.get("calorias") == cal_ref)), None)
-                                if item_para_remover:
-                                    db["refeicoes"].remove(item_para_remover)
-                                    salvar_dados(db)
-                                    st.rerun()
-                    st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
+                    html_boxes += f"""
+                        <div class='jarvis-food-box'>
+                            <div class='jarvis-food-info'>
+                                <p class='jarvis-food-name'>{nome_ref}</p>
+                                <p class='jarvis-food-details'>{detalhe_ref}</p>
+                            </div>
+                            <div class='jarvis-food-calories'>
+                                <p class='jarvis-cal-number'>{cal_ref}</p>
+                                <p class='jarvis-cal-unit'>kcal</p>
+                            </div>
+                        </div>
+                    """
+                html_boxes += "</div>"
+                st.markdown(html_boxes, unsafe_allow_html=True)
 
     # 4. AGENDA
     with aba_calendario:
@@ -581,7 +628,7 @@ if st.session_state.autenticado and username:
                     if ev_date_str not in dict_eventos: dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
 
-            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
+            meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "RENOVAR", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
             html_estilos_calendario = """
