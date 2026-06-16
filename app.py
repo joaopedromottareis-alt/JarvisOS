@@ -25,12 +25,12 @@ MODELO_PRINCIPAL = "llama-3.3-70b-versatile"
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
-# LOGO OFICIAL DEFINIDA: Ícone dourado do tridente com fundo transparente isolado para o Chrome
-LOGO_JARVIS_URL = "https://i.ibb.co/VpbyW9gQ/jarvis-logo-gold.png"
+# ÍCONE ATUALIZADO: Chip de Inteligência Artificial / Rede Neural Futurista em Branco e Transparente
+LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/ffffff/artificial-intelligence.png"
 
 st.set_page_config(
     page_title="Jarvis OS", 
-    page_icon=LOGO_JARVIS_URL,  # <--- Sua logo oficial aplicada com transparência perfeita
+    page_icon=LOGO_JARVIS_URL,  # <--- Nova identidade de IA pura na guia do Chrome
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
@@ -362,12 +362,12 @@ if st.session_state.autenticado and username:
             return " Falha nos Sistemas: Nenhuma chave configurada. Por favor, adicione a variável GROQ_API_KEY."
 
         prompt_sistema_chat = (
-            f"Você é o Jarvis, um assistente executivo altamente avançado e refinado. O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
+            f"Você é o Jarvis, o assistente virtual executivo de Tony Stark (agora servindo ao operador atual no sistema). O operador da conta principal está registrado como: '{name}'. Hoje é {data_hoje_str}.\n"
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"Antes de responder, analise o texto digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
             f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
-            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhorn', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegância corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento ou a marcação de tarefas, confirme de forma polida que a diretriz foi integrada aos sistemas de mapeamento."
         )
