@@ -43,7 +43,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Dicionário de Ícones SVG para os Cards Internos
+# Dicionário de Ícones SVG (Sem emojis)
 ICONES = {
     "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -75,7 +75,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS Customizado Ocultando a Sidebar Completamente e Otimizando as Abas de Ícones
+# CSS Customizado Ocultando a Sidebar Completamente
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -167,28 +167,22 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Customização das abas para exibição puramente minimalista de ícones */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: transparent !important; 
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         margin-bottom: 30px !important;
         width: 100% !important;
-        display: flex !important;
-        justify-content: space-around !important;
     }
     
     .stTabs [data-baseweb="tab"] { 
-        color: #555555 !important; 
-        font-size: 24px !important; /* Aumenta o tamanho do ícone */
-        padding: 12px 20px !important;
-        transition: all 0.3s ease-in-out !important;
+        color: #777777 !important; 
+        font-family: 'Kanit', sans-serif !important;
         flex-grow: 1 !important;
         text-align: center !important;
     }
     
     .stTabs [aria-selected="true"] { 
         color: #d4af37 !important; 
-        text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.4) !important;
     }
     
     [data-testid="stChatMessage"] {
@@ -435,6 +429,7 @@ if st.session_state.autenticado and username:
                 max_tokens=15
             )
             titulo_gerado = resposta_titulo.choices[0].message.content.strip()
+            # Remove caracteres estranhos ou aspas que a IA possa colocar por engano
             titulo_gerado = re.sub(r'["\']', '', titulo_gerado)
             return titulo_gerado if titulo_gerado else "Conversa Ativa"
         except:
@@ -466,10 +461,9 @@ if st.session_state.autenticado and username:
         except: pass
         return resposta_texto_jarvis
 
-    # ==================== NAVEGAÇÃO POR ABAS PURAMENTE POR ÍCONES ====================
-    # Utilizamos representações universais de alta fidelidade para o menu sequencial limpo
+    # ==================== NAVEGAÇÃO POR ABAS ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
-        "💬", "⏱️", "❤️", "📅"
+        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
     # 1. CONVERSA & METAS
@@ -480,6 +474,7 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSA PRINCIPAL</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
+            # --- MENU INTERNO SUPERIOR ESQUERDO ---
             col_seletor_interno, col_acao_nova = st.columns([2, 1])
             
             with col_seletor_interno:
@@ -510,6 +505,7 @@ if st.session_state.autenticado and username:
                     st.session_state.current_chat_id = novo_id
                     st.rerun()
 
+            # Caixa do chat
             chat_container = st.container(height=320)
             with chat_container:
                 for msg in mensagens_chat_atual: 
@@ -518,6 +514,7 @@ if st.session_state.autenticado and username:
             if prompt := st.chat_input("Insira uma instrução para o Jarvis..."):
                 mensagens_chat_atual.append({"role": "user", "content": prompt})
                 
+                # NOVO COMPORTAMENTO INTELIGENTE: Se a conversa possui um título padrão inicial, a IA lê e cria o título com base nas principais palavras
                 if current_chat["titulo"] in ["Conversa Inicial", "Conversa Sem Titulo", "Nova Conversa", "Nova Conversa..."]:
                     novo_titulo_inteligente = gerar_titulo_com_ia(prompt)
                     current_chat["titulo"] = novo_titulo_inteligente
