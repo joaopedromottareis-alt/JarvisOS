@@ -198,6 +198,11 @@ st.markdown("""
         background-color: rgba(20, 20, 20, 0.5) !important;
         border-left: 3px solid #d4af37 !important;
     }
+
+    /* ESTE TRUQUE EXPULSA O ESPAÇO VAZIO SUPERIOR DO BOTÃO DE ATUALIZAR DA AGENDA */
+    .subir-bloco-agenda {
+        margin-top: -66px !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -454,7 +459,7 @@ if st.session_state.autenticado and username:
             f"Antes de responder, analise o text digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
             f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
-            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
+            f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhorn', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegance corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
         )
@@ -520,7 +525,7 @@ if st.session_state.autenticado and username:
             
         return resposta_texto_jarvis
 
-# ==================== DEFINIÇÃO GLOBAL DE DATAS (CRÍTICO) ====================
+# ==================== DEFINIÇÃO GLOBAL DE DATAS ====================
     hoje = datetime.date.today()
     mes_atual = hoje.month
     ano_atual = hoje.year
@@ -715,18 +720,11 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA (COMPLETAMENTE NIVELADO)
+    # 4. AGENDA (ALINHAMENTO PROPORCIONAL E CORRETO)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
-        
-        if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
-            with st.spinner("Sincronizando tarefas atuais..."):
-                puxar_eventos_do_google()
-                st.success("Sincronização efetuada com sucesso!")
-                st.rerun()
 
-        # Proporção [1, 1.3] alinhando perfeitamente com os grids superiores
         col_esq_info, col_dir_cal = st.columns([1, 1.3])
         
         dia_num_hoje = hoje.strftime("%d")
@@ -762,7 +760,16 @@ if st.session_state.autenticado and username:
                             else:
                                 st.error("Falha ao salvar. Verifique se o arquivo credentials.json está correto.")
 
+        # --- AQUI ESTÁ O SEGREDO: ENVOLVEMOS A COLUNA DIREITA NUM CONTAINER HTML PARA SUBIR TUDO JUNTO ---
         with col_dir_cal:
+            st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
+            
+            if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
+                with st.spinner("Sincronizando tarefas atuais..."):
+                    puxar_eventos_do_google()
+                    st.success("Sincronização efetuada com sucesso!")
+                    st.rerun()
+                    
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
             cal_objeto = pycalendar.Calendar(firstweekday=6)
@@ -792,8 +799,8 @@ if st.session_state.autenticado and username:
                     border-radius: 20px; 
                     border: 1px solid rgba(212, 175, 55, 0.15); 
                     width: 100%; 
-                    box-sizing: border-box; 
-                    margin-top: -35px; /* <-- ENCAIXADO E ALINHADO PARA CIMA */
+                    box-sizing: border-box;
+                    margin-top: 5px; /* Margem limpa e zerada aqui */
                 }
                 
                 .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
@@ -807,7 +814,7 @@ if st.session_state.autenticado and username:
             </style>
             """
             
-            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 18px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
+            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 18px; color: #ffffff; font-weight: 600; letter-spacing: 2px; margin-top: 10px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
             
             for hd in dias_semana_headers:
@@ -837,6 +844,8 @@ if st.session_state.autenticado and username:
                         
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
+            
+            st.markdown('</div>', unsafe_allow_html=True) # Fecha a div que empurra tudo pra cima
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
