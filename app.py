@@ -25,12 +25,12 @@ MODELO_PRINCIPAL = "llama-3.3-70b-versatile"
 MODELO_EXTRATOR = "llama-3.3-70b-versatile"
 
 # ==================== CONFIGURAÇÃO VISUAL MODERNA ====================
-# Link direto para a imagem do Reator Arc / Jarvis oficial
-LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/000000/iron-man-arc-reactor.png"
+# URL Corrigida: Ícone branco com fundo transparente (perfeito para qualquer tema do Chrome)
+LOGO_JARVIS_URL = "https://img.icons8.com/ios-filled/510/ffffff/iron-man.png"
 
 st.set_page_config(
     page_title="Jarvis OS", 
-    page_icon=LOGO_JARVIS_URL,  # <--- Aplicado o Logo Real do Jarvis na Guia do Chrome
+    page_icon=LOGO_JARVIS_URL,  # <--- Aplicado o ícone corrigido na guia
     layout="wide", 
     initial_sidebar_state="collapsed"
 )
