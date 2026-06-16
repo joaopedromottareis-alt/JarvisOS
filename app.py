@@ -763,12 +763,6 @@ if st.session_state.autenticado and username:
         # --- AQUI ESTÁ O SEGREDO: ENVOLVEMOS A COLUNA DIREITA NUM CONTAINER HTML PARA SUBIR TUDO JUNTO ---
         with col_dir_cal:
             st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
-            
-            if st.button("🔄 ATUALIZAR DADOS COM GOOGLE AGENDA"):
-                with st.spinner("Sincronizando tarefas atuais..."):
-                    puxar_eventos_do_google()
-                    st.success("Sincronização efetuada com sucesso!")
-                    st.rerun()
                     
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
