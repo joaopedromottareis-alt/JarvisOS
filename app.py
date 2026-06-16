@@ -136,7 +136,7 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Remove labels fantasmas criados pela nossa nova caixa lado a lado */
+    /* Remove labels fantasmas */
     div[data-testid="stTextInput"] label {
         display: none !important;
     }
@@ -156,6 +156,19 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
+    /* Botão de Seta Estilizado para o Enviar do Chat */
+    .btn-seta-enviar button {
+        background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
+        color: #000000 !important; 
+        border: none !important;
+        border-radius: 12px !important; 
+        padding: 10px 0px !important; 
+        font-weight: 700 !important; 
+        width: 100% !important;
+        font-size: 18px !important;
+    }
+
+    /* Botões Padrões do Sistema */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -517,7 +530,8 @@ if st.session_state.autenticado and username:
 
     # 1. CONVERSA & METAS
     with aba_metas:
-        col_ia, col_lista = st.columns([1, 1])
+        # DIMINUIÇÃO DA ESQUERDA: Proporção alterada de [1, 1] para [0.8, 1.2] para liberar espaço ao calendário
+        col_ia, col_lista = st.columns([0.8, 1.2])
         with col_ia:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSAR COM O JARVIS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
@@ -525,13 +539,16 @@ if st.session_state.autenticado and username:
             with chat_container:
                 for msg in st.session_state.messages: st.chat_message(msg["role"]).write(msg["content"])
             
-            # --- CAIXA DE MENSAGEM LADO A LADO CORRIGIDA ---
+            # --- CAIXA DE MENSAGEM COM SETA PARA CIMA (▲) ---
             with st.container():
-                c_txt, c_btn = st.columns([5, 1])
+                c_txt, c_btn = st.columns([5.2, 0.8])
                 with c_txt:
                     prompt = st.text_input("Envie uma instrução...", key="chat_prompt_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
                 with c_btn:
-                    enviou_botao = st.button("ENVIAR", key="btn_enviar_chat")
+                    # O botão agora exibe a clássica seta para cima (▲)
+                    st.markdown('<div class="btn-seta-enviar">', unsafe_allow_html=True)
+                    enviou_botao = st.button("▲", key="btn_enviar_chat")
+                    st.markdown('</div>', unsafe_allow_html=True)
                 
                 if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
                     st.session_state.ultimo_prompt_enviado = prompt
@@ -561,7 +578,7 @@ if st.session_state.autenticado and username:
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
         if not metas_validas: st.warning("Nenhum objectivo ativo encontrado. Defina uma tarefa conversando com o Jarvis primeiro.")
         else:
-            cp1, cp2 = st.columns([1, 1])
+            cp1, cp2 = st.columns([0.8, 1.2]) # Mantendo proporção ajustada
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 
@@ -604,7 +621,7 @@ if st.session_state.autenticado and username:
 
     # 3. SAÚDE & FITNESS 
     with aba_saude:
-        cs1, cs2 = st.columns([1, 1])
+        cs1, cs2 = st.columns([0.8, 1.2]) # Mantendo proporção ajustada
         with cs1:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
             st.markdown(card_html, unsafe_allow_html=True)
@@ -695,7 +712,7 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA 
+    # 4. AGENDA (AUMENTADA EM PROPORÇÃO E TAMANHO)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES DE VERDADE</div>'
         st.markdown(card_html, unsafe_allow_html=True)
@@ -706,7 +723,8 @@ if st.session_state.autenticado and username:
                 st.success("Sincronização efetuada com sucesso!")
                 st.rerun()
 
-        col_esq_info, col_dir_cal = st.columns([1, 1])
+        # Proporção 0.8 / 1.2 reduzindo a largura da esquerda e expandindo brutalmente a direita
+        col_esq_info, col_dir_cal = st.columns([0.8, 1.2])
         
         hoje = datetime.date.today()
         dia_num_hoje = hoje.strftime("%d")
@@ -760,23 +778,24 @@ if st.session_state.autenticado and username:
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
             
+            # CALENDÁRIO REESTILIZADO: min-height das células aumentado para 85px para ficar muito maior
             html_estilos_calendario = """
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
                 body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
                 .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); width: 100%; box-sizing: border-box; }
-                .calendar-header-day { text-align: center; font-weight: 600; font-size: 12px; color: #777777; text-transform: uppercase; padding-bottom: 3px; }
-                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
+                .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
+                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
                 .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
                 .calendar-cell.cell-empty { background-color: transparent; border: none; }
-                .cell-number { font-weight: 700; font-size: 14px; color: #666666; margin-bottom: 4px; align-self: flex-end; }
-                .cell-today .cell-number { color: #d4af37; font-size: 15px; }
-                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; max-height: 42px; }
-                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; box-sizing: border-box; }
+                .cell-number { font-weight: 700; font-size: 15px; color: #666666; margin-bottom: 6px; align-self: flex-end; }
+                .cell-today .cell-number { color: #d4af37; font-size: 16px; }
+                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 55px; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 92%; box-sizing: border-box; }
             </style>
             """
             
-            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 16px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
+            html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 18px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
             
             for hd in dias_semana_headers:
@@ -805,7 +824,8 @@ if st.session_state.autenticado and username:
                         html_corpo += "</div>"
                         
             html_corpo += "</div>"
-            st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
+            # ALTURA DO COMPONENTE DO CALENDÁRIO: Aumentado para 560 de forma a acompanhar o novo tamanho do grid
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
