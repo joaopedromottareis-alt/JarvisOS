@@ -410,6 +410,31 @@ if st.session_state.autenticado and username:
             return json.loads(resposta_ia.choices[0].message.content.strip())
         except: return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
 
+    # Gerador Inteligente de Títulos Contextuais via IA
+    def gerar_titulo_com_ia(primeira_pergunta):
+        if not API_KEY or client is None:
+            return "Conversa Ativa"
+        prompt_titulo = (
+            "Você é uma inteligência encarregada de criar títulos curtos de chats.\n"
+            "Leia a pergunta do usuário e crie um título curtíssimo, contendo de 2 a 4 palavras chave, "
+            "que identifique com precisão o tema real do assunto abordado. Não use saudações, não use pontuação "
+            "nem aspas. Retorne APENAS o título direto limpo.\n"
+            f"Pergunta do usuário: '{primeira_pergunta}'"
+        )
+        try:
+            resposta_titulo = client.chat.completions.create(
+                model=MODELO_EXTRATOR,
+                messages=[{"role": "system", "content": prompt_titulo}],
+                temperature=0.3,
+                max_tokens=15
+            )
+            titulo_gerado = resposta_titulo.choices[0].message.content.strip()
+            # Remove caracteres estranhos ou aspas que a IA possa colocar por engano
+            titulo_gerado = re.sub(r'["\']', '', titulo_gerado)
+            return titulo_gerado if titulo_gerado else "Conversa Ativa"
+        except:
+            return "Conversa Ativa"
+
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         if not API_KEY or client is None: return "Falha nos Sistemas: Nenhuma chave configurada."
@@ -420,7 +445,7 @@ if st.session_state.autenticado and username:
         except Exception as e: return f"Instabilidade nos Servidores: {str(e)}"
 
         try:
-            prompt_sistema_extrator = f"Você é uma inteligência de extração de dados. Hoje é {data_hoje_str}.\nAnalise o comando e retorne estritamente um JSON estruturado se houver ações para metas ou eventos:\n{{\"criar_meta\": false, \"novas_metas\": [], \"criar_evento\": false, \"novos_eventos\": []}}"
+            prompt_sistema_extrator = f"Você é uma inteligência de extração de dados. Hoje é {data_hoje_str}.\nAnalise o comando e retorne estritamente un JSON estruturado se houver ações para metas ou eventos:\n{{\"criar_meta\": false, \"novas_metas\": [], \"criar_evento\": false, \"novos_eventos\": []}}"
             extracao_dados = client.chat.completions.create(model=MODELO_EXTRATOR, messages=[{"role": "system", "content": prompt_sistema_extrator}, {"role": "user", "content": comando}], temperature=0.0, response_format={"type": "json_object"})
             resultado = json.loads(extracao_dados.choices[0].message.content.strip())
             if resultado.get("criar_meta") and resultado.get("novas_metas"):
@@ -489,13 +514,10 @@ if st.session_state.autenticado and username:
             if prompt := st.chat_input("Insira uma instrução para o Jarvis..."):
                 mensagens_chat_atual.append({"role": "user", "content": prompt})
                 
-                # CORREÇÃO CRÍTICA: Se a conversa possui o título inicial genérico, redefinimos dinamicamente
-                if current_chat["titulo"] in ["Conversa Inicial", "Conversa Sem Titulo", "Nova Conversa"]:
-                    # Limpa caracteres especiais e pega as 3 primeiras palavras do prompt
-                    prompt_limpo = re.sub(r'[^\w\s]', '', prompt)
-                    palavras = prompt_limpo.split()
-                    novo_titulo = " ".join(palavras[:3]) + ("..." if len(palavras) > 3 else "")
-                    current_chat["titulo"] = novo_titulo.strip() if novo_titulo.strip() else "Conversa Ativa"
+                # NOVO COMPORTAMENTO INTELIGENTE: Se a conversa possui um título padrão inicial, a IA lê e cria o título com base nas principais palavras
+                if current_chat["titulo"] in ["Conversa Inicial", "Conversa Sem Titulo", "Nova Conversa", "Nova Conversa..."]:
+                    novo_titulo_inteligente = gerar_titulo_com_ia(prompt)
+                    current_chat["titulo"] = novo_titulo_inteligente
                 
                 resposta = processar_comando_e_criar_metas(prompt)
                 mensagens_chat_atual.append({"role": "assistant", "content": resposta})
@@ -663,7 +685,7 @@ if st.session_state.autenticado and username:
                 .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; }
                 .calendar-cell.cell-today { border: 1px solid #d4af37; background-color: rgba(212, 175, 55, 0.06); }
                 .cell-number { font-weight: 700; font-size: 14px; color: #666666; align-self: flex-end; }
-                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; padding: 2px 4px; border-radius: 4px; border-left: 2px solid #d4af37; margin-top:2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; padding: 2px 4px; border-radius: 4px; border-left: 2px solid #d4af37; margin-top:2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; box-sizing: border-box; }
             </style>
             """
             html_corpo = f"<div class='jarvis-calendar-grid'>"
@@ -676,7 +698,7 @@ if st.session_state.autenticado and username:
                         classe_hoje = "cell-today" if dia_num == hoje.day else ""
                         conteudo_eventos = ""
                         if data_corrente_str in dict_eventos:
-                            for ev in dict_eventos[data_corrente_str]: conteudo_eventos += f"<div class='event-tag'>{ev.get('title')}</div>"
+                            for ev in dict_eventos[data_corrente_str]: html_corpo += f"<div class='event-tag'>{ev.get('title')}</div>"
                         html_corpo += f"<div class='calendar-cell {classe_hoje}'><div class='cell-number'>{dia_num}</div>{conteudo_eventos}</div>"
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=440)
