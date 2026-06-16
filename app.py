@@ -730,7 +730,7 @@ if st.session_state.autenticado and username:
                     padding: 6px;
                     display: flex;
                     flex-direction: column;
-                    justify-content: transform;
+                    justify-content: space-between;
                     border: 1px solid rgba(255, 255, 255, 0.02);
                     transition: all 0.2s ease;
                 }
@@ -815,7 +815,7 @@ if st.session_state.autenticado and username:
             eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
             for idx, ev in enumerate(eventos_ordenados):
                 try:
-                    data_convertida = datetime.date.fromisoformat(ev["date"]).strftime(\"%d/%m/%Y\")
+                    data_convertida = datetime.date.fromisoformat(ev["date"]).strftime("%d/%m/%Y")
                 except:
                     data_convertida = ev["date"]
                 st.markdown(f"**{ev['title']}** — `{data_convertida}` às `{ev['time']}`")
