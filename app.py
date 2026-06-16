@@ -43,7 +43,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Dicionário de Ícones SVG (Sem emojis)
+# Dicionário de Ícones SVG para os Cards Internos
 ICONES = {
     "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -75,7 +75,7 @@ ICONES = {
     </svg>"""
 }
 
-# CSS Customizado Ocultando a Sidebar Completamente
+# CSS Customizado Estrito do Jarvis OS
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -167,22 +167,28 @@ st.markdown("""
         width: 100% !important;
     }
     
+    /* ABAS LIMPAS APENAS COM ÍCONES SEQUENCIAIS */
     .stTabs [data-baseweb="tab-list"] { 
         background-color: transparent !important; 
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
         margin-bottom: 30px !important;
         width: 100% !important;
+        display: flex !important;
+        justify-content: space-around !important;
     }
     
     .stTabs [data-baseweb="tab"] { 
-        color: #777777 !important; 
-        font-family: 'Kanit', sans-serif !important;
+        color: #555555 !important; 
+        font-size: 24px !important; 
+        padding: 12px 20px !important;
+        transition: all 0.3s ease-in-out !important;
         flex-grow: 1 !important;
         text-align: center !important;
     }
     
     .stTabs [aria-selected="true"] { 
         color: #d4af37 !important; 
+        text-shadow: 0px 0px 10px rgba(212, 175, 55, 0.4) !important;
     }
     
     [data-testid="stChatMessage"] {
@@ -429,7 +435,6 @@ if st.session_state.autenticado and username:
                 max_tokens=15
             )
             titulo_gerado = resposta_titulo.choices[0].message.content.strip()
-            # Remove caracteres estranhos ou aspas que a IA possa colocar por engano
             titulo_gerado = re.sub(r'["\']', '', titulo_gerado)
             return titulo_gerado if titulo_gerado else "Conversa Ativa"
         except:
@@ -461,9 +466,9 @@ if st.session_state.autenticado and username:
         except: pass
         return resposta_texto_jarvis
 
-    # ==================== NAVEGAÇÃO POR ABAS ====================
+    # ==================== NAVEGAÇÃO APENAS COM ÍCONES (MINIMALISTA) ====================
     aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
-        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
+        "💬", "⏱️", "❤️", "📅"
     ])
 
     # 1. CONVERSA & METAS
@@ -474,7 +479,6 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSA PRINCIPAL</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # --- MENU INTERNO SUPERIOR ESQUERDO ---
             col_seletor_interno, col_acao_nova = st.columns([2, 1])
             
             with col_seletor_interno:
@@ -505,7 +509,6 @@ if st.session_state.autenticado and username:
                     st.session_state.current_chat_id = novo_id
                     st.rerun()
 
-            # Caixa do chat
             chat_container = st.container(height=320)
             with chat_container:
                 for msg in mensagens_chat_atual: 
@@ -514,7 +517,6 @@ if st.session_state.autenticado and username:
             if prompt := st.chat_input("Insira uma instrução para o Jarvis..."):
                 mensagens_chat_atual.append({"role": "user", "content": prompt})
                 
-                # NOVO COMPORTAMENTO INTELIGENTE: Se a conversa possui um título padrão inicial, a IA lê e cria o título com base nas principais palavras
                 if current_chat["titulo"] in ["Conversa Inicial", "Conversa Sem Titulo", "Nova Conversa", "Nova Conversa..."]:
                     novo_titulo_inteligente = gerar_titulo_com_ia(prompt)
                     current_chat["titulo"] = novo_titulo_inteligente
@@ -648,65 +650,172 @@ if st.session_state.autenticado and username:
                             if item_para_remover: db["refeicoes"].remove(item_para_remover); salvar_dados(db); st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA
+    # 4. AGENDA (PRODUZIDA IGUAL A VERSÃO 6)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
-        if st.button("ATUALIZAR DADOS COM GOOGLE AGENDA"):
-            with st.spinner("Sincronizando..."): puxar_eventos_do_google(); st.rerun()
-
-        col_esq_info, col_dir_cal = st.columns([1, 1])
+        
+        if st.button("ATUALIZAR DADOS COLETADOS"):
+            with st.spinner("Sincronizando..."):
+                puxar_eventos_do_google()
+                st.rerun()
+                
+        col_esq_info, col_dir_cal = st.columns([1, 1.4])
         hoje = datetime.date.today()
+        
         with col_esq_info:
-            st.markdown(f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 25px; border: 1px solid rgba(212,175,55,0.1);'><span style='color: #777777; font-size: 13px; font-weight:600;'>Data Atual</span><h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{hoje.strftime('%d')}</h1></div>", unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 25px; border: 1px solid rgba(212,175,55,0.1);'>
+                    <span style='color: #777777; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;'>Data Operacional Atual</span>
+                    <h1 style='font-size: 75px; font-family: "Kanit", sans-serif; font-weight: 700; line-height: 1; margin: 5px 0 0 0; color: #ffffff;'>{hoje.strftime('%d')}</h1>
+                    <span style='color: #d4af37; font-size: 15px; font-weight: 500;'>{hoje.strftime('%B / %Y').upper()}</span>
+                </div>
+            """, unsafe_allow_html=True)
+            
             with st.expander("ENVIAR NOVO COMPROMISSO MANUAL", expanded=True):
                 nome_ev = st.text_input("Título do compromisso:")
                 data_ev = st.date_input("Data do evento:", hoje)
                 h_ini = st.time_input("Início da atividade:", datetime.time(9, 0))
+                
                 if st.button("Agendar na Nuvem"):
-                    if nome_ev and enviar_evento_para_google(nome_ev, data_ev.isoformat(), h_ini.strftime('%H:%M')):
-                        puxar_eventos_do_google(); st.rerun()
-
+                    if nome_ev:
+                        if enviar_evento_para_google(nome_ev, data_ev.isoformat(), h_ini.strftime('%H:%M')):
+                            st.success("Evento enviado com sucesso!")
+                            puxar_eventos_do_google()
+                            st.rerun()
+                        else:
+                            st.error("Falha ao salvar evento no Google Agenda.")
+                            
         with col_dir_cal:
-            mes_atual, ano_atual = hoje.month, hoje.year
+            mes_atual = hoje.month
+            ano_atual = hoje.year
+            
             cal_objeto = pycalendar.Calendar(firstweekday=6)
             mes_dias = cal_objeto.monthdayscalendar(ano_atual, mes_atual)
+            
             dict_eventos = {}
             for ev in db.get("eventos_locais", []):
                 ev_date_str = ev.get("date")
                 if ev_date_str:
-                    if ev_date_str not in dict_eventos: dict_eventos[ev_date_str] = []
+                    if ev_date_str not in dict_eventos:
+                        dict_eventos[ev_date_str] = []
                     dict_eventos[ev_date_str].append(ev)
-
+                    
             html_estilos_calendario = """
             <style>
-                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); width: 100%; box-sizing: border-box; }
-                .calendar-header-day { text-align: center; font-weight: 600; font-size: 12px; color: #777777; text-transform: uppercase; }
-                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border-radius: 12px; min-height: 65px; padding: 6px; display: flex; flex-direction: column; }
-                .calendar-cell.cell-today { border: 1px solid #d4af37; background-color: rgba(212, 175, 55, 0.06); }
-                .cell-number { font-weight: 700; font-size: 14px; color: #666666; align-self: flex-end; }
-                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; padding: 2px 4px; border-radius: 4px; border-left: 2px solid #d4af37; margin-top:2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; box-sizing: border-box; }
+                .jarvis-calendar-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 6px;
+                    background-color: #0a0a0a;
+                    padding: 12px;
+                    border-radius: 20px;
+                    border: 1px solid rgba(212, 175, 55, 0.15);
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .calendar-header-day {
+                    text-align: center;
+                    font-weight: 700;
+                    font-size: 11px;
+                    color: #d4af37;
+                    text-transform: uppercase;
+                    padding-bottom: 6px;
+                    letter-spacing: 0.5px;
+                }
+                .calendar-cell {
+                    background-color: rgba(16, 16, 16, 0.7);
+                    border-radius: 12px;
+                    min-height: 70px;
+                    padding: 6px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: transform;
+                    border: 1px solid rgba(255, 255, 255, 0.02);
+                    transition: all 0.2s ease;
+                }
+                .calendar-cell:hover {
+                    border-color: rgba(212, 175, 55, 0.3);
+                    background-color: rgba(255, 255, 255, 0.02);
+                }
+                .calendar-cell.cell-today {
+                    border: 1px solid #d4af37;
+                    background-color: rgba(212, 175, 55, 0.06);
+                    box-shadow: inset 0 0 8px rgba(212, 175, 55, 0.1);
+                }
+                .cell-number {
+                    font-weight: 700;
+                    font-size: 12px;
+                    color: #555555;
+                    align-self: flex-end;
+                    margin-bottom: auto;
+                }
+                .calendar-cell.cell-today .cell-number {
+                    color: #d4af37 !important;
+                }
+                .events-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 3px;
+                    margin-top: 4px;
+                    overflow: hidden;
+                }
+                .event-tag {
+                    background-color: rgba(212, 175, 55, 0.12);
+                    color: #f3e5ab;
+                    font-size: 9px;
+                    font-weight: 500;
+                    padding: 2px 5px;
+                    border-radius: 5px;
+                    border-left: 2px solid #d4af37;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
             </style>
             """
-            html_corpo = f"<div class='jarvis-calendar-grid'>"
-            for hd in ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]: html_corpo += f"<div class='calendar-header-day'>{hd}</div>"
+            
+            html_corpo = "<div class='jarvis-calendar-grid'>"
+            for hd in ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]:
+                html_corpo += f"<div class='calendar-header-day'>{hd}</div>"
+                
             for semana in mes_dias:
                 for dia_num in semana:
-                    if dia_num == 0: html_corpo += "<div class='calendar-cell' style='background:transparent;'></div>"
+                    if dia_num == 0:
+                        html_corpo += "<div class='calendar-cell' style='background: transparent; border: none;'></div>"
                     else:
                         data_corrente_str = datetime.date(ano_atual, mes_atual, dia_num).isoformat()
-                        classe_hoje = "cell-today" if dia_num == hoje.day else ""
-                        conteudo_eventos = ""
+                        classe_hoje = "cell-today" if (dia_num == hoje.day) else ""
+                        
+                        conteudo_eventos = "<div class='events-container'>"
                         if data_corrente_str in dict_eventos:
-                            for ev in dict_eventos[data_corrente_str]: html_corpo += f"<div class='event-tag'>{ev.get('title')}</div>"
-                        html_corpo += f"<div class='calendar-cell {classe_hoje}'><div class='cell-number'>{dia_num}</div>{conteudo_eventos}</div>"
+                            for ev in dict_eventos[data_corrente_str]:
+                                titulo_limpo = ev.get('title', 'Sem Título').replace("'", "&#39;")
+                                conteudo_eventos += f"<div class='event-tag' title='{titulo_limpo}'>{titulo_limpo}</div>"
+                        conteudo_eventos += "</div>"
+                            
+                        html_corpo += f"<div class='calendar-cell {classe_hoje}'>"
+                        html_corpo += f"<div class='cell-number'>{dia_num}</div>"
+                        html_corpo += conteudo_eventos
+                        html_corpo += "</div>"
+                        
             html_corpo += "</div>"
-            st.components.v1.html(html_estilos_calendario + html_corpo, height=440)
+            st.components.v1.html(html_estilos_calendario + html_corpo, height=480, scrolling=False)
             
         st.markdown("<br>", unsafe_allow_html=True)
-        card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS</div>'
+        card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
         st.markdown(card_html, unsafe_allow_html=True)
+        
         eventos_cadastrados = db.get("eventos_locais", [])
-        if eventos_cadastrados:
-            for ev in sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", ""))):
-                st.markdown(f"**{ev['title']}** — `{ev['date']}` às `{ev['time']}`")
+        if not eventos_cadastrados:
+            st.info("Pressione 'Atualizar Dados' acima para carregar as informações do servidor.")
+        else:
+            eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
+            for idx, ev in enumerate(eventos_ordenados):
+                try:
+                    data_convertida = datetime.date.fromisoformat(ev["date"]).strftime(\"%d/%m/%Y\")
+                except:
+                    data_convertida = ev["date"]
+                st.markdown(f"**{ev['title']}** — `{data_convertida}` às `{ev['time']}`")
