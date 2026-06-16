@@ -40,7 +40,7 @@ st.set_page_config(
     page_title="Jarvis OS", 
     page_icon=LOGO_JARVIS_URL,
     layout="wide", 
-    initial_sidebar_state="collapsed"  # Ocultado para focar no design em tela cheia
+    initial_sidebar_state="collapsed"
 )
 
 # Dicionário de Ícones SVG (Sem emojis)
@@ -88,7 +88,6 @@ st.markdown("""
         background-attachment: fixed !important;
     }
     
-    /* Remove a Barra Lateral Padrão e Cabeçalhos Streamlit */
     [data-testid="stSidebar"], [data-testid="stSidebarCollapseButton"], #MainMenu, footer, header {
         display: none !important;
     }
@@ -190,17 +189,6 @@ st.markdown("""
         background-color: rgba(20, 20, 20, 0.5) !important;
         border-left: 3px solid #d4af37 !important;
     }
-    
-    /* Seletor Interno de Conversas Minimalista */
-    .box-historico-interno {
-        background-color: rgba(11, 11, 11, 0.8);
-        border: 1px solid rgba(212, 175, 55, 0.15);
-        border-radius: 12px;
-        padding: 10px;
-        max-height: 180px;
-        overflow-y: auto;
-        margin-bottom: 15px;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -227,31 +215,27 @@ usernames_db = carregar_credenciais_salvas()
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
 if "username" not in st.session_state: st.session_state.username = None
 
-# --- CAPTURA DE RETORNO DO OAUTH DO GOOGLE ---
+# Captura de retorno OAUTH Google
 parametros_url = st.query_params
 if "code" in parametros_url and "state" in parametros_url:
     codigo_google = parametros_url["code"]
     usuario_registro = parametros_url["state"] 
-    
     if os.path.exists('credentials.json'):
         try:
             redirecionamento_uri = "http://localhost:8501" 
-            
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
             flow.fetch_token(code=codigo_google)
             creds = flow.credentials
-            
             token_path = f"token_user_{usuario_registro}.json"
             with open(token_path, 'w') as token_file:
                 token_file.write(creds.to_json())
-                
             st.success("✓ Integração com o Google Agenda realizada com sucesso!")
             st.query_params.clear() 
             time.sleep(2)
         except Exception as e:
             st.error(f"Erro ao salvar token do Google: {e}")
 
-# --- TELA DE LOGIN / REGISTRO ---
+# Tela de Login
 if not st.session_state.autenticado:
     header_html = f"<h2 class='custom-title'>{ICONES['jarvis']} ENTRAR NO <span class='jarvis-brand'>JARVIS OS</span></h2>"
     st.markdown(header_html, unsafe_allow_html=True)
@@ -293,12 +277,9 @@ if not st.session_state.autenticado:
             else:
                 usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
                 salvar_novas_credenciais(usernames_db)
-                
                 redirecionamento_uri = "http://localhost:8501" 
-                
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
                 auth_url, _ = flow.authorization_url(prompt='consent', state=novo_user)
-                
                 st.success("Conta Local criada! Redirecionando para a Google...")
                 st.markdown(f'<meta http-equiv="refresh" content="1;url={auth_url}">', unsafe_allow_html=True)
                 st.stop()
@@ -312,7 +293,6 @@ if st.session_state.autenticado and username:
     TOKEN_GOOGLE_USER = f"token_user_{username}.json"
     ARQUIVO_HISTORICO_CHATS = f"historico_chats_user_{username}.json"
 
-    # --- CARREGAR INFRAESTRUTURA DE DADOS ---
     def carregar_dados():
         if os.path.exists(ARQUIVO_DADOS):
             with open(ARQUIVO_DADOS, "r", encoding="utf-8") as f: return json.load(f)
@@ -321,14 +301,13 @@ if st.session_state.autenticado and username:
     def salvar_dados(dados):
         with open(ARQUIVO_DADOS, "w", encoding="utf-8") as f: json.dump(dados, f, indent=4, ensure_ascii=False)
 
-    # --- SISTEMA DE HISTÓRICO DE CONVERSAS (SEM EMOJIS) ---
     def carregar_historico_chats():
         if os.path.exists(ARQUIVO_HISTORICO_CHATS):
             with open(ARQUIVO_HISTORICO_CHATS, "r", encoding="utf-8") as f: return json.load(f)
         id_padrao = str(int(time.time()))
         return {
             id_padrao: {
-                "titulo": "Conversa Inicial",
+                "titulo": "Nova Conversa",
                 "messages": [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
             }
         }
@@ -353,7 +332,7 @@ if st.session_state.autenticado and username:
     current_chat = chats_db[st.session_state.current_chat_id]
     mensagens_chat_atual = current_chat["messages"]
 
-    # --- INTEGRALIZAÇÃO GOOGLE AGENDA ---
+    # Google Agenda Connection
     def obter_servico_google_calendar():
         creds = None
         if os.path.exists(TOKEN_GOOGLE_USER):
@@ -376,7 +355,6 @@ if st.session_state.autenticado and username:
             horas, minutos = map(int, horario_str.split(':'))
             fim_horas = (horas + 1) % 24
             end_datetime = f"{data_str}T{fim_horas:02d}:{minutos:02d}:00"
-            
             event = {
                 'summary': titulo,
                 'description': 'Agendado via Jarvis OS',
@@ -406,7 +384,7 @@ if st.session_state.autenticado and username:
             salvar_dados(db)
         except: pass
 
-    # --- TOP DASHBOARD HEADER ---
+    # Header Dashboard
     col_titulo_sistema, col_botao_logout = st.columns([5, 1])
     with col_titulo_sistema:
         header_dashboard = f"<h1 class='custom-title' style='margin-bottom: 0px !important;'>{ICONES['jarvis']} <span class='jarvis-brand'>JARVIS OS</span></h1>"
@@ -463,7 +441,7 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # 1. CONVERSA & METAS (INTEGRAÇÃO DE SELEÇÃO INTERNA SEM EMOJIS)
+    # 1. CONVERSA & METAS
     with aba_metas:
         col_ia_interface, col_lista_metas = st.columns([1.2, 0.8])
         
@@ -471,11 +449,10 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} CONVERSA PRINCIPAL</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # --- MENU INTERNO SUPERIOR ESQUERDO PARA GERENCIAMENTO DE CHATS ---
+            # --- MENU INTERNO SUPERIOR ESQUERDO ---
             col_seletor_interno, col_acao_nova = st.columns([2, 1])
             
             with col_seletor_interno:
-                # Mapeia as opções sem usar emojis, limpo como o Claude
                 lista_ids = list(chats_db.keys())
                 lista_titulos = [chats_db[cid]["titulo"] for cid in lista_ids]
                 idx_atual = lista_ids.index(st.session_state.current_chat_id)
@@ -487,7 +464,6 @@ if st.session_state.autenticado and username:
                     label_visibility="collapsed"
                 )
                 
-                # Sincroniza se o usuário trocar a caixa de seleção
                 novo_id_selecionado = lista_ids[lista_titulos.index(escolha_chat_titulo)]
                 if novo_id_selecionado != st.session_state.current_chat_id:
                     st.session_state.current_chat_id = novo_id_selecionado
@@ -497,14 +473,14 @@ if st.session_state.autenticado and username:
                 if st.button("Nova Conversa", use_container_width=True):
                     novo_id = str(int(time.time()))
                     chats_db[novo_id] = {
-                        "titulo": "Conversa Sem Titulo",
+                        "titulo": "Nova Conversa",
                         "messages": [{"role": "assistant", "content": f"Sistemas prontos para novas diretrizes, {name}."}]
                     }
                     salvar_historico_chats(chats_db)
                     st.session_state.current_chat_id = novo_id
                     st.rerun()
 
-            # Caixa container do chat atualizado
+            # Caixa do chat
             chat_container = st.container(height=320)
             with chat_container:
                 for msg in mensagens_chat_atual: 
@@ -513,11 +489,13 @@ if st.session_state.autenticado and username:
             if prompt := st.chat_input("Insira uma instrução para o Jarvis..."):
                 mensagens_chat_atual.append({"role": "user", "content": prompt})
                 
-                # Atualização do título baseado no contexto sem emojis
-                if current_chat["titulo"] == "Conversa Inicial" or current_chat["titulo"] == "Conversa Sem Titulo":
-                    palavras = prompt.split()
-                    titulo_limpo = " ".join(palavras[:3]) + ("..." if len(palavras) > 3 else "")
-                    current_chat["titulo"] = titulo_limpo.strip()
+                # CORREÇÃO CRÍTICA: Se a conversa possui o título inicial genérico, redefinimos dinamicamente
+                if current_chat["titulo"] in ["Conversa Inicial", "Conversa Sem Titulo", "Nova Conversa"]:
+                    # Limpa caracteres especiais e pega as 3 primeiras palavras do prompt
+                    prompt_limpo = re.sub(r'[^\w\s]', '', prompt)
+                    palavras = prompt_limpo.split()
+                    novo_titulo = " ".join(palavras[:3]) + ("..." if len(palavras) > 3 else "")
+                    current_chat["titulo"] = novo_titulo.strip() if novo_titulo.strip() else "Conversa Ativa"
                 
                 resposta = processar_comando_e_criar_metas(prompt)
                 mensagens_chat_atual.append({"role": "assistant", "content": resposta})
@@ -526,7 +504,6 @@ if st.session_state.autenticado and username:
                 salvar_historico_chats(chats_db)
                 st.rerun()
                 
-            # Botão discreto para apagar a conversa corrente
             if len(chats_db) > 1:
                 if st.button("Excluir esta conversa permanentemente", type="secondary"):
                     del chats_db[st.session_state.current_chat_id]
@@ -557,7 +534,7 @@ if st.session_state.autenticado and username:
         else:
             cp1, cp2 = st.columns([1, 1])
             with cp1:
-                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
+                meta_alvo = st.selectbox("Selecione a tarefa activa para focar:", [m["nome"] for m in metas_validas])
                 minutos_digitados = st.number_input("Duração (em minutos):", min_value=1, max_value=120, value=int(st.session_state.pomo_tempo_inicial_escolhido), step=1, disabled=st.session_state.pomo_rodando)
                 if not st.session_state.pomo_rodando and st.session_state.pomo_tempo_inicial_escolhido != minutos_digitados:
                     st.session_state.pomo_tempo_inicial_escolhido = minutos_digitados
