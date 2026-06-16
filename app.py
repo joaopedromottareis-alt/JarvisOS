@@ -779,22 +779,37 @@ if st.session_state.autenticado and username:
 
             meses_nomes = {1: "JANEIRO", 2: "FEVEREIRO", 3: "MARÇO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO", 7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO"}
             nome_do_mes = meses_nomes.get(mes_atual, "CRONOGRAMA")
-            
-            html_estilos_calendario = """
-            <style>
-                @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
-                body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
-                .jarvis-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background-color: #0a0a0a; padding: 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.15); width: 100%; box-sizing: border-box; }
-                .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
-                .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
-                .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
-                .calendar-cell.cell-empty { background-color: transparent; border: none; }
-                .cell-number { font-weight: 700; font-size: 15px; color: #666666; margin-bottom: 6px; align-self: flex-end; }
-                .cell-today .cell-number { color: #d4af37; font-size: 16px; }
-                .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 55px; }
-                .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 92%; box-sizing: border-box; }
-            </style>
-            """
+            # --- LOCALIZA ISSO NO SEU CÓDIGO (DENTRO DA ABA CALENDÁRIO) ---
+
+html_estilos_calendario = """
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap');
+    body { background-color: transparent; margin: 0; padding: 0; font-family: 'Kanit', sans-serif; color: #ffffff; }
+    
+    /* ESTA É A LINHA QUE VAI PUXAR O CALENDÁRIO PARA CIMA */
+    .jarvis-calendar-grid { 
+        display: grid; 
+        grid-template-columns: repeat(7, 1fr); 
+        gap: 6px; 
+        background-color: #0a0a0a; 
+        padding: 12px; 
+        border-radius: 20px; 
+        border: 1px solid rgba(212, 175, 55, 0.15); 
+        width: 100%; 
+        box-sizing: border-box; 
+        margin-top: -42px; /* <-- ADICIONE OU AJUSTE ESTE VALOR AQUI */
+    }
+    
+    .calendar-header-day { text-align: center; font-weight: 600; font-size: 13px; color: #777777; text-transform: uppercase; padding-bottom: 6px; }
+    .calendar-cell { background-color: rgba(16, 16, 16, 0.7); border: 1px solid rgba(255, 255, 255, 0.02); border-radius: 12px; min-height: 85px; padding: 8px; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; position: relative; overflow: hidden; }
+    .calendar-cell.cell-today { background-color: rgba(212, 175, 55, 0.06); border: 1px solid #d4af37; }
+    .calendar-cell.cell-empty { background-color: transparent; border: none; }
+    .cell-number { font-weight: 700; font-size: 15px; color: #666666; margin-bottom: 6px; align-self: flex-end; }
+    .cell-today .cell-number { color: #d4af37; font-size: 16px; }
+    .events-wrapper { width: 100%; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 55px; }
+    .event-tag { background-color: rgba(212, 175, 55, 0.15); color: #f3e5ab; font-size: 10px; font-weight: 500; padding: 4px 6px; border-radius: 6px; border-left: 2px solid #d4af37; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 92%; box-sizing: border-box; }
+</style>
+"""
             
             html_corpo = f"<div style='text-align: center; margin-bottom: 12px; font-size: 18px; color: #ffffff; font-weight: 600; letter-spacing: 2px;'>{nome_do_mes} {ano_atual}</div>"
             html_corpo += "<div class='jarvis-calendar-grid'>"
