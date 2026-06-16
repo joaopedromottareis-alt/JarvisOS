@@ -136,16 +136,17 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Correção da caixa de mensagem para remover rolagem dupla chata */
+    /* MODIFICAÇÃO CIRÚRGICA: Remove as rolagens duplas e fantasmas do chat_input */
     [data-testid="stChatInput"] {
-        background-color: transparent !important;
         padding: 0px !important;
-        margin-top: 10px !important;
+        background-color: transparent !important;
     }
-    
+    [data-testid="stChatInput"] iframe {
+        overflow: hidden !important;
+    }
     [data-testid="stChatInputTextArea"] {
-        background-color: #0b0b0b !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        overflow-y: hidden !important;
+        resize: none !important;
     }
 
     .titulo-card { 
@@ -323,7 +324,7 @@ if st.session_state.autenticado and username:
         return {
             id_padrao: {
                 "titulo": "Conversa Inicial",
-                "messages": [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está ativa."}]
+                "messages": [{"role": "assistant", "content": f"Sistemas online, {name}! Sua Agenda Google vinculada está activa."}]
             }
         }
 
@@ -428,7 +429,7 @@ if st.session_state.autenticado and username:
     # Gerador Inteligente de Títulos Contextuais via IA
     def gerar_titulo_com_ia(primeira_pergunta):
         if not API_KEY or client is None:
-            return "Conversa Ativa"
+            return "Conversa Activa"
         prompt_titulo = (
             "Você é uma inteligência encarregada de criar títulos curtos de chats.\n"
             "Leia a pergunta do usuário e crie um título curtíssimo, contendo de 2 a 4 palavras chave, "
@@ -445,9 +446,9 @@ if st.session_state.autenticado and username:
             )
             titulo_gerado = resposta_titulo.choices[0].message.content.strip()
             titulo_gerado = re.sub(r'["\']', '', titulo_gerado)
-            return titulo_gerado if titulo_gerado else "Conversa Ativa"
+            return titulo_gerado if titulo_gerado else "Conversa Activa"
         except:
-            return "Conversa Ativa"
+            return "Conversa Activa"
 
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
@@ -518,8 +519,7 @@ if st.session_state.autenticado and username:
                     st.session_state.current_chat_id = novo_id
                     st.rerun()
 
-            # AJUSTE AQUI: Removido st.container fixo para tirar barras de rolagem duplas
-            chat_box = st.container()
+            chat_box = st.container(height=320)
             with chat_box:
                 for msg in mensagens_chat_atual: 
                     st.chat_message(msg["role"]).write(msg["content"])
@@ -661,7 +661,7 @@ if st.session_state.autenticado and username:
                             if item_para_remover: db["refeicoes"].remove(item_para_remover); salvar_dados(db); st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA (ESTÁVEL DA VERSÃO 6)
+    # 4. AGENDA (100% INTACTO DO APP 6)
     with aba_calendario:
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
