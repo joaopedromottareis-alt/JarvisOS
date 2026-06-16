@@ -136,10 +136,22 @@ st.markdown("""
         width: 100% !important;
     }
     
+    /* REMOÇÃO CIRÚRGICA DA BARRA DE ROLAGEM INDESEJADA NA CAIXA DE TEXTO */
     [data-testid="stChatInput"] {
-        background-color: #050505 !important;
+        background-color: transparent !important;
         border-radius: 14px !important;
-        padding: 4px !important;
+        padding: 0px !important;
+        overflow: hidden !important;
+    }
+    [data-testid="stChatInput"] fieldset {
+        border: none !important;
+    }
+    div[data-testid="stChatInputTextArea"] {
+        overflow-y: hidden !important;
+        resize: none !important;
+    }
+    .stChatInputContainer {
+        padding: 0px !important;
     }
 
     .titulo-card { 
@@ -465,7 +477,7 @@ if st.session_state.autenticado and username:
                 f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
                 "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
-                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
+                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true and inclua o objeto dentro de 'novas_metas'.\n"
                 "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
                 "Esquema JSON estrito:\n"
                 "{\n"
@@ -555,7 +567,7 @@ if st.session_state.autenticado and username:
             with cp1:
                 meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
                 
-                # IMPLEMENTADO: Substituição do Slider pelo campo de digitação de minutos
+                # Duração (em minutos)
                 minutos_digitados = st.number_input(
                     "Duração (em minutos):", 
                     min_value=1, 
@@ -710,7 +722,7 @@ if st.session_state.autenticado and username:
         with col_esq_info:
             st.markdown(
                 f"<div style='background-color: #0b0b0b; padding: 25px; border-radius: 16px; border-left: 4px solid #d4af37; margin-bottom: 25px; border: 1px solid rgba(212,175,55,0.1);'>"
-                f"<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Atual</span>"
+                f"<span style='color: #777777; font-size: 13px; font-weight:600; text-transform:uppercase;'>Data Actual</span>"
                 f"<h1 style='font-size: 75px; font-family: \"Kanit\", sans-serif; font-weight: 700; line-height:1; margin: 5px 0; color: #ffffff;'>{dia_num_hoje}</h1>"
                 f"<div style='font-size: 15px; font-family: \"Kanit\", sans-serif; color: #d4af37; font-weight:500; text-transform: uppercase; letter-spacing: 1px;'>{dia_name_hoje}</div>"
                 f"</div>", 
