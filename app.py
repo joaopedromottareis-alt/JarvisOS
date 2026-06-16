@@ -218,28 +218,25 @@ if "username" not in st.session_state: st.session_state.username = None
 # --- CAPTURA DE RETORNO DO OAUTH DO GOOGLE (Verifica a URL do Streamlit) ---
 parametros_url = st.query_params
 if "code" in parametros_url and "state" in parametros_url:
-    # Significa que o usuário acabou de voltar do login da Google!
     codigo_google = parametros_url["code"]
-    usuario_registro = parametros_url["state"] # Usamos o 'state' para passar o username temporário
+    usuario_registro = parametros_url["state"] 
     
     if os.path.exists('credentials.json'):
         try:
-            # Reconstrói o fluxo para converter o código em token real
-            # ATENÇÃO: Mude a porta/url para bater exatamente com a sua URI cadastrada no Google Console
-            redirecionamento_uri = "http://localhost:8501/" 
+            # AJUSTADO: Sem a barra final para combinar com as requisições nativas do Google
+            redirecionamento_uri = "http://localhost:8501" 
             
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
             flow.fetch_token(code=codigo_google)
             creds = flow.credentials
             
-            # Salva o token específico desse usuário recém criado
             token_path = f"token_user_{usuario_registro}.json"
             with open(token_path, 'w') as token_file:
                 token_file.write(creds.to_json())
                 
             st.success("✓ Integração com o Google Agenda realizada com sucesso durante o registro!")
             st.info("Faça o login agora para acessar sua conta integrada.")
-            st.query_params.clear() # Limpa a URL do Streamlit
+            st.query_params.clear() 
             time.sleep(2)
         except Exception as e:
             st.error(f"Erro ao salvar token do Google: {e}")
@@ -284,22 +281,18 @@ if not st.session_state.autenticado:
             elif not os.path.exists('credentials.json'):
                 st.error("Arquivo 'credentials.json' ausente na raiz do servidor!")
             else:
-                # 1. Salva a conta local no banco de dados primeiro
                 usernames_db[novo_user] = {"name": novo_nome.upper(), "password": gerar_hash_sha256(nova_senha)}
                 salvar_novas_credenciais(usernames_db)
                 
-                # 2. Inicia o fluxo de autorização OAuth2 automático do Google
-                # IMPORTANTE: Mude para a URL pública se não estiver rodando em localhost
-                redirecionamento_uri = "http://localhost:8501/" 
+                # AJUSTADO: Sem a barra final para corresponder ao Google Console
+                redirecionamento_uri = "http://localhost:8501" 
                 
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES, redirect_uri=redirecionamento_uri)
                 
-                # Geramos a URL e guardamos o username do cara dentro do parâmetro 'state' 
-                # para sabermos de quem é o token quando o Google nos responder de volta.
                 auth_url, _ = flow.authorization_url(prompt='consent', state=novo_user)
                 
                 st.success("Conta Local criada! Redirecionando para a Google para ativação do Calendário...")
-                st.markdown(f'<meta http-serif="refresh" content="1;url={auth_url}">', unsafe_allow_html=True)
+                st.markdown(f'<meta http-equiv="refresh" content="1;url={auth_url}">', unsafe_allow_html=True)
                 st.markdown(f"[Se não for redirecionado automaticamente, clique aqui para Autenticar]({auth_url})")
         st.stop()
 
@@ -332,7 +325,6 @@ if st.session_state.autenticado and username:
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
 
-    # --- CARREGAR CONEXÃO DO GOOGLE JÁ VINCULADA ---
     def obter_servico_google_calendar():
         creds = None
         if os.path.exists(TOKEN_GOOGLE_USER):
@@ -416,7 +408,6 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # --- INTEGRAÇÃO DA IA: ANALISADOR DE PRATOS E NUTRIENTES ---
     def analisar_nutrientes_refeicao(descricao_refeicao):
         if not API_KEY or client is None:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
@@ -444,7 +435,6 @@ if st.session_state.autenticado and username:
         except Exception:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
 
-    # --- MOTOR DE EXECUÇÃO DUPLO COM CORREÇÃO DE GÊNERO DINÂMICA ---
     def processar_comando_e_criar_metas(comando):
         data_hoje_str = datetime.date.today().isoformat()
         
@@ -475,7 +465,7 @@ if st.session_state.autenticado and username:
         try:
             prompt_sistema_extrator = (
                 f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
-                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas em formato JSON.\n\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
                 "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true e inclua o objeto dentro de 'novas_metas'.\n"
                 "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
