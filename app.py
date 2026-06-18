@@ -277,7 +277,7 @@ if not st.session_state.autenticado:
         st.stop()
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
-        st.markdown("### CRIAR NOVA CONTA INTEGRADA COM GOOGLE")
+        st.markdown("### CRIAR NOVA CONTA INTEGRADA WITH GOOGLE")
         novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
         novo_user = st.text_input("USERNAME (SEM ESPAÇOS, CURTO):").strip().lower()
         nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password")
@@ -712,8 +712,13 @@ if st.session_state.autenticado and username:
             peso_texto = st.text_input("Seu peso atual (kg):", value=str(db.get("peso_usuario", 70.0)))
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
-            db["peso_usuario"] = peso_limpo
-            alvo_calc = int(peso_limpo * 35)
+            
+            # ATUALIZAÇÃO E GRAVAÇÃO REAL DO PESO NO ARQUIVO JSON
+            if peso_limpo != db.get("peso_usuario"):
+                db["peso_usuario"] = peso_limpo
+                salvar_dados(db)
+                
+            alvo_calc = int(db["peso_usuario"] * 35)
             st.metric("Consumido", f"{db['agua']} ml", f"Alvo do Jarvis: {alvo_calc} ml")
             cb1, cb2 = st.columns([1, 1])
             if cb1.button("➕ Copo (250ml)"): db["agua"] += 250; salvar_dados(db); st.rerun()
