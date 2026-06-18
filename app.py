@@ -176,27 +176,39 @@ st.markdown("""
         width: 100% !important;
     }
     
-    .stTabs [data-baseweb="tab-list"] { 
-        background-color: transparent !important; 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-        margin-bottom: 30px !important;
-        width: 100% !important;
+    /* Estilização para as Abas Customizadas em formato de Cards Horizontais */
+    .nav-card-container {
+        background: #0b0b0b !important;
+        border: 1px solid rgba(212, 175, 55, 0.15) !important;
+        border-radius: 16px !important;
+        padding: 15px !important;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
     
-    .stTabs [data-baseweb="tab"] { 
-        color: #777777 !important; 
+    .nav-card-container.active {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
+        border: 1px solid #d4af37 !important;
+        box-shadow: 0px 0px 15px rgba(212, 175, 55, 0.1);
+    }
+    
+    .nav-card-title {
         font-family: 'Kanit', sans-serif !important;
-        flex-grow: 1 !important;
-        text-align: center !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 1px;
+        color: #777777;
+        text-transform: uppercase;
     }
     
-    .stTabs [aria-selected="true"] { 
-        color: #d4af37 !important; 
-    }
-    
-    [data-testid="stChatMessage"] {
-        background-color: rgba(20, 20, 20, 0.5) !important;
-        border-left: 3px solid #d4af37 !important;
+    .nav-card-container.active .nav-card-title {
+        color: #d4af37 !important;
     }
 
     .subir-bloco-agenda {
@@ -348,6 +360,10 @@ if st.session_state.autenticado and username:
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
+    
+    # Estado da aba selecionada (Controle de Janelas customizado)
+    if "aba_atual" not in st.session_state:
+        st.session_state.aba_atual = "CONVERSA & METAS"
 
     def obter_servico_google_calendar():
         creds = None
@@ -431,8 +447,42 @@ if st.session_state.autenticado and username:
             if "conversas" in st.session_state: del st.session_state.conversas
             st.rerun()
 
-    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
+    # ==================== MENU DE NAVEGAÇÃO CUSTOMIZADO (CARDS HORIZONTAIS) ====================
+    c_nav1, c_nav2, c_nav3, c_nav4 = st.columns(4)
+    
+    with c_nav1:
+        ativo_1 = "active" if st.session_state.aba_atual == "CONVERSA & METAS" else ""
+        st.markdown(f"<div class='nav-card-container {ativo_1}'>{ICONES['conversa']}<div class='nav-card-title'>Conversa & Metas</div></div>", unsafe_allow_html=True)
+        if st.button("ACESSAR CONVERSAS", key="nav_btn_conversas", label_visibility="collapsed"):
+            st.session_state.aba_atual = "CONVERSA & METAS"
+            st.rerun()
+            
+    with c_nav2:
+        ativo_2 = "active" if st.session_state.aba_atual == "TIMER DE FOCO" else ""
+        st.markdown(f"<div class='nav-card-container {ativo_2}'>{ICONES['foco']}<div class='nav-card-title'>Timer de Foco</div></div>", unsafe_allow_html=True)
+        if st.button("ACESSAR FOCO", key="nav_btn_foco", label_visibility="collapsed"):
+            st.session_state.aba_atual = "TIMER DE FOCO"
+            st.rerun()
+            
+    with c_nav3:
+        ativo_3 = "active" if st.session_state.aba_atual == "SAÚDE & FITNESS" else ""
+        st.markdown(f"<div class='nav-card-container {ativo_3}'>{ICONES['saude']}<div class='nav-card-title'>Saúde & Fitness</div></div>", unsafe_allow_html=True)
+        if st.button("ACESSAR SAÚDE", key="nav_btn_saude", label_visibility="collapsed"):
+            st.session_state.aba_atual = "SAÚDE & FITNESS"
+            st.rerun()
+            
+    with c_nav4:
+        ativo_4 = "active" if st.session_state.aba_atual == "AGENDA" else ""
+        st.markdown(f"<div class='nav-card-container {ativo_4}'>{ICONES['calendario']}<div class='nav-card-title'>Agenda</div></div>", unsafe_allow_html=True)
+        if st.button("ACESSAR AGENDA", key="nav_btn_agenda", label_visibility="collapsed"):
+            st.session_state.aba_atual = "AGENDA"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ==================== FUNÇÕES AUXILIARES ====================
     def analisar_nutrientes_refeicao(descricao_refeicao):
         if not API_KEY or client is None:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
@@ -494,7 +544,6 @@ if st.session_state.autenticado and username:
             f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
         )
         
-        # Constrói o histórico para a IA se lembrar do contexto da conversa selecionada
         mensagens_ia = [{"role": "system", "content": prompt_sistema_chat}]
         for msg in historico_chat:
             mensagens_ia.append({"role": msg["role"], "content": msg["content"]})
@@ -559,27 +608,20 @@ if st.session_state.autenticado and username:
             
         return resposta_texto_jarvis
 
-# ==================== DEFINIÇÃO GLOBAL DE DATAS ====================
+# ==================== GESTÃO DE EXIBIÇÃO DE CONTEÚDO DAS JANELAS ====================
     hoje = datetime.date.today()
     mes_atual = hoje.month
     ano_atual = hoje.year
 
-# ==================== NAVEGAÇÃO POR ABAS ====================
-    aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
-        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
-    ])
-
-    # 1. CONVERSA & METAS (COM GESTÃO COMPLETA DE MULTI-CONVERSAS)
-    with aba_metas:
+    # 1. JANELA: CONVERSA & METAS
+    if st.session_state.aba_atual == "CONVERSA & METAS":
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} GERENCIADOR DE CONVERSAS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Mapeamento e montagem do seletor de chats
             opcoes_conversas = ["➕ Iniciar Nova Conversa"] + list(db["conversas"].keys())
             
-            # Preserva a seleção atual do usuário para evitar resets visuais
             if "id_conversa_atual" not in st.session_state:
                 st.session_state.id_conversa_atual = opcoes_conversas[0]
                 
@@ -591,7 +633,6 @@ if st.session_state.autenticado and username:
             )
             st.session_state.id_conversa_atual = conversa_selecionada
             
-            # Carrega o histórico correspondente da conversa selecionada
             if conversa_selecionada == "➕ Iniciar Nova Conversa":
                 mensagens_exibidas = [{"role": "assistant", "content": f"Sistemas online, {name}! Como posso auxiliá-lo com suas diretrizes hoje?"}]
             else:
@@ -614,11 +655,9 @@ if st.session_state.autenticado and username:
                 if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
                     st.session_state.ultimo_prompt_enviado = prompt
                     
-                    # Se for um chat novo, gera o título inteligente pela primeira mensagem
                     if conversa_selecionada == "➕ Iniciar Nova Conversa":
                         with st.spinner("Estruturando nova linha de chat..."):
                             titulo_novo = gerar_titulo_conversa(prompt)
-                            # Previne colisões de nomes iguais adicionando carimbo de tempo se necessário
                             if titulo_novo in db["conversas"]:
                                 titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
                             
@@ -628,10 +667,7 @@ if st.session_state.autenticado and username:
                     else:
                         conversa_alvo = conversa_selecionada
                     
-                    # Registra a mensagem do usuário
                     db["conversas"][conversa_alvo].append({"role": "user", "content": prompt})
-                    
-                    # Solicita resposta do Jarvis trazendo o histórico deste chat específico
                     resposta = processar_comando_e_criar_metas(prompt, db["conversas"][conversa_alvo])
                     db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
                     
@@ -655,8 +691,8 @@ if st.session_state.autenticado and username:
                             if c3.button("✓", key=m["id"]):
                                 m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. TIMER DE FOCO (POMODORO)
-    with aba_pomodoro:
+    # 2. JANELA: TIMER DE FOCO
+    elif st.session_state.aba_atual == "TIMER DE FOCO":
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
@@ -664,7 +700,7 @@ if st.session_state.autenticado and username:
         else:
             cp1, cp2 = st.columns([1, 1.3])
             with cp1:
-                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
+                meta_alvo = st.selectbox("Selecione a tarefa activa para focar:", [m["nome"] for m in metas_validas])
                 
                 minutos_digitados = st.number_input(
                     "Duração (em minutos):", 
@@ -703,8 +739,8 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE & FITNESS 
-    with aba_saude:
+    # 3. JANELA: SAÚDE & FITNESS
+    elif st.session_state.aba_atual == "SAÚDE & FITNESS":
         cs1, cs2 = st.columns([1, 1.3])
         with cs1:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
@@ -713,7 +749,6 @@ if st.session_state.autenticado and username:
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
             
-            # ATUALIZAÇÃO E GRAVAÇÃO REAL DO PESO NO ARQUIVO JSON
             if peso_limpo != db.get("peso_usuario"):
                 db["peso_usuario"] = peso_limpo
                 salvar_dados(db)
@@ -801,8 +836,8 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA 
-    with aba_calendario:
+    # 4. JANELA: AGENDA
+    elif st.session_state.aba_atual == "AGENDA":
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
 
@@ -842,8 +877,6 @@ if st.session_state.autenticado and username:
                                 st.error("Falha ao salvar. Verifique suas credenciais.")
 
         with col_dir_cal:
-            st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
-                    
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
             cal_objeto = pycalendar.Calendar(firstweekday=6)
@@ -918,7 +951,6 @@ if st.session_state.autenticado and username:
                         
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
-            st.markdown('</div>', unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
