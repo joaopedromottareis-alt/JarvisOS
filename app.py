@@ -45,7 +45,7 @@ st.set_page_config(
 
 # Dicionário de Ícones SVG
 ICONES = {
-    "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -58,11 +58,11 @@ ICONES = {
         <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
         <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
     </svg>""",
-    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
-    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
-    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
-    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
-    "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
+    "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;">
         <defs>
             <linearGradient id="gold-grad-caderno" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -166,6 +166,7 @@ st.markdown("""
         font-size: 18px !important;
     }
 
+    /* Estilização Geral de Botões Padrão */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -176,39 +177,37 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Estilização para as Abas Customizadas em formato de Cards Horizontais */
-    .nav-card-container {
+    /* Customização dos Botões da Barra de Navegação Superior (Menu de Abas) */
+    div[data-testid="column"] button[key^="btn_nav_"] {
         background: #0b0b0b !important;
         border: 1px solid rgba(212, 175, 55, 0.15) !important;
+        color: #777777 !important;
         border-radius: 16px !important;
-        padding: 15px !important;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
+        padding: 18px 10px !important;
+        font-family: 'Kanit', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        box-shadow: none !important;
+    }
+
+    div[data-testid="column"] button[key^="btn_nav_"]:hover {
+        border-color: rgba(212, 175, 55, 0.5) !important;
+        color: #ffffff !important;
     }
     
-    .nav-card-container.active {
+    /* Destaque para a Aba Ativa / Selecionada */
+    div[data-testid="column"] button[key*="_active"] {
         background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
         border: 1px solid #d4af37 !important;
-        box-shadow: 0px 0px 15px rgba(212, 175, 55, 0.1);
-    }
-    
-    .nav-card-title {
-        font-family: 'Kanit', sans-serif !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        letter-spacing: 1px;
-        color: #777777;
-        text-transform: uppercase;
-    }
-    
-    .nav-card-container.active .nav-card-title {
         color: #d4af37 !important;
+        box-shadow: 0px 0px 15px rgba(212, 175, 55, 0.1) !important;
     }
 
     .subir-bloco-agenda {
@@ -449,34 +448,34 @@ if st.session_state.autenticado and username:
 
     st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
-    # ==================== MENU DE NAVEGAÇÃO CUSTOMIZADO (CARDS HORIZONTAIS) ====================
+    # ==================== MENU DE NAVEGAÇÃO INTERATIVO (ICONIZADO) ====================
     c_nav1, c_nav2, c_nav3, c_nav4 = st.columns(4)
     
     with c_nav1:
-        ativo_1 = "active" if st.session_state.aba_atual == "CONVERSA & METAS" else ""
-        st.markdown(f"<div class='nav-card-container {ativo_1}'>{ICONES['conversa']}<div class='nav-card-title'>Conversa & Metas</div></div>", unsafe_allow_html=True)
-        if st.button("ACESSAR CONVERSAS", key="nav_btn_conversas", label_visibility="collapsed"):
+        is_active = "_active" if st.session_state.aba_atual == "CONVERSA & METAS" else ""
+        label_1 = "Conversa & Metas"
+        if st.button(label_1, key=f"btn_nav_conversas{is_active}", use_container_width=True):
             st.session_state.aba_atual = "CONVERSA & METAS"
             st.rerun()
             
     with c_nav2:
-        ativo_2 = "active" if st.session_state.aba_atual == "TIMER DE FOCO" else ""
-        st.markdown(f"<div class='nav-card-container {ativo_2}'>{ICONES['foco']}<div class='nav-card-title'>Timer de Foco</div></div>", unsafe_allow_html=True)
-        if st.button("ACESSAR FOCO", key="nav_btn_foco", label_visibility="collapsed"):
+        is_active = "_active" if st.session_state.aba_atual == "TIMER DE FOCO" else ""
+        label_2 = "Timer de Foco"
+        if st.button(label_2, key=f"btn_nav_foco{is_active}", use_container_width=True):
             st.session_state.aba_atual = "TIMER DE FOCO"
             st.rerun()
             
     with c_nav3:
-        ativo_3 = "active" if st.session_state.aba_atual == "SAÚDE & FITNESS" else ""
-        st.markdown(f"<div class='nav-card-container {ativo_3}'>{ICONES['saude']}<div class='nav-card-title'>Saúde & Fitness</div></div>", unsafe_allow_html=True)
-        if st.button("ACESSAR SAÚDE", key="nav_btn_saude", label_visibility="collapsed"):
+        is_active = "_active" if st.session_state.aba_atual == "SAÚDE & FITNESS" else ""
+        label_3 = "Saúde & Fitness"
+        if st.button(label_3, key=f"btn_nav_saude{is_active}", use_container_width=True):
             st.session_state.aba_atual = "SAÚDE & FITNESS"
             st.rerun()
             
     with c_nav4:
-        ativo_4 = "active" if st.session_state.aba_atual == "AGENDA" else ""
-        st.markdown(f"<div class='nav-card-container {ativo_4}'>{ICONES['calendario']}<div class='nav-card-title'>Agenda</div></div>", unsafe_allow_html=True)
-        if st.button("ACESSAR AGENDA", key="nav_btn_agenda", label_visibility="collapsed"):
+        is_active = "_active" if st.session_state.aba_atual == "AGENDA" else ""
+        label_4 = "Agenda"
+        if st.button(label_4, key=f"btn_nav_agenda{is_active}", use_container_width=True):
             st.session_state.aba_atual = "AGENDA"
             st.rerun()
 
