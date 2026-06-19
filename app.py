@@ -155,17 +155,6 @@ st.markdown("""
         padding-bottom: 8px;
     }
 
-    .btn-seta-enviar button {
-        background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
-        color: #000000 !important; 
-        border: none !important;
-        border-radius: 12px !important; 
-        padding: 10px 0px !important; 
-        font-weight: 700 !important; 
-        width: 100% !important;
-        font-size: 18px !important;
-    }
-
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -367,7 +356,6 @@ if st.session_state.autenticado and username:
                     creds = None
             
             if not creds:
-                st.warning("⚠️ Seu Google Agenda não está vinculado a este operador. Vá até a aba da Agenda para configurar.")
                 return None
         
         return build('calendar', 'v3', credentials=creds)
@@ -403,6 +391,7 @@ if st.session_state.autenticado and username:
                                                 orderBy='startTime').execute()
             events = events_result.get('items', [])
             
+            # Reconstrói os locais sincronizando
             db["eventos_locais"] = []
             for ev in events:
                 start = ev['start'].get('dateTime', ev['start'].get('date'))
@@ -491,13 +480,13 @@ if st.session_state.autenticado and username:
             f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhorn' ou pronomes masculinos.\n"
             f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegance corporativa e formalidade britânica.\n"
-            f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
+            f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada e processada no sistema."
         )
         
-        # Constrói o histórico para a IA se lembrar do contexto da conversa selecionada
         mensagens_ia = [{"role": "system", "content": prompt_sistema_chat}]
         for msg in historico_chat:
-            mensagens_ia.append({"role": msg["role"], "content": msg["content"]})
+            if msg["role"] != "system":
+                mensagens_ia.append({"role": msg["role"], "content": msg["content"]})
         
         try:
             conversa_principal = client.chat.completions.create(
@@ -551,7 +540,20 @@ if st.session_state.autenticado and username:
                     if isinstance(ev, dict) and "title" in ev:
                         data_ev = ev.get("date", data_hoje_str)
                         hora_ev = ev.get("time", "12:00")
+                        
+                        # Correção essencial: Salva obrigatoriamente na base local primeiro
+                        id_evento_unico = f"evt_{int(time.time())}_{len(db['eventos_locais'])}"
+                        db["eventos_locais"].append({
+                            "id": id_evento_unico,
+                            "title": ev["title"],
+                            "date": data_ev,
+                            "time": hora_ev
+                        })
+                        salvar_dados(db)
+                        
+                        # Tenta mandar para a nuvem da Google em segundo plano
                         enviar_evento_para_google(ev["title"], data_ev, hora_ev)
+                
                 puxar_eventos_do_google()
                 
         except Exception:
@@ -576,10 +578,8 @@ if st.session_state.autenticado and username:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} GERENCIADOR DE CONVERSAS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Mapeamento e montagem do seletor de chats
             opcoes_conversas = ["➕ Iniciar Nova Conversa"] + list(db["conversas"].keys())
             
-            # Preserva a seleção atual do usuário para evitar resets visuais
             if "id_conversa_atual" not in st.session_state:
                 st.session_state.id_conversa_atual = opcoes_conversas[0]
                 
@@ -591,52 +591,39 @@ if st.session_state.autenticado and username:
             )
             st.session_state.id_conversa_atual = conversa_selecionada
             
-            # Carrega o histórico correspondente da conversa selecionada
             if conversa_selecionada == "➕ Iniciar Nova Conversa":
                 mensagens_exibidas = [{"role": "assistant", "content": f"Sistemas online, {name}! Como posso auxiliá-lo com suas diretrizes hoje?"}]
             else:
                 mensagens_exibidas = db["conversas"][conversa_selecionada]
             
-            chat_container = st.container(height=260)
+            chat_container = st.container(height=300)
             with chat_container:
                 for msg in mensagens_exibidas: 
                     st.chat_message(msg["role"]).write(msg["content"])
             
-            with st.container():
-                c_txt, c_btn = st.columns([5.2, 0.8])
-                with c_txt:
-                    prompt = st.text_input("Envie uma instrução...", key="chat_prompt_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
-                with c_btn:
-                    st.markdown('<div class="btn-seta-enviar">', unsafe_allow_html=True)
-                    enviou_botao = st.button("▲", key="btn_enviar_chat")
-                    st.markdown('</div>', unsafe_allow_html=True)
+            # --- SOLUÇÃO: Utilização do st.chat_input nativo perfeitamente alinhado e funcional ---
+            prompt = st.chat_input("Envie uma instrução para o Jarvis...")
+            
+            if prompt:
+                if conversa_selecionada == "➕ Iniciar Nova Conversa":
+                    with st.spinner("Estruturando nova linha de chat..."):
+                        titulo_novo = gerar_titulo_conversa(prompt)
+                        if titulo_novo in db["conversas"]:
+                            titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
+                        
+                        db["conversas"][titulo_novo] = []
+                        conversa_alvo = titulo_novo
+                        st.session_state.id_conversa_atual = titulo_novo
+                else:
+                    conversa_alvo = conversa_selecionada
                 
-                if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
-                    st.session_state.ultimo_prompt_enviado = prompt
-                    
-                    # Se for um chat novo, gera o título inteligente pela primeira mensagem
-                    if conversa_selecionada == "➕ Iniciar Nova Conversa":
-                        with st.spinner("Estruturando nova linha de chat..."):
-                            titulo_novo = gerar_titulo_conversa(prompt)
-                            # Previne colisões de nomes iguais adicionando carimbo de tempo se necessário
-                            if titulo_novo in db["conversas"]:
-                                titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
-                            
-                            db["conversas"][titulo_novo] = []
-                            conversa_alvo = titulo_novo
-                            st.session_state.id_conversa_atual = titulo_novo
-                    else:
-                        conversa_alvo = conversa_selecionada
-                    
-                    # Registra a mensagem do usuário
-                    db["conversas"][conversa_alvo].append({"role": "user", "content": prompt})
-                    
-                    # Solicita resposta do Jarvis trazendo o histórico deste chat específico
-                    resposta = processar_comando_e_criar_metas(prompt, db["conversas"][conversa_alvo])
-                    db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
-                    
-                    salvar_dados(db)
-                    st.rerun()
+                db["conversas"][conversa_alvo].append({"role": "user", "content": prompt})
+                
+                resposta = processar_comando_e_criar_metas(prompt, db["conversas"][conversa_alvo])
+                db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
+                
+                salvar_dados(db)
+                st.rerun()
                     
         with col_lista:
             card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
@@ -664,7 +651,7 @@ if st.session_state.autenticado and username:
         else:
             cp1, cp2 = st.columns([1, 1.3])
             with cp1:
-                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
+                meta_alvo = st.selectbox("Selecione a tarefa activa para focar:", [m["nome"] for m in metas_validas])
                 
                 minutos_digitados = st.number_input(
                     "Duração (em minutos):", 
@@ -713,7 +700,6 @@ if st.session_state.autenticado and username:
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
             
-            # ATUALIZAÇÃO E GRAVAÇÃO REAL DO PESO NO ARQUIVO JSON
             if peso_limpo != db.get("peso_usuario"):
                 db["peso_usuario"] = peso_limpo
                 salvar_dados(db)
@@ -832,14 +818,22 @@ if st.session_state.autenticado and username:
                 
                 if st.button("Agendar na Nuvem"):
                     if nome_ev:
+                        # Salva localmente primeiro antes de disparar o envio à API
+                        id_evento_unico = f"evt_{int(time.time())}_{len(db['eventos_locais'])}"
+                        db["eventos_locais"].append({
+                            "id": id_evento_unico,
+                            "title": nome_ev,
+                            "date": data_ev.isoformat(),
+                            "time": h_ini.strftime('%H:%M')
+                        })
+                        salvar_dados(db)
+                        
                         with st.spinner("A enviar evento para o Google..."):
-                            sucesso = enviar_evento_para_google(nome_ev, data_ev.isoformat(), h_ini.strftime('%H:%M'))
-                            if sucesso:
-                                puxar_eventos_do_google()
-                                st.toast("Evento salvo no Google Agenda!")
-                                st.rerun()
-                            else:
-                                st.error("Falha ao salvar. Verifique suas credenciais.")
+                            enviar_evento_para_google(nome_ev, data_ev.isoformat(), h_ini.strftime('%H:%M'))
+                        
+                        puxar_eventos_do_google()
+                        st.toast("Evento salvo no Cronograma!")
+                        st.rerun()
 
         with col_dir_cal:
             st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
@@ -926,7 +920,7 @@ if st.session_state.autenticado and username:
         
         eventos_cadastrados = db.get("eventos_locais", [])
         if not eventos_cadastrados:
-            st.info("Pressione 'Atualizar Dados' acima para carregar as informações do servidor.")
+            st.info("Nenhum compromisso catalogado.")
         else:
             eventos_ordenados = sorted(eventos_cadastrados, key=lambda x: (x.get("date", ""), x.get("time", "")))
             for idx, ev in enumerate(eventos_ordenados):
