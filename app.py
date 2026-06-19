@@ -45,7 +45,7 @@ st.set_page_config(
 
 # Dicionário de Ícones SVG
 ICONES = {
-    "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "jarvis": """<svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
         <defs>
             <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -58,11 +58,11 @@ ICONES = {
         <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
         <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
     </svg>""",
-    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
-    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
-    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
-    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
-    "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
+    "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 8px;">
         <defs>
             <linearGradient id="gold-grad-caderno" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#ffd700"/>
@@ -160,12 +160,16 @@ st.markdown("""
         color: #000000 !important; 
         border: none !important;
         border-radius: 12px !important; 
-        padding: 10px 0px !important; 
+        padding: 9px 0px !important; 
         font-weight: 700 !important; 
         width: 100% !important;
-        font-size: 18px !important;
+        font-size: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
+    /* Estilização Geral de Botões Padrão */
     .stButton>button { 
         background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%) !important; 
         color: #000000 !important; 
@@ -176,27 +180,37 @@ st.markdown("""
         width: 100% !important;
     }
     
-    .stTabs [data-baseweb="tab-list"] { 
-        background-color: transparent !important; 
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-        margin-bottom: 30px !important;
-        width: 100% !important;
-    }
-    
-    .stTabs [data-baseweb="tab"] { 
-        color: #777777 !important; 
+    /* Customização dos Botões da Barra de Navegação Superior (Menu de Abas) */
+    div[data-testid="column"] button[key^="btn_nav_"] {
+        background: #0b0b0b !important;
+        border: 1px solid rgba(212, 175, 55, 0.15) !important;
+        color: #777777 !important;
+        border-radius: 16px !important;
+        padding: 18px 10px !important;
         font-family: 'Kanit', sans-serif !important;
-        flex-grow: 1 !important;
-        text-align: center !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        transition: all 0.3s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        box-shadow: none !important;
+    }
+
+    div[data-testid="column"] button[key^="btn_nav_"]:hover {
+        border-color: rgba(212, 175, 55, 0.5) !important;
+        color: #ffffff !important;
     }
     
-    .stTabs [aria-selected="true"] { 
-        color: #d4af37 !important; 
-    }
-    
-    [data-testid="stChatMessage"] {
-        background-color: rgba(20, 20, 20, 0.5) !important;
-        border-left: 3px solid #d4af37 !important;
+    /* Destaque para a Aba Ativa / Selecionada */
+    div[data-testid="column"] button[key*="_active"] {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%) !important;
+        border: 1px solid #d4af37 !important;
+        color: #d4af37 !important;
+        box-shadow: 0px 0px 15px rgba(212, 175, 55, 0.1) !important;
     }
 
     .subir-bloco-agenda {
@@ -348,6 +362,10 @@ if st.session_state.autenticado and username:
     if "pomo_rodando" not in st.session_state: st.session_state.pomo_rodando = False
     if "pomo_tempo_inicial_escolhido" not in st.session_state: st.session_state.pomo_tempo_inicial_escolhido = 25
     if "eventos_locais" not in db: db["eventos_locais"] = []
+    
+    # Estado da aba selecionada (Controle de Janelas customizado)
+    if "aba_atual" not in st.session_state:
+        st.session_state.aba_atual = "CONVERSA & METAS"
 
     def obter_servico_google_calendar():
         creds = None
@@ -367,7 +385,6 @@ if st.session_state.autenticado and username:
                     creds = None
             
             if not creds:
-                st.warning("⚠️ Seu Google Agenda não está vinculado a este operador. Vá até a aba da Agenda para configurar.")
                 return None
         
         return build('calendar', 'v3', credentials=creds)
@@ -431,14 +448,48 @@ if st.session_state.autenticado and username:
             if "conversas" in st.session_state: del st.session_state.conversas
             st.rerun()
 
-    st.markdown("<hr style='margin-top: 5px; margin-bottom: 25px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border-color: rgba(212,175,55,0.15);'>", unsafe_allow_html=True)
 
+    # ==================== MENU DE NAVEGAÇÃO INTERATIVO (ICONIZADO) ====================
+    c_nav1, c_nav2, c_nav3, c_nav4 = st.columns(4)
+    
+    with c_nav1:
+        is_active = "_active" if st.session_state.aba_atual == "CONVERSA & METAS" else ""
+        label_1 = "Conversa & Metas"
+        if st.button(label_1, key=f"btn_nav_conversas{is_active}", use_container_width=True):
+            st.session_state.aba_atual = "CONVERSA & METAS"
+            st.rerun()
+            
+    with c_nav2:
+        is_active = "_active" if st.session_state.aba_atual == "TIMER DE FOCO" else ""
+        label_2 = "Timer de Foco"
+        if st.button(label_2, key=f"btn_nav_foco{is_active}", use_container_width=True):
+            st.session_state.aba_atual = "TIMER DE FOCO"
+            st.rerun()
+            
+    with c_nav3:
+        is_active = "_active" if st.session_state.aba_atual == "SAÚDE & FITNESS" else ""
+        label_3 = "Saúde & Fitness"
+        if st.button(label_3, key=f"btn_nav_saude{is_active}", use_container_width=True):
+            st.session_state.aba_atual = "SAÚDE & FITNESS"
+            st.rerun()
+            
+    with c_nav4:
+        is_active = "_active" if st.session_state.aba_atual == "AGENDA" else ""
+        label_4 = "Agenda"
+        if st.button(label_4, key=f"btn_nav_agenda{is_active}", use_container_width=True):
+            st.session_state.aba_atual = "AGENDA"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ==================== FUNÇÕES AUXILIARES ====================
     def analisar_nutrientes_refeicao(descricao_refeicao):
         if not API_KEY or client is None:
             return {"calorias": 0, "carboidratos": 0, "proteinas": 0, "gorduras": 0}
             
         prompt_nutricional = (
-            "Você é uma inteligência artificial especialista em nutrição e mapeamento de macroalimentos.\n"
+            "Você é uma inteligência artificial especialista in nutrição e mapeamento de macroalimentos.\n"
             f"Sua tarefa é analisar a refeição descrita pelo usuário: '{descricao_refeicao}'.\n"
             "Estime os valores nutricionais gerais dessa porção padrão de forma assertiva e realista.\n\n"
             "Retorne OBRIGATORIAMENTE apenas um objeto JSON limpo com as seguintes chaves numéricas inteiras:\n"
@@ -488,13 +539,12 @@ if st.session_state.autenticado and username:
             f"DIRETRIZES OBRIGATÓRIAS E CRÍTICAS DE IDENTIFICAÇÃO DE GÊNERO:\n"
             f"Antes de responder, analise o text digitado pelo usuário ('{comando}') E o nome da conta ('{name}').\n"
             f"1. Se o comando atual contiver referências explícitas à mãe do usuário, se o usuário disser que quem está falando é a mãe, uma mulher, ou usar saudações femininas, ou se o próprio nome '{name}' for feminino (ex: Maria, Ana, Paula, Mãe), você deve mudar IMEDIATAMENTE os pronomes para o FEMININO.\n"
-            f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhorn' ou pronomes masculinos.\n"
+            f"   - Sob condição feminina, use sempre: 'Senhora', 'atendê-la', 'pronta', 'minha senhora', 'comissionada'. Nunca, sob hipótese alguma, use 'Senhor' ou pronomes masculinos.\n"
             f"2. Caso o comando ou o nome sugiram gênero masculino (ex: João, admin, ou referências ao 'pai' ou 'filho'), use: 'Senhor', 'atendê-lo', 'pronto', 'meu senhor'.\n"
             f"3. Responda com extrema imponência, elegance corporativa e formalidade britânica.\n"
             f"4. Se for solicitado o agendamento real de um evento, confirme de forma extremamente polida que a diretriz foi gravada na nuvem do Google Agenda."
         )
         
-        # Constrói o histórico para a IA se lembrar do contexto da conversa selecionada
         mensagens_ia = [{"role": "system", "content": prompt_sistema_chat}]
         for msg in historico_chat:
             mensagens_ia.append({"role": msg["role"], "content": msg["content"]})
@@ -511,17 +561,17 @@ if st.session_state.autenticado and username:
 
         try:
             prompt_sistema_extrator = (
-                f"Você é uma inteligência de extração de dados and automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
-                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas in formato JSON.\n\n"
+                f"Você é uma inteligência de extração de dados e automação estruturada. Hoje é exatamente {data_hoje_str}.\n"
+                "Analise minuciosamente o comando enviado pelo usuário e tome ações estruturadas no formato JSON.\n\n"
                 "Regras Obrigatórias:\n"
-                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, ou criar uma tarefa/meta, mude 'criar_meta' para true and inclua o objeto dentro de 'novas_metas'.\n"
-                "2. Se o comando contiver referências de tempo ou data, você também deve mudar 'criar_evento' para true e gerar o item in 'novos_eventos' contendo a data YYYY-MM-DD e o horário HH:MM correspondentes.\n\n"
-                "Esquema JSON estrito:\n"
+                "1. Se o usuário pediu para adicionar, marcar, estudar, fazer, lembrar de algo, marcar uma reunião, compromisso ou criar uma tarefa/meta, altere 'criar_meta' para true e preencha 'novas_metas'.\n"
+                "2. Se o comando pedir explicitamente para marcar na agenda, calendário, cronograma ou contiver datas ou tempos implícitos (como hoje, amanhã, segunda, às 14h), você DEVE obrigatoriamente mudar 'criar_evento' para true e gerar o item em 'novos_eventos' contendo a data no formato YYYY-MM-DD e o horário no formato HH:MM correspondentes.\n\n"
+                "Esquema JSON estrito (não retorne nenhum outro texto extra):\n"
                 "{\n"
                 "  \"criar_meta\": true/false,\n"
-                "  \"novas_metas\": [ {\"nome\": \"Estudar Geografia\", \"categoria\": \"Estudos\"} ],\n"
+                "  \"novas_metas\": [ {\"nome\": \"Título da Meta\", \"categoria\": \"Geral\"} ],\n"
                 "  \"criar_evento\": true/false,\n"
-                "  \"novos_eventos\": [ {\"title\": \"Estudar Geografia\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"} ]\n"
+                "  \"novos_eventos\": [ {\"title\": \"Título do Evento\", \"date\": \"YYYY-MM-DD\", \"time\": \"HH:MM\"} ]\n"
                 "}"
             )
             
@@ -559,27 +609,28 @@ if st.session_state.autenticado and username:
             
         return resposta_texto_jarvis
 
-# ==================== DEFINIÇÃO GLOBAL DE DATAS ====================
+    # Função Callback para Limpar a caixa ao enviar
+    def submeter_mensagem_chat():
+        prompt_digitado = st.session_state.campo_texto_input
+        if prompt_digitado:
+            st.session_state.ultimo_prompt_processado = prompt_digitado
+            # Limpa o campo do widget redefinindo o valor associado no session_state
+            st.session_state.campo_texto_input = ""
+
+# ==================== GESTÃO DE EXIBIÇÃO DE CONTEÚDO DAS JANELAS ====================
     hoje = datetime.date.today()
     mes_atual = hoje.month
     ano_atual = hoje.year
 
-# ==================== NAVEGAÇÃO POR ABAS ====================
-    aba_metas, aba_pomodoro, aba_saude, aba_calendario = st.tabs([
-        "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
-    ])
-
-    # 1. CONVERSA & METAS (COM GESTÃO COMPLETA DE MULTI-CONVERSAS)
-    with aba_metas:
+    # 1. JANELA: CONVERSA & METAS
+    if st.session_state.aba_atual == "CONVERSA & METAS":
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
             card_html = f'<div class="titulo-card">{ICONES["conversa"]} GERENCIADOR DE CONVERSAS</div>'
             st.markdown(card_html, unsafe_allow_html=True)
             
-            # Mapeamento e montagem do seletor de chats
             opcoes_conversas = ["➕ Iniciar Nova Conversa"] + list(db["conversas"].keys())
             
-            # Preserva a seleção atual do usuário para evitar resets visuais
             if "id_conversa_atual" not in st.session_state:
                 st.session_state.id_conversa_atual = opcoes_conversas[0]
                 
@@ -591,7 +642,6 @@ if st.session_state.autenticado and username:
             )
             st.session_state.id_conversa_atual = conversa_selecionada
             
-            # Carrega o histórico correspondente da conversa selecionada
             if conversa_selecionada == "➕ Iniciar Nova Conversa":
                 mensagens_exibidas = [{"role": "assistant", "content": f"Sistemas online, {name}! Como posso auxiliá-lo com suas diretrizes hoje?"}]
             else:
@@ -602,41 +652,39 @@ if st.session_state.autenticado and username:
                 for msg in mensagens_exibidas: 
                     st.chat_message(msg["role"]).write(msg["content"])
             
-            with st.container():
+            # Form com Callback para limpar o input de texto automaticamente
+            with st.form("form_chat_jarvis", clear_on_submit=True):
                 c_txt, c_btn = st.columns([5.2, 0.8])
                 with c_txt:
-                    prompt = st.text_input("Envie uma instrução...", key="chat_prompt_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
+                    st.text_input("Envie uma instrução...", key="campo_texto_input", label_visibility="collapsed", placeholder="Envie uma instrução...")
                 with c_btn:
                     st.markdown('<div class="btn-seta-enviar">', unsafe_allow_html=True)
-                    enviou_botao = st.button("▲", key="btn_enviar_chat")
+                    st.form_submit_button("▲", on_click=submeter_mensagem_chat)
                     st.markdown('</div>', unsafe_allow_html=True)
+
+            # Processamento assíncrono após o callback disparar
+            if "ultimo_prompt_processado" in st.session_state and st.session_state.ultimo_prompt_processado:
+                prompt_atual = st.session_state.ultimo_prompt_processado
+                del st.session_state.ultimo_prompt_processado # Evita loops
                 
-                if (prompt and st.session_state.get("ultimo_prompt_enviado") != prompt) or (enviou_botao and prompt):
-                    st.session_state.ultimo_prompt_enviado = prompt
-                    
-                    # Se for um chat novo, gera o título inteligente pela primeira mensagem
-                    if conversa_selecionada == "➕ Iniciar Nova Conversa":
-                        with st.spinner("Estruturando nova linha de chat..."):
-                            titulo_novo = gerar_titulo_conversa(prompt)
-                            # Previne colisões de nomes iguais adicionando carimbo de tempo se necessário
-                            if titulo_novo in db["conversas"]:
-                                titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
-                            
-                            db["conversas"][titulo_novo] = []
-                            conversa_alvo = titulo_novo
-                            st.session_state.id_conversa_atual = titulo_novo
-                    else:
-                        conversa_alvo = conversa_selecionada
-                    
-                    # Registra a mensagem do usuário
-                    db["conversas"][conversa_alvo].append({"role": "user", "content": prompt})
-                    
-                    # Solicita resposta do Jarvis trazendo o histórico deste chat específico
-                    resposta = processar_comando_e_criar_metas(prompt, db["conversas"][conversa_alvo])
-                    db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
-                    
-                    salvar_dados(db)
-                    st.rerun()
+                if conversa_selecionada == "➕ Iniciar Nova Conversa":
+                    with st.spinner("Estruturando nova linha de chat..."):
+                        titulo_novo = gerar_titulo_conversa(prompt_atual)
+                        if titulo_novo in db["conversas"]:
+                            titulo_novo = f"{titulo_novo} ({datetime.datetime.now().strftime('%H:%M')})"
+                        
+                        db["conversas"][titulo_novo] = []
+                        conversa_alvo = titulo_novo
+                        st.session_state.id_conversa_atual = titulo_novo
+                else:
+                    conversa_alvo = conversa_selecionada
+                
+                db["conversas"][conversa_alvo].append({"role": "user", "content": prompt_atual})
+                resposta = processar_comando_e_criar_metas(prompt_atual, db["conversas"][conversa_alvo])
+                db["conversas"][conversa_alvo].append({"role": "assistant", "content": resposta})
+                
+                salvar_dados(db)
+                st.rerun()
                     
         with col_lista:
             card_html = f'<div class="titulo-card">{ICONES["metas_caderno"]} OBJETIVOS ATIVOS</div>'
@@ -655,8 +703,8 @@ if st.session_state.autenticado and username:
                             if c3.button("✓", key=m["id"]):
                                 m["concluida"] = True; salvar_dados(db); st.rerun()
 
-    # 2. TIMER DE FOCO (POMODORO)
-    with aba_pomodoro:
+    # 2. JANELA: TIMER DE FOCO
+    elif st.session_state.aba_atual == "TIMER DE FOCO":
         card_html = f'<div class="titulo-card">{ICONES["foco"]} TIMER DE FOCO</div>'
         st.markdown(card_html, unsafe_allow_html=True)
         metas_validas = [m for m in db["metas"] if not m["concluida"]]
@@ -664,7 +712,7 @@ if st.session_state.autenticado and username:
         else:
             cp1, cp2 = st.columns([1, 1.3])
             with cp1:
-                meta_alvo = st.selectbox("Selecione a tarefa ativa para focar:", [m["nome"] for m in metas_validas])
+                meta_alvo = st.selectbox("Selecione a tarefa activa para focar:", [m["nome"] for m in metas_validas])
                 
                 minutos_digitados = st.number_input(
                     "Duração (em minutos):", 
@@ -703,8 +751,8 @@ if st.session_state.autenticado and username:
                     salvar_dados(db); st.balloons()
                 st.rerun()
 
-    # 3. SAÚDE & FITNESS 
-    with aba_saude:
+    # 3. JANELA: SAÚDE & FITNESS
+    elif st.session_state.aba_atual == "SAÚDE & FITNESS":
         cs1, cs2 = st.columns([1, 1.3])
         with cs1:
             card_html = f'<div class="titulo-card">{ICONES["saude"]} DIRETRIZES DE HIDRATAÇÃO</div>'
@@ -713,7 +761,6 @@ if st.session_state.autenticado and username:
             try: peso_limpo = float(peso_texto.replace(',', '.'))
             except: peso_limpo = 70.0
             
-            # ATUALIZAÇÃO E GRAVAÇÃO REAL DO PESO NO ARQUIVO JSON
             if peso_limpo != db.get("peso_usuario"):
                 db["peso_usuario"] = peso_limpo
                 salvar_dados(db)
@@ -801,8 +848,8 @@ if st.session_state.autenticado and username:
                                     st.rerun()
                     st.markdown("<hr style='margin: 4px 0; border-color: rgba(212,175,55,0.05);'>", unsafe_allow_html=True)
 
-    # 4. AGENDA 
-    with aba_calendario:
+    # 4. JANELA: AGENDA
+    elif st.session_state.aba_atual == "AGENDA":
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} SEU CRONOGRAMA DE ATIVIDADES</div>'
         st.markdown(card_html, unsafe_allow_html=True)
 
@@ -842,8 +889,6 @@ if st.session_state.autenticado and username:
                                 st.error("Falha ao salvar. Verifique suas credenciais.")
 
         with col_dir_cal:
-            st.markdown('<div class="subir-bloco-agenda">', unsafe_allow_html=True)
-                    
             dias_semana_headers = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
             
             cal_objeto = pycalendar.Calendar(firstweekday=6)
@@ -918,7 +963,6 @@ if st.session_state.autenticado and username:
                         
             html_corpo += "</div>"
             st.components.v1.html(html_estilos_calendario + html_corpo, height=560, scrolling=False)
-            st.markdown('</div>', unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
         card_html = f'<div class="titulo-card">{ICONES["calendario"]} EVENTOS PRÓXIMOS SINCRONIZADOS DA NUVEM</div>'
