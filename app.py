@@ -215,6 +215,7 @@ def salvar_novas_credenciais(dicionario_usernames):
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
         json.dump({"usernames": dicionario_usernames}, f, indent=4, ensure_ascii=False)
 
+# MUDANÇA CRÍTICA: Definir a variável ANTES do tratamento de parâmetros de URL
 usernames_db = carregar_credenciais_salvas()
 
 if "autenticado" not in st.session_state: st.session_state.autenticado = False
@@ -271,7 +272,6 @@ if not st.session_state.autenticado:
     elif modo_tela == "REGISTRAR NOVA CONTA":
         st.markdown("### CRIAR NOVA CONTA INTEGRADA WITH GOOGLE")
         
-        # Inclusão de placeholders descritivos (instruções internas) em cada caixa
         novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?", placeholder="Ex: Lucas, Maria (Como o assistente se referirá a você)")
         novo_user = st.text_input("USERNAME (SEM ESPAÇOS, CURTO):", placeholder="Ex: lucas12, maria_adm (Seu usuário único de login)").strip().lower()
         nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", placeholder="Digite uma senha forte para proteção do painel")
