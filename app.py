@@ -58,10 +58,10 @@ ICONES = {
         <path d="M50 32 L66 60 L34 60 Z" stroke="url(#gold-grad)" stroke-width="3" fill="none"/>
         <circle cx="50" cy="52" r="6" fill="url(#gold-grad)"/>
     </svg>""",
-    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)"/></svg>""",
-    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)"/></svg>""",
-    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)"/></svg>""",
-    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)"/></svg>""",
+    "conversa": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="url(#gold-grad)/></svg>""",
+    "foco": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" fill="url(#gold-grad)/></svg>""",
+    "saude": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM10.5 7.5H9v2H7.5v1.5H9v2h1.5v-2H12v-1.5h-1.5v-2zm6 1.5h-3v1.5h3V9z" fill="url(#gold-grad)/></svg>""",
+    "calendario": """<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#d4af37"/><stop offset="100%" stop-color="#aa7c11"/></linearGradient></defs><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" fill="url(#gold-grad)/></svg>""",
     "metas_caderno": """<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
             <linearGradient id="gold-grad-caderno" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -205,7 +205,6 @@ def carregar_credenciais_salvas():
         try:
             with open(ARQUIVO_CONFIG_USERS, "r", encoding="utf-8") as f:
                 dados = json.load(f)
-                # Garante leitura tanto no formato direto estruturado quanto no encapsulado
                 if "usernames" in dados: return dados["usernames"]
                 return dados
         except Exception:
@@ -214,7 +213,6 @@ def carregar_credenciais_salvas():
 
 def salvar_novas_credenciais(dicionario_usernames):
     with open(ARQUIVO_CONFIG_USERS, "w", encoding="utf-8") as f:
-        # Salva em formato encapsulado padrão
         json.dump({"usernames": dicionario_usernames}, f, indent=4, ensure_ascii=False)
 
 usernames_db = carregar_credenciais_salvas()
@@ -272,10 +270,12 @@ if not st.session_state.autenticado:
             
     elif modo_tela == "REGISTRAR NOVA CONTA":
         st.markdown("### CRIAR NOVA CONTA INTEGRADA WITH GOOGLE")
-        novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?")
-        novo_user = st.text_input("USERNAME (SEM ESPAÇOS, CURTO):").strip().lower()
-        nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password")
-        confirmar_senha = st.text_input("CONFIRME A SENHA:", type="password")
+        
+        # Inclusão de placeholders descritivos (instruções internas) em cada caixa
+        novo_nome = st.text_input("COMO O JARVIS DEVE TE CHAMAR?", placeholder="Ex: Lucas, Maria (Como o assistente se referirá a você)")
+        novo_user = st.text_input("USERNAME (SEM ESPAÇOS, CURTO):", placeholder="Ex: lucas12, maria_adm (Seu usuário único de login)").strip().lower()
+        nova_senha = st.text_input("SENHA DE SEGURANÇA:", type="password", placeholder="Digite uma senha forte para proteção do painel")
+        confirmar_senha = st.text_input("CONFIRME A SENHA:", type="password", placeholder="Repita exatamente a mesma senha para validação")
         
         if st.button("VINCULAR GOOGLE CALENDAR E FINALIZAR CADASTRO"):
             if not novo_nome or not novo_user or not nova_senha: 
@@ -396,7 +396,6 @@ if st.session_state.autenticado and username:
                                                 orderBy='startTime').execute()
             events = events_result.get('items', [])
             
-            # Reconstrói os locais sincronizando
             db["eventos_locais"] = []
             for ev in events:
                 start = ev['start'].get('dateTime', ev['start'].get('date'))
@@ -546,7 +545,6 @@ if st.session_state.autenticado and username:
                         data_ev = ev.get("date", data_hoje_str)
                         hora_ev = ev.get("time", "12:00")
                         
-                        # Correção essencial: Salva obrigatoriamente na base local primeiro
                         id_evento_unico = f"evt_{int(time.time())}_{len(db['eventos_locais'])}"
                         db["eventos_locais"].append({
                             "id": id_evento_unico,
@@ -555,8 +553,6 @@ if st.session_state.autenticado and username:
                             "time": hora_ev
                         })
                         salvar_dados(db)
-                        
-                        # Tenta mandar para a nuvem da Google em segundo plano
                         enviar_evento_para_google(ev["title"], data_ev, hora_ev)
                 
                 puxar_eventos_do_google()
@@ -576,7 +572,7 @@ if st.session_state.autenticado and username:
         "CONVERSA & METAS", "TIMER DE FOCO", "SAÚDE & FITNESS", "AGENDA"
     ])
 
-    # 1. CONVERSA & METAS (COM GESTÃO COMPLETA DE MULTI-CONVERSAS)
+    # 1. CONVERSA & METAS
     with aba_metas:
         col_ia, col_lista = st.columns([1, 1.3])
         with col_ia:
@@ -606,7 +602,6 @@ if st.session_state.autenticado and username:
                 for msg in mensagens_exibidas: 
                     st.chat_message(msg["role"]).write(msg["content"])
             
-            # --- SOLUÇÃO: Utilização do st.chat_input nativo perfeitamente alinhado e funcional ---
             prompt = st.chat_input("Envie uma instrução para o Jarvis...")
             
             if prompt:
@@ -823,7 +818,6 @@ if st.session_state.autenticado and username:
                 
                 if st.button("Agendar na Nuvem"):
                     if nome_ev:
-                        # Salva localmente primeiro antes de disparar o envio à API
                         id_evento_unico = f"evt_{int(time.time())}_{len(db['eventos_locais'])}"
                         db["eventos_locais"].append({
                             "id": id_evento_unico,
